@@ -1,0 +1,8 @@
+5
+fidap019.mtx
+fidap019_rhs1.mtx
+MM 
+CG
+NONE
+CSR
+BLOCK
