@@ -28,13 +28,24 @@
 !    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 !    POSSIBILITY OF SUCH DAMAGE.
 !
-
+!    @author Staccone Simone
+!    @brief  This is s wrapper function to study the statistichs about the
+!	     implementation of the psb_dscg algorithm. So the main goal is
+! 	     to compare the mixed precision implementation of the Conjugate 
+!            Gradient algorithm w.r.t. double and single precsion 
+!            implementation of the same algorithm.
+!   @info    This is the version of the code that supports GPU computation
+!	     using CUDA programming interface.
+!
+!
+!
 program psb_dscg
   use psb_base_mod
   use psb_prec_mod
   use psb_krylov_mod
   use psb_util_mod
-  use psb_ds_gen_mod
+  use psb_d_pde3d_mod
+  use psb_s_pde3d_mod
   use psb_d_cg
   use psb_s_cg
   use psb_ds_cg_1
@@ -46,7 +57,7 @@ program psb_dscg
 
   implicit none
 
-  ! input parameters
+  ! input parameters needed for PSBLAS CG invocation
   character(len=20)                     :: krylov_method, prec_type
   character(len=5)                      :: afmt
   integer(psb_ipk_)                     :: idim
@@ -100,6 +111,9 @@ program psb_dscg
   type(psb_s_cuda_elg_sparse_mat)       :: gpu_matrix_format_single
 
   type(psb_i_vect_cuda)                 :: gpu_descriptor_format
+
+  type(psb_d_coo_sparse_mat)            :: matrix_coo_format_double
+  type(psb_s_coo_sparse_mat)            :: matrix_coo_format_single
 #endif
 
   ! Parameters for solvers in Block-Jacobi preconditioner
@@ -185,9 +199,10 @@ program psb_dscg
   !  allocate and fill in the coefficient matrix, rhs and initial guess
   !
   initial_time = psb_wtime()
-  call psb_ds_gen_matrix(ctxt,idim,local_a,local_b,local_x,&
-      & local_a_lower_precision,local_b_lower_precision,local_x_lower_precision, &
-      & desc_a,afmt,info)
+
+  call psb_d_gen_pde3d(ctxt,idim,local_a,local_b,local_x,desc_a,'CSR  ',info,partition=3,tnd=.false.)  
+  call psb_s_gen_pde3d(ctxt,idim,local_a_lower_precision,local_b_lower_precision,local_x_lower_precision,desc_a,&
+  & 'CSR  ',info,partition=3)  
 
   generation_time = psb_wtime() - initial_time
 
@@ -299,24 +314,27 @@ program psb_dscg
   temporary_time = psb_wtime()
 
   ! marking data structures to use them in GPU
-  call local_a%cscnv(local_a_gpu,info,mold=gpu_matrix_format_double)
-  if(info == psb_success_) call local_a_lower_precision%cscnv(local_a_lower_gpu,info,mold=gpu_matrix_format_single) 
-
-  if(info /= psb_success_) then
-    info=psb_err_from_subroutine_
-    ch_err='gpu convert mat'
-    call psb_errpush(info,name,a_err=ch_err)
-    goto 9999
+  call local_a%cscnv(local_a_gpu,info,mold=matrix_coo_format_double)
+  if ((info /= psb_success_).or.(psb_get_errstatus()/=0)) then 
+    write(0,*) 'From cscnv ',info
+    call psb_error()
+    stop
   end if
 
-  
+  call local_a_lower_precision%cscnv(local_a_lower_gpu,info,mold=matrix_coo_format_single)
+  if ((info /= psb_success_).or.(psb_get_errstatus()/=0)) then 
+    write(0,*) 'From cscnv ',info
+    call psb_error()
+    stop
+  end if
+
   call desc_a%cnv(mold=gpu_descriptor_format)
 
-  call psb_geasb(local_b,desc_a,info,scratch=.false.,mold=gpu_vector_format_double)
-  if(info == psb_success_) call psb_geasb(local_x,desc_a,info,scratch=.false.,mold=gpu_vector_format_double)
-  if(info == psb_success_) call psb_geasb(local_b_lower_precision,desc_a,info,scratch=.false.,mold=gpu_vector_format_single)
-  if(info == psb_success_) call psb_geasb(local_x_lower_precision,desc_a,info,scratch=.false.,mold=gpu_vector_format_single)
+  call psb_geasb(local_b,desc_a,info,scratch=.true.,mold=gpu_vector_format_double)
+  call psb_geasb(local_x,desc_a,info,scratch=.true.,mold=gpu_vector_format_double)
 
+  call psb_geasb(local_b_lower_precision,desc_a,info,scratch=.true.,mold=gpu_vector_format_single)
+  call psb_geasb(local_x_lower_precision,desc_a,info,scratch=.true.,mold=gpu_vector_format_single)
 
   if(info /= psb_success_) then
     info=psb_err_from_subroutine_
@@ -324,45 +342,14 @@ program psb_dscg
     call psb_errpush(info,name,a_err=ch_err)
     goto 9999
   end if
-
+  
+  call psb_barrier(ctxt)
   call local_a_gpu%cscnv(info,mold=gpu_matrix_format_double)
   call local_a_lower_gpu%cscnv(info,mold=gpu_matrix_format_single)
 
+  call psb_cuda_DeviceSync()
+
   gpu_convertion_time = psb_wtime() - temporary_time
-
-  call psb_geall(local_r,desc_a,info)
-  call psb_geall(local_r_lower_precision,desc_a,info)
-
-  call psb_geasb(local_r_lower_precision,desc_a,info,scratch=.false.,mold=gpu_vector_format_single)
-
-  write(*,*) local_b_lower_precision%v%v
-  print '(" ")'
-
-  call local_b_lower_precision%set_host()
-  call local_r_lower_precision%set_host()
-  
-
-  call psb_geaxpby(sone, local_b_lower_precision, szero, local_r_lower_precision, desc_a, info)
-  call psb_cuda_DeviceSync()
-
-  write(*,*) local_r_lower_precision%get_vect()
-
-  print '(" ")'
-
-  call psb_geasb(local_r,desc_a,info,scratch=.false.,mold=gpu_vector_format_double)
-
-  write(*,*) local_b%v%v
-  print '(" ")'
-
-  call local_b%set_host()
-  call local_r%set_host()
-
-  call psb_geaxpby(done, local_b, dzero, local_r, desc_a, info)
-
-  call psb_cuda_DeviceSync()
-  write(*,*) local_r%get_vect()
-
-  print '(" ")'
 
 #endif
 
@@ -493,46 +480,6 @@ program psb_dscg
   end if
 
 
-  call psb_gather(global_x,local_x,desc_a,info,root=psb_root_)
-  if(info == psb_success_) call psb_gather(global_x_lower_precision,local_x_lower_precision,desc_a,info,root=psb_root_)
-
-  if(info /= psb_success_) then
-    info=psb_err_from_subroutine_    
-    call psb_errpush(info,name,a_err='gathering x')
-    goto 9999
-   end if
-
-  call psb_barrier(ctxt)
-
-
-
-  call psb_gather(global_b,local_b,desc_a,info,root=psb_root_)
-  if(info == psb_success_) call psb_gather(global_b_lower_precision,local_b_lower_precision,desc_a,info,root=psb_root_)
-  
-  if(info /= psb_success_) then
-    info=psb_err_from_subroutine_    
-    call psb_errpush(info,name,a_err='gathering b')
-    goto 9999
-   end if
-
-  call psb_barrier(ctxt)
-
-  
-  if( (precision_mode == 1).or.(precision_mode == 3).or.(precision_mode == 5) ) then 
-    call psb_gather(global_r,local_r,desc_a,info,root=psb_root_)
-  else if( (precision_mode == 2).or.(precision_mode == 4).or.(precision_mode == 6) ) then
-    call psb_gather(global_r_lower_precision,local_r_lower_precision,desc_a,info,root=psb_root_)
-  end if
-
-  if(info /= psb_success_) then
-    info=psb_err_from_subroutine_    
-    call psb_errpush(info,name,a_err='gathering r')
-    goto 9999
-   end if
-
-  call psb_barrier(ctxt)
-
-
   
   if(my_rank == psb_root_) then
     write(output_file_string, '("../data/gpu/final_result_",i0,".txt")') precision_mode
@@ -541,30 +488,10 @@ program psb_dscg
     write(20,*) 'iterations to convergence: ',iter
     write(20,*) 'time to convergence: ',computation_time
     write(20,*) 'matrix size: ',idim * idim, ' x ', idim * idim
-    if(precision_mode == 6) then
-      write(20,*) 'error estimate on exit:', &
-      & ' ||r|| / ||b|| = ',err_lower
-    else
-      write(20,*) 'error estimate on exit:', &
-      & ' ||r|| / ||b|| = ',err
-    end if
-    
-    write(20,'(a8,4(2x,a20))') 'I','X(I)','B(I)','R(I)'
-
-
-    if( (precision_mode == 1).or.(precision_mode == 3).or.(precision_mode == 5) ) then 
-      do i=1,100
-        write(20,*) i ,global_x(i), global_b(i) , global_r(i)
-      end do
-    else if( (precision_mode == 2).or.(precision_mode == 4).or.(precision_mode == 6) ) then
-      do i=1,100
-        write(20,*) i, global_x_lower_precision(i), global_b_lower_precision(i), global_r_lower_precision(i)
-      end do
-    else
-      close(20)
-      goto 9999
-    end if
-    close(20)
+    write(20,*) 'error estimate on exit:', &
+    & ' ||r|| / ||b|| = ',err
+    write(21,*) local_x%v%v
+    write(22,*) local_x_lower_precision%v%v
   endif
 
 

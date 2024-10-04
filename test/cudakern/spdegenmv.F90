@@ -568,7 +568,7 @@ program pdgenmv
   ! descriptor
   type(psb_desc_type)   :: desc_a
   ! dense matrices
-  type(psb_s_vect_type), target :: xv,bv, xg, bg 
+  type(psb_s_vect_type), target :: xv,bv, xg, bg
 #ifdef HAVE_CUDA
   type(psb_s_vect_cuda)  :: vmold
   type(psb_i_vect_cuda)  :: imold 
@@ -718,10 +718,12 @@ program pdgenmv
     call psb_error()
     stop
   end if
+
   call desc_a%cnv(mold=imold)
 
   call psb_geasb(bg,desc_a,info,scratch=.true.,mold=vmold)
   call psb_geasb(xg,desc_a,info,scratch=.true.,mold=vmold)
+
 #endif
   nr       = desc_a%get_local_rows()
   nrg      = desc_a%get_global_rows() 
@@ -760,6 +762,7 @@ program pdgenmv
     call psb_amx(ctxt,t2)
     if (j==1) tcnvg1 = t2
     tcnvgpu = tcnvgpu + t2
+    
 #endif
   end do
 
@@ -783,6 +786,7 @@ program pdgenmv
   
   call psb_barrier(ctxt)
   tt1 = psb_wtime()
+
   do i=1,ntests 
     call psb_spmm(sone,agpu,xv,szero,bg,desc_a,info)
     if ((info /= 0).or.(psb_get_errstatus()/=0)) then 
@@ -790,12 +794,31 @@ program pdgenmv
       call psb_error()
       stop
     end if
-
   end do
-  call psb_cuda_DeviceSync()
+
+
+
   call psb_barrier(ctxt)
   tt2 = psb_wtime() - tt1
   call psb_amx(ctxt,tt2)
+
+
+  write(*,*) psb_norm2(bg,desc_a, info)
+  write(*,*) psb_norm2(xg,desc_a, info)
+
+
+  call psb_geaxpby(sone, bg, szero, xg, desc_a, info)
+  call psb_cuda_DeviceSync()
+
+  x1 = xg%get_vect()
+  x2 = bg%get_vect()
+
+
+  write(*,*) psb_norm2(bg,desc_a, info)
+  write(*,*) psb_norm2(xg,desc_a, info)
+
+
+
   x1 = bv%get_vect()
   x2 = bg%get_vect()
   nr       = desc_a%get_local_rows() 

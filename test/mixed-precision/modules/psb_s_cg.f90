@@ -95,13 +95,15 @@ module psb_s_cg
                 call psb_errpush(info,name,a_err='allocating local vectors')
                 goto 9999
             end if
-        
+
 
 #ifdef HAVE_CUDA
+            !call r%bld(b%get_vect())
+
             ! marking data structures to use them in GPU
-            call psb_geasb(r,desc_a,info,scratch=.false.,mold=gpu_vector_format)
-            call psb_geasb(d,desc_a,info,scratch=.false.,mold=gpu_vector_format)
-            call psb_geasb(rho,desc_a,info,scratch=.false.,mold=gpu_vector_format)
+            call psb_geasb(r,desc_a,info,scratch=.true.,mold=gpu_vector_format)
+            call psb_geasb(d,desc_a,info,scratch=.true.,mold=gpu_vector_format)
+            call psb_geasb(rho,desc_a,info,scratch=.true.,mold=gpu_vector_format)
 
             if(info /= psb_success_) then
               info=psb_err_from_subroutine_
@@ -111,6 +113,7 @@ module psb_s_cg
             end if
 
 #endif
+
             restart: do 
                 ! =   
                 ! =    r_0 = b - A * x_0
@@ -126,12 +129,6 @@ module psb_s_cg
                     call psb_errpush(info,name,a_err=ch_err)
                     goto 9999
                 end if
-
-
-                write(*,*) r%v%v
-                print '(" ")'
-
-
     
                 call psb_spmm(-sone,a,x,sone,r,desc_a,info) ! r_0 = -A * x_0 + r_0
             
@@ -142,9 +139,6 @@ module psb_s_cg
                     goto 9999
                 end if
                 ! computed r_0 = b - A * x_0
-                
-                write(*,*) r%v%v
-                print '(" ")'
 
                 call psb_geaxpby(sone,r,szero,d,desc_a,info) ! d_0 = r_0
 
@@ -160,34 +154,31 @@ module psb_s_cg
                     else
                         r_scalar_product    = r_scalar_product_next
                     end if
-                    
+
             
                     ! call prec%apply(r,z,desc_a,info,work=aux)
             
             
                     call psb_spmm(sone,a,d,szero,rho,desc_a,info) ! rho_i = A * d_i
-                
             
                     
                     partial_result_d_rho      = psb_gedot(d,rho,desc_a,info) ! d_i * rho_i
                     alpha                     = r_scalar_product / partial_result_d_rho
             
-            
                     call psb_geaxpby(alpha,d,sone,x,desc_a,info)        ! x_i+1 = x_i + alpha_i * rho_i
                     call psb_geaxpby(-alpha,rho,sone,r,desc_a,info)     ! r_i+1 = r_i - alpha_i * rho_i
-                    
+
                     r_scalar_product_next = psb_gedot(r,r,desc_a,info)  ! r_i+1 * ri+1
-                    
                     beta = r_scalar_product_next / r_scalar_product
-            
+
                     call psb_geaxpby(sone,r,beta,d,desc_a,info)       ! d_i+1 = r_i+1 + beta_i+1 * d_i
-                    
+
                     ! ||r|| / ||b||
                     r_norm = psb_norm2(r, desc_a, info)
                     b_norm = psb_norm2(b, desc_a, info)
                     err = r_norm / b_norm
-                    !write(*,'(i0," ", es15.9," ", es15.9)') it, err, error_stopping_criterion
-                    !write(*,'(i0," ", es15.9," ", es15.9)') it, r_norm, b_norm
+                    ! write(*,'(i0," ", es15.9," ", es15.9)') it, err, error_stopping_criterion
+                    ! write(*,'(i0," ", es15.9," ", es15.9)') it, r_norm, b_norm
 
 
                     if(err < error_stopping_criterion) then
