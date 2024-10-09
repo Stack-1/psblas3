@@ -11,3 +11,4 @@ void single_to_double(float *vect_single, double *vect_double, int size){
     }
     
 }
+

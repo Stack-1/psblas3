@@ -28,7 +28,7 @@ SINGLE_VERSION			= modules/psb_s_cg
 CG_FILE					= psb_dscg
 
 CPU_OBJ					= $(MATRIX_GENERATION_D).o $(MATRIX_GENERATION_S).o $(MIXED_VERSION_1).o $(DOUBLE_VERSION).o $(SINGLE_VERSION).o $(CG_FILE).o
-GPU_OBJ					= $(MIXED_VERSION_1).o $(MIXED_VERSION_2).o $(DOUBLE_VERSION).o $(SINGLE_VERSION).o 
+GPU_OBJ					= $(MATRIX_GENERATION_D).o $(MATRIX_GENERATION_S).o $(MIXED_VERSION_1).o $(MIXED_VERSION_2).o $(DOUBLE_VERSION).o $(SINGLE_VERSION).o 
 
 EXEDIR=./runs
 
@@ -43,7 +43,7 @@ all: --runsd cpu gpu
 	(if test ! -d data/gpu ; then mkdir data/gpu; fi)
 
 
-cpu: 
+cpu: --runsd
 	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -c $(MATRIX_GENERATION_D).f90 -o $(MATRIX_GENERATION_D).o
 	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -c $(MATRIX_GENERATION_S).f90 -o $(MATRIX_GENERATION_S).o
 	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -c $(MIXED_VERSION_1).f90 -o $(MIXED_VERSION_1).o
@@ -54,16 +54,17 @@ cpu:
 	$(FLINK) $(LOPT) $(CCOPT) $(CPU_OBJ) $(MIXED_VERSION_2).o -o $(CG_FILE)_cpu $(PSBLAS_LIB) $(LDLIBS) 
 	/bin/mv $(CG_FILE)_cpu $(EXEDIR)
 
-gpu: 
-	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -c psb_d_pde3d_mod.f90 -o psb_d_pde3d_mod.o
-	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -c psb_s_pde3d_mod.f90 -o psb_s_pde3d_mod.o
+gpu: --runsd
+	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -c $(MATRIX_GENERATION_D).f90 -o $(MATRIX_GENERATION_D).o
+	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -c $(MATRIX_GENERATION_S).f90 -o $(MATRIX_GENERATION_S).o
 	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -c -DHAVE_CUDA $(MIXED_VERSION_1).f90 -o $(MIXED_VERSION_1).o
 	g++ -O3 -c modules/single_to_double.cpp -o modules/single_to_double.o
+	g++ -O3 -c modules/double_to_single.cpp -o modules/double_to_single.o
 	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -c -DHAVE_CUDA $(MIXED_VERSION_2).f90 -o $(MIXED_VERSION_2).o
 	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -c -DHAVE_CUDA $(DOUBLE_VERSION).f90 -o $(DOUBLE_VERSION).o
 	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -c -DHAVE_CUDA $(SINGLE_VERSION).f90 -o $(SINGLE_VERSION).o
 	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -c -DHAVE_CUDA $(CG_FILE)_gpu.f90 -o $(CG_FILE)_gpu.o
-	$(FLINK) $(LOPT) $(CCOPT) $(OBJ) psb_s_pde2d_mod.o psb_d_pde2d_mod.o modules/single_to_double.o $(CG_FILE)_gpu.o -o psb_dscg_gpu $(PSBLAS_LIB) $(LDLIBS) 
+	$(FLINK) $(LOPT) $(CCOPT) $(GPU_OBJ) modules/double_to_single.o modules/single_to_double.o $(CG_FILE)_gpu.o -o psb_dscg_gpu $(PSBLAS_LIB) $(LDLIBS) 
 	/bin/mv $(CG_FILE)_gpu $(EXEDIR)
 
 gpu-special:

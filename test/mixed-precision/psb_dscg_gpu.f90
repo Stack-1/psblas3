@@ -44,8 +44,8 @@ program psb_dscg
   use psb_prec_mod
   use psb_krylov_mod
   use psb_util_mod
-  use psb_d_pde3d_mod
-  use psb_s_pde3d_mod
+  use psb_d_pde2d_mod
+  use psb_s_pde2d_mod
   use psb_d_cg
   use psb_s_cg
   use psb_ds_cg_1
@@ -105,10 +105,10 @@ program psb_dscg
   ! cuda variables
 #ifdef HAVE_CUDA
   type(psb_d_vect_cuda)                 :: gpu_vector_format_double
-  type(psb_d_cuda_elg_sparse_mat)       :: gpu_matrix_format_double
+  type(psb_d_cuda_hlg_sparse_mat)       :: gpu_matrix_format_double
 
   type(psb_s_vect_cuda)                 :: gpu_vector_format_single
-  type(psb_s_cuda_elg_sparse_mat)       :: gpu_matrix_format_single
+  type(psb_s_cuda_hlg_sparse_mat)       :: gpu_matrix_format_single
 
   type(psb_i_vect_cuda)                 :: gpu_descriptor_format
 
@@ -139,7 +139,7 @@ program psb_dscg
   ! Standard input for krylov PSBLAS standard benchmark
   krylov_method = "CG"
   prec_type = "NONE"
-  afmt = "CSR"
+  afmt = "COO"
   istopc = 2 ! 1 - Normwise backword error, 2 - Relative residual in the 2-norm , 3 - relative residual reduction in the 2-norm
   itmax = 10000
   itrace = 0 ! Debug option on
@@ -200,9 +200,9 @@ program psb_dscg
   !
   initial_time = psb_wtime()
 
-  call psb_d_gen_pde3d(ctxt,idim,local_a,local_b,local_x,desc_a,'CSR  ',info,partition=3,tnd=.false.)  
-  call psb_s_gen_pde3d(ctxt,idim,local_a_lower_precision,local_b_lower_precision,local_x_lower_precision,desc_a,&
-  & 'CSR  ',info,partition=3)  
+  call psb_d_gen_pde2d(ctxt,idim,local_a,local_b,local_x,desc_a,'COO  ',info,partition=3)  
+  call psb_s_gen_pde2d(ctxt,idim,local_a_lower_precision,local_b_lower_precision,local_x_lower_precision,desc_a,&
+  & 'COO  ',info,partition=3)  
 
   generation_time = psb_wtime() - initial_time
 
@@ -330,11 +330,11 @@ program psb_dscg
 
   call desc_a%cnv(mold=gpu_descriptor_format)
 
-  call psb_geasb(local_b,desc_a,info,scratch=.true.,mold=gpu_vector_format_double)
-  call psb_geasb(local_x,desc_a,info,scratch=.true.,mold=gpu_vector_format_double)
+  call psb_geasb(local_b,desc_a,info,scratch=.false.,mold=gpu_vector_format_double)
+  call psb_geasb(local_x,desc_a,info,scratch=.false.,mold=gpu_vector_format_double)
 
-  call psb_geasb(local_b_lower_precision,desc_a,info,scratch=.true.,mold=gpu_vector_format_single)
-  call psb_geasb(local_x_lower_precision,desc_a,info,scratch=.true.,mold=gpu_vector_format_single)
+  call psb_geasb(local_b_lower_precision,desc_a,info,scratch=.false.,mold=gpu_vector_format_single)
+  call psb_geasb(local_x_lower_precision,desc_a,info,scratch=.false.,mold=gpu_vector_format_single)
 
   if(info /= psb_success_) then
     info=psb_err_from_subroutine_
@@ -372,14 +372,14 @@ program psb_dscg
     ! Mixed precision computation
     if(my_rank == psb_root_) print '("[INFO] Calling mixed precision 1 Conjugate Gradient")'
     
-    call psb_dscg_1_impl(local_a_lower_gpu,prec,local_b,local_x, &
-    & eps,desc_a,info, itmax=itmax,iter=iter,err=err)
+    !call psb_dscg_1_impl(local_a_lower_gpu,prec,local_b,local_x, &
+    !& eps,desc_a,info, itmax=itmax,iter=iter,err=err)
   else if(precision_mode == 4) then  
     ! Mixed precision computation
     if(my_rank == psb_root_) print '("[INFO] Calling mixed precision 2 Conjugate Gradient")'
     
-    call psb_dscg_2_impl(local_a, local_a_lower_precision,prec,local_b,local_x, &
-    & eps,desc_a,info, itmax=itmax,iter=iter,err=err)
+    !call psb_dscg_2_impl(local_a, local_a_lower_precision,prec,local_b,local_x, &
+    !& eps,desc_a,info, itmax=itmax,iter=iter,err=err)
   else if(precision_mode == 5) then  
     ! PSBLAS CG double computation computation
     if(my_rank == psb_root_) print '("[INFO] Calling iterative method ",a)', krylov_method

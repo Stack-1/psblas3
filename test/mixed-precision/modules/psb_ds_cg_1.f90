@@ -112,6 +112,8 @@ module psb_ds_cg_1
         real(psb_spk_), allocatable                     :: global_x(:), global_a(:)
     
         character(len=20) :: output_file_name
+        integer(psb_lpk_), allocatable :: ltg(:)
+
         info = psb_success_
         name = 'mixed_psb_dscg'
         call psb_erractionsave(err_act)
@@ -168,7 +170,16 @@ module psb_ds_cg_1
         m       = a_single%get_nrows()
         nnz     = a_single%get_nzeros()
 
-
+        !allocate(ltg(n))
+!
+        !do i = 1, n
+        !    ltg(i) = i
+        !end do
+!
+        !write(output_file_name, '("dasdsd_",i0)') my_rank
+!
+!
+        !call a_single%print(fname=output_file_name, iv=ltg)
 
         ! Restart function should be implemented to helps stabilize the computation
         restart: do 
@@ -189,18 +200,14 @@ module psb_ds_cg_1
 
                     call psb_gather(global_x, x_single, desc_a, info)
 
-                    
+
                     ! r_0 = - A * x_0 + r_0
                     do i=1,nnz
                         ir = new_a%ia(i)
                         jc = new_a%ja(i)
                         r_double%v%v(ir) = r_double%v%v(ir) &
                         & - ( real(new_a%val(i),8) * real(global_x(jc),8) )
-                        if( (itx == 3).and.(my_rank == 1)) write(*,*) my_rank, itx, r_double%v%v(ir),&
-                        & new_a%val(i), global_x(jc), i, ir, jc
-                        if( (itx == 3).and.(my_rank == 1)) write(*,*) my_rank, r_double%v%v
                     end do
-                    if( (itx == 3).and.(my_rank == 0)) write(*,*) my_rank, r_double%v%v
 
                 class default
                     write(*,'("Error in class initialization")') 
