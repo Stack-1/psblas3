@@ -10,7 +10,6 @@ module psb_s_cg
             use psb_ext_mod
             use psb_cuda_mod
 #endif
-
             implicit none
         
             class(psb_dprec_type), intent(inout)            :: prec
@@ -19,7 +18,7 @@ module psb_s_cg
             integer(psb_ipk_), intent(out)                  :: info
             integer(psb_ipk_), Optional, Intent(in)         :: itmax
             integer(psb_ipk_), Optional, Intent(out)        :: iter
-            real(psb_dpk_), Optional, Intent(out)           :: err
+            real(psb_spk_), Optional, Intent(out)           :: err
             ! =   Local data
             integer(psb_ipk_)                               :: itmax_, istop_, it, itx,&
                                                             &  n_col, n_row,err_act, ieg,nspl, istebz
@@ -46,12 +45,13 @@ module psb_s_cg
             ! Norm variables
             real(psb_dpk_)                                  :: r_norm, x_norm, a_norm, b_norm
             
-            ! GPU variables
 #ifdef HAVE_CUDA
-            type(psb_s_vect_cuda)                           :: gpu_vector_format
-            type(psb_s_cuda_elg_sparse_mat)                 :: gpu_matrix_format
-
-            type(psb_i_vect_cuda)                           :: gpu_descriptor_format
+            type(psb_s_vect_cuda)                 :: gpu_vector_format
+            type(psb_s_cuda_elg_sparse_mat)       :: gpu_matrix_format
+          
+            type(psb_i_vect_cuda)                 :: gpu_descriptor_format
+          
+            type(psb_s_coo_sparse_mat)            :: matrix_coo_format_single
 #endif
 
             info = psb_success_
@@ -97,22 +97,6 @@ module psb_s_cg
             end if
 
 
-#ifdef HAVE_CUDA
-            !call r%bld(b%get_vect())
-
-            ! marking data structures to use them in GPU
-            call psb_geasb(r,desc_a,info,scratch=.true.,mold=gpu_vector_format)
-            call psb_geasb(d,desc_a,info,scratch=.true.,mold=gpu_vector_format)
-            call psb_geasb(rho,desc_a,info,scratch=.true.,mold=gpu_vector_format)
-
-            if(info /= psb_success_) then
-              info=psb_err_from_subroutine_
-              ch_err='gpu convert vectors'
-              call psb_errpush(info,name,a_err=ch_err)
-              goto 9999
-            end if
-
-#endif
 
             restart: do 
                 ! =   
@@ -155,23 +139,27 @@ module psb_s_cg
                         r_scalar_product    = r_scalar_product_next
                     end if
 
-            
                     ! call prec%apply(r,z,desc_a,info,work=aux)
             
             
                     call psb_spmm(sone,a,d,szero,rho,desc_a,info) ! rho_i = A * d_i
-            
+
                     
                     partial_result_d_rho      = psb_gedot(d,rho,desc_a,info) ! d_i * rho_i
                     alpha                     = r_scalar_product / partial_result_d_rho
-            
+
                     call psb_geaxpby(alpha,d,sone,x,desc_a,info)        ! x_i+1 = x_i + alpha_i * rho_i
+
                     call psb_geaxpby(-alpha,rho,sone,r,desc_a,info)     ! r_i+1 = r_i - alpha_i * rho_i
+
 
                     r_scalar_product_next = psb_gedot(r,r,desc_a,info)  ! r_i+1 * ri+1
                     beta = r_scalar_product_next / r_scalar_product
 
+
                     call psb_geaxpby(sone,r,beta,d,desc_a,info)       ! d_i+1 = r_i+1 + beta_i+1 * d_i
+
+
 
                     ! ||r|| / ||b||
                     r_norm = psb_norm2(r, desc_a, info)

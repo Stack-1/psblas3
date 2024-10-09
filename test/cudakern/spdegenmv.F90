@@ -580,7 +580,7 @@ program pdgenmv
 
   ! solver parameters
   integer(psb_epk_) :: amatsize, precsize, descsize, annz, nbytes
-  real(psb_spk_)   :: err, eps
+  real(psb_spk_)   :: err, eps, tn1, tn2, snrm2
   integer, parameter :: ntests=200, ngpu=50, ncnv=20
   type(psb_s_coo_sparse_mat), target   :: acoo
   type(psb_s_csr_sparse_mat), target   :: acsr
@@ -802,10 +802,10 @@ program pdgenmv
   tt2 = psb_wtime() - tt1
   call psb_amx(ctxt,tt2)
 
-
-  write(*,*) psb_norm2(bg,desc_a, info)
-  write(*,*) psb_norm2(xg,desc_a, info)
-
+  tn1 = psb_norm2(bg,desc_a, info)
+  tn2 = psb_norm2(xg,desc_a, info)
+  write(*,*) '1 BG',tn1
+  write(*,*) '1 XG ',tn2
 
   call psb_geaxpby(sone, bg, szero, xg, desc_a, info)
   call psb_cuda_DeviceSync()
@@ -813,9 +813,10 @@ program pdgenmv
   x1 = xg%get_vect()
   x2 = bg%get_vect()
 
-
-  write(*,*) psb_norm2(bg,desc_a, info)
-  write(*,*) psb_norm2(xg,desc_a, info)
+  tn1 = psb_norm2(bg,desc_a, info)
+  tn2 = psb_norm2(xg,desc_a, info)
+  write(*,*) '2 BG',tn1
+  write(*,*) '2 XG ',tn2, snrm2(desc_a%get_local_rows(),x1,1)
 
 
 

@@ -34,7 +34,8 @@ program psb_dscg
   use psb_prec_mod
   use psb_krylov_mod
   use psb_util_mod
-  use psb_ds_gen_mod
+  use psb_d_pde2d_mod
+  use psb_s_pde2d_mod
   use psb_d_cg
   use psb_s_cg
   use psb_ds_cg_1
@@ -89,7 +90,9 @@ program psb_dscg
 
   ! Stats variables
   real(psb_dpk_)                        :: r_norm, b_norm
-  real(psb_dpk_)                        :: mean_matrix_memory_size, mean_desc_memory_size, mean_err
+  real(psb_dpk_)                        :: mean_matrix_memory_size, mean_desc_memory_size, mean_err, &
+  & mean_max_r_value, mean_max_r_value_lower, mean_r_norm
+  real(psb_dpk_)                        :: max_r_value, max_r_value_lower
 
 
   ! debug output variables
@@ -97,7 +100,7 @@ program psb_dscg
 
 
   ! other variables
-  integer(psb_ipk_) :: info, i, err_act, precision_mode, iteration_number
+  integer(psb_ipk_) :: info, i, j, err_act, precision_mode, iteration_number
   character(len=20) :: name,ch_err
   character(len=40) :: fname
   real(psb_dpk_)    :: r_amax, b_amax, scale,resmx,resmxp, condition_number
@@ -111,14 +114,14 @@ program psb_dscg
   ! Standard input for krylov PSBLAS standard benchmark
   krylov_method     = "CG"
   prec_type         = "NONE"
-  afmt              = "CSR"
+  afmt              = "COO"
   istopc            = 2 ! 1 - Normwise backword error, 2 - Relative residual in the 2-norm , 3 - relative residual reduction in the 2-norm
-  itmax             = 10000
+  itmax             = 15000
   itrace            = 0 ! Debug option on
   irst              = 0 ! Restart parameter, ignored for CG
 
 
-  iteration_number  = 100
+  iteration_number  = 1
 
   call psb_init(ctxt)
   call psb_info(ctxt,my_rank,np)
@@ -172,9 +175,13 @@ program psb_dscg
   !  allocate and fill in the coefficient matrix, rhs and initial guess
   !
   initial_time = psb_wtime()
-  call psb_ds_gen_matrix(ctxt,idim,local_a,local_b,local_x,&
-      & local_a_lower_precision,local_b_lower_precision,local_x_lower_precision, &
-      & desc_a,afmt,info)
+
+
+  call psb_d_gen_pde2d(ctxt,idim,local_a,local_b,local_x,&
+      & desc_a,afmt,info, partition=1)
+
+  call psb_s_gen_pde2d(ctxt,idim,local_a_lower_precision,local_b_lower_precision,&
+      & local_x_lower_precision,desc_a,afmt,info, partition=1)
 
   generation_time = psb_wtime() - initial_time
 
@@ -256,6 +263,9 @@ program psb_dscg
   mean_desc_memory_size   = 0.d0
   mean_matrix_memory_size = 0.d0
   mean_err                = 0.d0
+  mean_max_r_value        = 0.d0
+  mean_max_r_value_lower  = 0
+  mean_r_norm             = 0.d0
   r_norm                  = 0.d0
   b_norm                  = 0.d0
 
@@ -318,10 +328,12 @@ program psb_dscg
         goto 9999
       end if
 
+      call psb_gather(global_r, local_r, desc_a, info)
 
       if(my_rank == psb_root_) then
         err       = r_norm / b_norm
         mean_err  = mean_err + err
+        max_r_value = maxval(global_r)
       end if 
 
 
@@ -330,6 +342,8 @@ program psb_dscg
       call psb_sum(ctxt, matrix_memory_size)
 
       if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size + matrix_memory_size 
+      if(my_rank == psb_root_) mean_max_r_value = mean_max_r_value + max_r_value 
+      if(my_rank == psb_root_) mean_r_norm = mean_r_norm + r_norm 
 
       desc_memory_size = desc_a%sizeof()
       call psb_sum(ctxt, desc_memory_size)
@@ -341,6 +355,7 @@ program psb_dscg
     if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size / iteration_number
     if(my_rank == psb_root_) mean_desc_memory_size = mean_desc_memory_size / iteration_number
     if(my_rank == psb_root_) mean_err = mean_err / iteration_number
+    if(my_rank == psb_root_) mean_r_norm = mean_r_norm /iteration_number 
 
 
 
@@ -357,8 +372,8 @@ program psb_dscg
       temporary_time = psb_wtime()
 
       call psb_scg_impl(local_a_lower_precision,prec,local_b_lower_precision,local_x_lower_precision, &
-      & eps,desc_a,info, itmax=itmax,iter=iter,err=err)
-      
+      & eps,desc_a,info, itmax=itmax,iter=iter,err=err_lower)
+
       computation_time = psb_wtime() - temporary_time
       call psb_amx(ctxt, computation_time)
 
@@ -405,18 +420,23 @@ program psb_dscg
         goto 9999
       end if
 
+      call psb_gather(global_r_lower_precision,local_r_lower_precision,desc_a, info)
 
       if(my_rank == psb_root_) then
-        err       = r_norm / b_norm
-        mean_err  = mean_err + err
+        err                 = r_norm / b_norm
+        mean_err            = mean_err + err
+        max_r_value_lower   = maxval(global_r_lower_precision)
       end if 
 
 
       ! Save stats
-      matrix_memory_size      = local_a%sizeof()
+      matrix_memory_size      = local_a_lower_precision%sizeof()
       call psb_sum(ctxt, matrix_memory_size)
 
       if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size + matrix_memory_size 
+      if(my_rank == psb_root_) mean_max_r_value = mean_max_r_value + max_r_value_lower 
+      if(my_rank == psb_root_) mean_r_norm = mean_r_norm + r_norm 
+
 
       desc_memory_size = desc_a%sizeof()
       call psb_sum(ctxt, desc_memory_size)
@@ -428,6 +448,10 @@ program psb_dscg
     if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size / iteration_number
     if(my_rank == psb_root_) mean_desc_memory_size = mean_desc_memory_size / iteration_number
     if(my_rank == psb_root_) mean_err = mean_err / iteration_number
+    if(my_rank == psb_root_) mean_max_r_value = mean_max_r_value / iteration_number 
+    if(my_rank == psb_root_) mean_r_norm = mean_r_norm / iteration_number 
+
+
 
   else if(precision_mode == 3) then  
     ! Mixed precision computation
@@ -439,7 +463,7 @@ program psb_dscg
       
       temporary_time = psb_wtime()
 
-      call psb_dscg_1_impl(local_a_lower_precision,prec,local_b,local_x, &
+      call psb_dscg_1_impl(local_a_lower_precision,prec,local_b_lower_precision,local_x_lower_precision, &
       & eps,desc_a,info, itmax=itmax,iter=iter,err=err)
       
       computation_time = psb_wtime() - temporary_time
@@ -459,6 +483,147 @@ program psb_dscg
         goto 9999
       end if
 
+      do j = 1, size(local_x%v%v)
+        local_x%v%v(j)  = local_x_lower_precision%v%v(j)
+      end do
+
+      ! r = r - A * x
+      call psb_spmm(-done, local_a, local_x, done, local_r, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_
+        ch_err='r = r - A * x'
+        call psb_errpush(info,name,a_err=ch_err)
+        goto 9999
+      end if
+
+      ! Compute error on exit
+      r_norm = psb_norm2(local_r, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_    
+        call psb_errpush(info,name,a_err='r norms computation')
+        goto 9999
+      end if
+      
+      b_norm = psb_norm2(local_b, desc_a, info)
+      
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_    
+        call psb_errpush(info,name,a_err='b norms computation')
+        goto 9999
+      end if
+
+      call psb_gather(global_r, local_r, desc_a, info)
+
+
+      if(my_rank == psb_root_) then
+        err       = r_norm / b_norm
+        mean_err  = mean_err + err
+        max_r_value = maxval(global_r)
+      end if 
+
+
+      ! Save stats
+      matrix_memory_size      = local_a%sizeof()
+      call psb_sum(ctxt, matrix_memory_size)
+
+      if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size + matrix_memory_size 
+      if(my_rank == psb_root_) mean_max_r_value = mean_max_r_value + max_r_value 
+      if(my_rank == psb_root_) mean_r_norm = mean_r_norm + r_norm 
+
+
+      desc_memory_size = desc_a%sizeof()
+      call psb_sum(ctxt, desc_memory_size)
+      if(my_rank == psb_root_)  mean_desc_memory_size = mean_desc_memory_size + desc_memory_size 
+
+    end do
+    
+    if(my_rank == psb_root_) mean_computation_time = mean_computation_time / iteration_number
+    if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size / iteration_number
+    if(my_rank == psb_root_) mean_desc_memory_size = mean_desc_memory_size / iteration_number
+    if(my_rank == psb_root_) mean_err = mean_err / iteration_number
+    if(my_rank == psb_root_) mean_max_r_value = mean_max_r_value / iteration_number 
+    if(my_rank == psb_root_) mean_r_norm = mean_r_norm / iteration_number
+
+
+  else if(precision_mode == 4) then  
+    ! Mixed precision computation
+    if(my_rank == psb_root_) print '("[INFO] Calling mixed precision 2 Conjugate Gradient")'
+
+    do i = 1, iteration_number
+      ! We want to iterate to get a mean value instead of a single computation
+      call local_x_lower_precision%zero()   
+      call local_x%zero()   
+
+      temporary_time = psb_wtime()
+
+      cg: do 
+
+        call psb_dscg_2_impl(local_a, local_a_lower_precision,prec,local_b, local_b_lower_precision,local_x, &
+        & local_x_lower_precision, eps,desc_a,info, itmax=itmax,iter=iter,err=err)
+
+
+        do j = 1, size(local_x%v%v)
+          local_x%v%v(j)  = local_x_lower_precision%v%v(j)
+        end do
+
+        call psb_geaxpby(done, local_b, dzero, local_r, desc_a, info)
+        if(info /= psb_success_) then
+          info=psb_err_from_subroutine_
+          ch_err='r = b'
+          call psb_errpush(info,name,a_err=ch_err)
+          goto 9999
+        end if
+  
+        ! r = r - A * x
+        call psb_spmm(-done, local_a, local_x, done, local_r, desc_a, info)
+  
+        if(info /= psb_success_) then
+          info=psb_err_from_subroutine_
+          ch_err='r = r - A * x'
+          call psb_errpush(info,name,a_err=ch_err)
+          goto 9999
+        end if
+
+        ! Compute error on exit
+        r_norm = psb_norm2(local_r, desc_a, info)
+
+        if(info /= psb_success_) then
+          info=psb_err_from_subroutine_    
+          call psb_errpush(info,name,a_err='r norms computation')
+          goto 9999
+        end if
+
+        b_norm = psb_norm2(local_b, desc_a, info)
+
+        if(info /= psb_success_) then
+          info=psb_err_from_subroutine_    
+          call psb_errpush(info,name,a_err='b norms computation')
+          goto 9999
+        end if
+
+
+        err = r_norm / b_norm 
+
+        exit cg
+      end do cg
+
+      computation_time = psb_wtime() - temporary_time
+      call psb_amx(ctxt, computation_time)
+
+      if(my_rank == psb_root_) mean_computation_time = mean_computation_time + computation_time
+      ! Compute residual
+
+      ! r = b
+      call psb_geaxpby(done, local_b, dzero, local_r, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_
+        ch_err='r = b'
+        call psb_errpush(info,name,a_err=ch_err)
+        goto 9999
+      end if
 
       ! r = r - A * x
       call psb_spmm(-done, local_a, local_x, done, local_r, desc_a, info)
@@ -489,21 +654,25 @@ program psb_dscg
       end if
 
 
+      call psb_gather(global_r,local_r,desc_a, info)
+
       if(my_rank == psb_root_) then
-        err       = r_norm / b_norm
-        mean_err  = mean_err + err
+        err                 = r_norm / b_norm
+        mean_err            = mean_err + err
+        max_r_value         = maxval(global_r)
       end if 
 
-
       ! Save stats
-      matrix_memory_size      = local_a%sizeof()
+      matrix_memory_size      = local_a_lower_precision%sizeof() + local_a%sizeof()
       call psb_sum(ctxt, matrix_memory_size)
 
       if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size + matrix_memory_size 
+      if(my_rank == psb_root_) mean_max_r_value = mean_max_r_value + max_r_value 
 
       desc_memory_size = desc_a%sizeof()
       call psb_sum(ctxt, desc_memory_size)
       if(my_rank == psb_root_)  mean_desc_memory_size = mean_desc_memory_size + desc_memory_size 
+      if(my_rank == psb_root_)  mean_r_norm = mean_r_norm + r_norm 
 
     end do
     
@@ -511,92 +680,8 @@ program psb_dscg
     if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size / iteration_number
     if(my_rank == psb_root_) mean_desc_memory_size = mean_desc_memory_size / iteration_number
     if(my_rank == psb_root_) mean_err = mean_err / iteration_number
-
-  else if(precision_mode == 4) then  
-    ! Mixed precision computation
-    if(my_rank == psb_root_) print '("[INFO] Calling mixed precision 2 Conjugate Gradient")'
-
-
-
-    do i = 1, iteration_number
-      ! We want to iterate to get a mean value instead of a single computation
-      call local_x_lower_precision%zero()      
-
-      temporary_time = psb_wtime()
-
-      call psb_dscg_2_impl(local_a_lower_precision,prec,local_b_lower_precision,local_x_lower_precision, &
-      & eps,desc_a,info, itmax=itmax,iter=iter,err=err)
-      
-      computation_time = psb_wtime() - temporary_time
-      call psb_amx(ctxt, computation_time)
-
-      if(my_rank == psb_root_) mean_computation_time = mean_computation_time + computation_time
-      ! Compute residual
-      call local_r_lower_precision%zero()
-
-      ! r = b
-      call psb_geaxpby(sone, local_b_lower_precision, szero, local_r_lower_precision, desc_a, info)
-
-      if(info /= psb_success_) then
-        info=psb_err_from_subroutine_
-        ch_err='r = b'
-        call psb_errpush(info,name,a_err=ch_err)
-        goto 9999
-      end if
-
-
-      ! r = r - A * x
-      call psb_spmm(-sone, local_a_lower_precision, local_x_lower_precision, sone, local_r_lower_precision, desc_a, info)
-
-      if(info /= psb_success_) then
-        info=psb_err_from_subroutine_
-        ch_err='r = r - A * x'
-        call psb_errpush(info,name,a_err=ch_err)
-        goto 9999
-      end if
-
-
-      ! Compute error on exit
-      r_norm = psb_norm2(local_r_lower_precision, desc_a, info)
-
-      if(info /= psb_success_) then
-        info=psb_err_from_subroutine_    
-        call psb_errpush(info,name,a_err='r norms computation')
-        goto 9999
-      end if
-      
-      b_norm = psb_norm2(local_b_lower_precision, desc_a, info)
-      
-      if(info /= psb_success_) then
-        info=psb_err_from_subroutine_    
-        call psb_errpush(info,name,a_err='b norms computation')
-        goto 9999
-      end if
-
-
-      if(my_rank == psb_root_) then
-        err       = r_norm / b_norm
-        mean_err  = mean_err + err
-      end if 
-
-
-      ! Save stats
-      matrix_memory_size      = local_a%sizeof()
-      call psb_sum(ctxt, matrix_memory_size)
-
-      if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size + matrix_memory_size 
-
-      desc_memory_size = desc_a%sizeof()
-      call psb_sum(ctxt, desc_memory_size)
-      if(my_rank == psb_root_)  mean_desc_memory_size = mean_desc_memory_size + desc_memory_size 
-
-    end do
-    
-    if(my_rank == psb_root_) mean_computation_time = mean_computation_time / iteration_number
-    if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size / iteration_number
-    if(my_rank == psb_root_) mean_desc_memory_size = mean_desc_memory_size / iteration_number
-    if(my_rank == psb_root_) mean_err = mean_err / iteration_number
-
+    if(my_rank == psb_root_) mean_r_norm = mean_r_norm / iteration_number
+    if(my_rank == psb_root_) mean_max_r_value = mean_max_r_value / iteration_number 
 
   else if(precision_mode == 5) then  
     ! PSBLAS CG double computation computation
@@ -678,9 +763,15 @@ program psb_dscg
     write(20,*) 'computed solution on ',np,' processors.'
     write(20,*) 'iterations to convergence: ',iter
     write(20,*) 'time to convergence: ',mean_computation_time
+    write(20,*) 'Time per iteration : ', mean_computation_time/iter
     write(20,*) 'matrix size: ',idim * idim, ' x ', idim * idim
     write(20,*) 'mean error estimate on exit:', &
     & ' ||r|| / ||b|| = ', mean_err
+    write(20,*) 'maxval r value: ', mean_max_r_value 
+    write(20,*) 'R norm : ', mean_r_norm
+    write(20,*) 'Mean total memory occupation for A  : ',mean_matrix_memory_size
+    write(20,*) 'Mean total memory occupation for DESC_A : ', mean_desc_memory_size
+
   end if
 
 

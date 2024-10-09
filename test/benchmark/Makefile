@@ -10,23 +10,25 @@ LDLIBS=$(PSBLDLIBS)
 #
 # Compilers and such
 #
-CCOPT= -g -fcheck=all -Wall -fbacktrace
+CCOPT= -g -fcheck=all -Wall -fbacktrace -O3
 FINCLUDES=$(FMFLAG)$(MODDIR) $(FMFLAG).
-OBJ = dot_vs_conv.o
 
 EXEDIR=./runs
 
 
-all: runsd dot_vs_conv
+all: runsd dot_vs_conv geaxpby_vs_conv
 
 runsd:
 	(if test ! -d runs ; then mkdir runs; fi)
 
 
-dot_vs_conv: $(OBJ)
-	$(FLINK) $(OBJ) $(CCOPT) -o dot_vs_conv $(PSBLAS_LIB) $(LDLIBS)
+dot_vs_conv: dot_vs_conv.o 
+	$(FLINK) dot_vs_conv.o  $(CCOPT) -o dot_vs_conv $(PSBLAS_LIB) $(LDLIBS)
 	/bin/mv dot_vs_conv $(EXEDIR)
 
+geaxpby_vs_conv: geaxpby_vs_conv.o
+	$(FLINK) geaxpby_vs_conv.o $(CCOPT) -o geaxpby_vs_conv $(PSBLAS_LIB) $(LDLIBS)
+	/bin/mv geaxpby_vs_conv $(EXEDIR)
 
 clean: 
 	/bin/rm -f dot_vs_conv.o  *$(.mod) \

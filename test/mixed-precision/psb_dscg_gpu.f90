@@ -367,7 +367,7 @@ program psb_dscg
     if(my_rank == psb_root_) print '("[INFO] Calling single precision Conjugate Gradient")'
 
     call psb_scg_impl(local_a_lower_gpu,prec,local_b_lower_precision,local_x_lower_precision, &
-    & eps,desc_a,info, itmax=itmax,iter=iter,err=err)
+    & eps,desc_a,info, itmax=itmax,iter=iter,err=err_lower)
   else if(precision_mode == 3) then  
     ! Mixed precision computation
     if(my_rank == psb_root_) print '("[INFO] Calling mixed precision 1 Conjugate Gradient")'
@@ -378,7 +378,7 @@ program psb_dscg
     ! Mixed precision computation
     if(my_rank == psb_root_) print '("[INFO] Calling mixed precision 2 Conjugate Gradient")'
     
-    call psb_dscg_2_impl(local_a_lower_gpu,prec,local_b_lower_precision,local_x_lower_precision, &
+    call psb_dscg_2_impl(local_a, local_a_lower_precision,prec,local_b,local_x, &
     & eps,desc_a,info, itmax=itmax,iter=iter,err=err)
   else if(precision_mode == 5) then  
     ! PSBLAS CG double computation computation
