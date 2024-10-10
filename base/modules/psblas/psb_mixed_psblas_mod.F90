@@ -1,9 +1,9 @@
-!   
+!
 !                Parallel Sparse BLAS  version 3.5
 !      (C) Copyright 2006-2018
-!        Salvatore Filippone    
-!        Alfredo Buttari      
-!   
+!        Salvatore Filippone
+!        Alfredo Buttari
+!
 !    Redistribution and use in source and binary forms, with or without
 !    modification, are permitted provided that the following conditions
 !    are met:
@@ -15,7 +15,7 @@
 !      3. The name of the PSBLAS group or the names of its contributors may
 !         not be used to endorse or promote products derived from this
 !         software without specific written permission.
-!   
+!
 !    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 !    ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 !    TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -27,14 +27,27 @@
 !    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 !    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 !    POSSIBILITY OF SUCH DAMAGE.
-!   
-!    
-module psb_psblas_mod
+!
+!
+module psb_mixed_psblas_mod
+  use psb_desc_mod, only : psb_desc_type, psb_spk_, psb_dpk_, psb_ipk_, psb_lpk_
+  use psb_d_vect_mod, only : psb_d_vect_type, psb_s_vect_type
+  use psb_d_mat_mod, only : psb_dspmat_type, psb_sspmat_type
 
-  use psb_s_psblas_mod
-  use psb_c_psblas_mod
-  use psb_d_psblas_mod
-  use psb_z_psblas_mod
-  use psb_mixed_psblas_mod
+  interface psb_spmm
+    subroutine psb_mx_sd_spmv_vect(alpha, a, x, beta, y,&
+         & desc_a, info, trans, work,doswap)
+      import 
+      type(psb_sspmat_type), intent(in)    :: a
+      type(psb_d_vect_type), intent(inout) :: x
+      type(psb_d_vect_type), intent(inout) :: y
+      real(psb_dpk_), intent(in)        :: alpha, beta
+      type(psb_desc_type), intent(in)      :: desc_a
+      character, optional, intent(in)      :: trans
+      real(psb_dpk_), optional, intent(inout),target :: work(:)
+      logical, optional, intent(in)        :: doswap
+      integer(psb_ipk_), intent(out)                 :: info
+    end subroutine psb_mx_sd_spmv_vect
+  end interface
 
-end module psb_psblas_mod
+end module psb_mixed_psblas_mod
