@@ -1,0 +1,713 @@
+(if test ! -d lib ; then mkdir lib; fi)
+make -C base objs
+make[1]: ingresso nella directory «/home/stack/repackage/psblas3/base»
+make -C modules objs F90="" F90COPT=" "
+(if test ! -d include ; then mkdir include; fi; /usr/bin/install -c -p -m 644 Make.inc  include/Make.inc.psblas)
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/base/modules»
+/bin/cp -p  *.mod ../../modules
+(if test ! -d modules ; then mkdir modules; fi;)	
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/base/modules»
+make -C serial objs 
+make -C comm objs 
+make -C internals objs 
+make -C psblas objs 
+make -C tools objs 
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/base/serial»
+make -C impl objs
+make -C sort objs
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/base/comm»
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/base/internals»
+make -C internals objs
+(make psi_desc_index.o psi_fnd_owner.o psi_a2a_fnd_owner.o psi_graph_fnd_owner.o psi_adjcncy_fnd_owner.o psi_symm_dep_list.o FC="mpifort")	
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/base/tools»
+(make psb_icdasb.o psb_ssphalo.o  psb_dsphalo.o psb_csphalo.o psb_zsphalo.o psb_dcdbldext.o psb_zcdbldext.o psb_scdbldext.o psb_ccdbldext.o psb_s_remote_mat.o psb_d_remote_mat.o psb_c_remote_mat.o psb_z_remote_mat.o psb_s_remote_vect.o psb_d_remote_vect.o psb_c_remote_vect.o psb_z_remote_vect.o psb_e_remote_vect.o psb_m_remote_vect.o  FC="mpifort")
+make psb_dscatter.o psb_zscatter.o psb_iscatter.o psb_lscatter.o psb_cscatter.o psb_sscatter.o psb_dscatter_a.o psb_zscatter_a.o psb_mscatter_a.o psb_escatter_a.o psb_cscatter_a.o psb_sscatter_a.o psb_dspgather.o psb_sspgather.o psb_zspgather.o psb_cspgather.o FC="mpifort" 
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/base/psblas»
+make[2]: Nessuna operazione da eseguire per «objs».
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/base/psblas»
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/serial/impl»
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_s_mat_impl.F90 -o psb_s_mat_impl.o
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/serial/sort»
+make[3]: Nessuna operazione da eseguire per «objs».
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/serial/sort»
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/comm/internals»
+(make psi_dswapdata.o psi_dswaptran.o psi_sswapdata.o  psi_sswaptran.o psi_iswapdata.o psi_iswaptran.o psi_lswapdata.o psi_lswaptran.o psi_cswapdata.o psi_cswaptran.o psi_zswapdata.o psi_zswaptran.o psi_dswapdata_a.o psi_dswaptran_a.o psi_sswapdata_a.o  psi_sswaptran_a.o psi_mswapdata_a.o psi_mswaptran_a.o psi_eswapdata_a.o psi_eswaptran_a.o psi_cswapdata_a.o psi_cswaptran_a.o psi_zswapdata_a.o psi_zswaptran_a.o   FC="mpifort" )	
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/internals»
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/tools»
+make[3]: «psi_desc_index.o» è aggiornato.
+make[3]: «psi_fnd_owner.o» è aggiornato.
+make[3]: «psi_a2a_fnd_owner.o» è aggiornato.
+make[3]: «psi_graph_fnd_owner.o» è aggiornato.
+make[3]: «psi_adjcncy_fnd_owner.o» è aggiornato.
+make[3]: «psi_symm_dep_list.o» è aggiornato.
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/internals»
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/comm»
+make[3]: «psb_dscatter.o» è aggiornato.
+make[3]: «psb_zscatter.o» è aggiornato.
+make[3]: «psb_iscatter.o» è aggiornato.
+make[3]: «psb_lscatter.o» è aggiornato.
+make[3]: «psb_cscatter.o» è aggiornato.
+make[3]: «psb_sscatter.o» è aggiornato.
+make[3]: «psb_dscatter_a.o» è aggiornato.
+make[3]: «psb_zscatter_a.o» è aggiornato.
+make[3]: «psb_mscatter_a.o» è aggiornato.
+make[3]: «psb_escatter_a.o» è aggiornato.
+make[3]: «psb_cscatter_a.o» è aggiornato.
+make[3]: «psb_sscatter_a.o» è aggiornato.
+make[3]: «psb_dspgather.o» è aggiornato.
+make[3]: «psb_sspgather.o» è aggiornato.
+make[3]: «psb_zspgather.o» è aggiornato.
+make[3]: «psb_cspgather.o» è aggiornato.
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/comm»
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/base/internals»
+make[3]: «psb_icdasb.o» è aggiornato.
+make[3]: «psb_ssphalo.o» è aggiornato.
+make[3]: «psb_dsphalo.o» è aggiornato.
+make[3]: «psb_csphalo.o» è aggiornato.
+make[3]: «psb_zsphalo.o» è aggiornato.
+make[3]: «psb_dcdbldext.o» è aggiornato.
+make[3]: «psb_zcdbldext.o» è aggiornato.
+make[3]: «psb_scdbldext.o» è aggiornato.
+make[3]: «psb_ccdbldext.o» è aggiornato.
+make[3]: «psb_s_remote_mat.o» è aggiornato.
+make[3]: «psb_d_remote_mat.o» è aggiornato.
+make[3]: «psb_c_remote_mat.o» è aggiornato.
+make[3]: «psb_z_remote_mat.o» è aggiornato.
+make[3]: «psb_s_remote_vect.o» è aggiornato.
+make[3]: «psb_d_remote_vect.o» è aggiornato.
+make[3]: «psb_c_remote_vect.o» è aggiornato.
+make[3]: «psb_z_remote_vect.o» è aggiornato.
+make[3]: «psb_e_remote_vect.o» è aggiornato.
+make[3]: «psb_m_remote_vect.o» è aggiornato.
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/tools»
+make[4]: ingresso nella directory «/home/stack/repackage/psblas3/base/comm/internals»
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/base/tools»
+make[4]: «psi_dswapdata.o» è aggiornato.
+make[4]: «psi_dswaptran.o» è aggiornato.
+make[4]: «psi_sswapdata.o» è aggiornato.
+make[4]: «psi_sswaptran.o» è aggiornato.
+make[4]: «psi_iswapdata.o» è aggiornato.
+make[4]: «psi_iswaptran.o» è aggiornato.
+make[4]: «psi_lswapdata.o» è aggiornato.
+make[4]: «psi_lswaptran.o» è aggiornato.
+make[4]: «psi_cswapdata.o» è aggiornato.
+make[4]: «psi_cswaptran.o» è aggiornato.
+make[4]: «psi_zswapdata.o» è aggiornato.
+make[4]: «psi_zswaptran.o» è aggiornato.
+make[4]: «psi_dswapdata_a.o» è aggiornato.
+make[4]: «psi_dswaptran_a.o» è aggiornato.
+make[4]: «psi_sswapdata_a.o» è aggiornato.
+make[4]: «psi_sswaptran_a.o» è aggiornato.
+make[4]: «psi_mswapdata_a.o» è aggiornato.
+make[4]: «psi_mswaptran_a.o» è aggiornato.
+make[4]: «psi_eswapdata_a.o» è aggiornato.
+make[4]: «psi_eswaptran_a.o» è aggiornato.
+make[4]: «psi_cswapdata_a.o» è aggiornato.
+make[4]: «psi_cswaptran_a.o» è aggiornato.
+make[4]: «psi_zswapdata_a.o» è aggiornato.
+make[4]: «psi_zswaptran_a.o» è aggiornato.
+make[4]: uscita dalla directory «/home/stack/repackage/psblas3/base/comm/internals»
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/comm/internals»
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/base/comm»
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/serial/impl»
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/base/serial»
+make[1]: uscita dalla directory «/home/stack/repackage/psblas3/base»
+make -C prec objs
+make -C util objs 
+make -C ext objs
+make[1]: ingresso nella directory «/home/stack/repackage/psblas3/ext»
+make -C impl objs 
+make[1]: ingresso nella directory «/home/stack/repackage/psblas3/prec»
+make -C impl objs
+make[1]: ingresso nella directory «/home/stack/repackage/psblas3/util»
+/bin/cp -p  *.mod ../modules
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/prec/impl»
+make[2]: Nessuna operazione da eseguire per «objs».
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/prec/impl»
+/bin/cp -p  *.mod ../modules
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/ext/impl»
+make[2]: Nessuna operazione da eseguire per «objs».
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/ext/impl»
+/bin/cp -p *.mod ../modules
+make[1]: uscita dalla directory «/home/stack/repackage/psblas3/util»
+make[1]: uscita dalla directory «/home/stack/repackage/psblas3/ext»
+make -C cuda objs
+make[1]: ingresso nella directory «/home/stack/repackage/psblas3/cuda»
+make -C spgpu includes	
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cuda/spgpu»
+make -C impl objs
+/bin/cp -p *.h ../../include
+make -C CUDA objs
+make -C spgpu objs
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cuda/spgpu»
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cuda/impl»
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cuda/CUDA»
+make[2]: Nessuna operazione da eseguire per «objs».
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cuda/CUDA»
+make -C kernels objs
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/cuda/spgpu/kernels»
+make[3]: Nessuna operazione da eseguire per «objs».
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/cuda/spgpu/kernels»
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cuda/spgpu»
+make[2]: Nessuna operazione da eseguire per «objs».
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cuda/impl»
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cuda/spgpu»
+/bin/cp -p *.mod ../modules
+/bin/cp -p *.h ../include
+make[1]: uscita dalla directory «/home/stack/repackage/psblas3/prec»
+make -C krylov objs
+make[1]: ingresso nella directory «/home/stack/repackage/psblas3/krylov»
+/bin/cp -p  *.mod ../modules
+make[1]: uscita dalla directory «/home/stack/repackage/psblas3/cuda»
+make -C cuda lib
+make[1]: ingresso nella directory «/home/stack/repackage/psblas3/cuda»
+make -C spgpu includes	
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cuda/spgpu»
+make -C impl objs
+/bin/cp -p *.h ../../include
+make -C CUDA objs
+make -C spgpu objs
+make -C spgpu lib
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cuda/spgpu»
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cuda/spgpu»
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cuda/impl»
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cuda/CUDA»
+make[2]: Nessuna operazione da eseguire per «objs».
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cuda/CUDA»
+make -C kernels objs
+make -C kernels objs
+make -C kernels lib LIBNAME=libspgpu.a
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/cuda/spgpu/kernels»
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/cuda/spgpu/kernels»
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/cuda/spgpu/kernels»
+make[3]: Nessuna operazione da eseguire per «objs».
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/cuda/spgpu/kernels»
+make[2]: Nessuna operazione da eseguire per «objs».
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cuda/impl»
+make[3]: Nessuna operazione da eseguire per «objs».
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/cuda/spgpu/kernels»
+ar cur ../libspgpu.a cabs.o  camax.o  casum.o  caxpby.o  caxy.o  cdot.o  cgath.o cnrm2.o cscal.o cscat.o csetscal.o cupd_xyz.o dabs.o damax.o dasum.o daxpby.o daxy.o ddot.o dgath.o dupd_xyz.o dia_cspmv.o dia_dspmv.o dia_sspmv.o dia_zspmv.o dnrm2.o dscal.o dscat.o dsetscal.o ell_ccsput.o ell_cspmv.o ell_dcsput.o ell_dspmv.o ell_scsput.o ell_sspmv.o ell_zcsput.o ell_zspmv.o hdia_cspmv.o hdia_dspmv.o hdia_sspmv.o hdia_zspmv.o hell_cspmv.o hell_dspmv.o hell_sspmv.o hell_zspmv.o igath.o iscat.o isetscal.o sabs.o samax.o sasum.o saxpby.o saxy.o sdot.o sgath.o snrm2.o sscal.o sscat.o ssetscal.o zabs.o zamax.o supd_xyz.o zasum.o zaxpby.o zaxy.o zdot.o zgath.o znrm2.o zscal.o zscat.o zsetscal.o zupd_xyz.o sxyzw.o cxyzw.o dxyzw.o zxyzw.o
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cuda/spgpu»
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/cuda/spgpu/kernels»
+ar cur libspgpu.a coo.o core.o dia.o ell.o hdia.o hell.o 
+/bin/cp -p libspgpu.a ../../lib
+make[1]: uscita dalla directory «/home/stack/repackage/psblas3/krylov»
+make -C cbind objs 
+make[1]: ingresso nella directory «/home/stack/repackage/psblas3/cbind»
+cd base && make objs LIBNAME=libpsb_cbind.a
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cbind/base»
+/bin/cp -p  *.mod psb_base_cbind.h psb_c_base.h psb_c_sbase.h  psb_c_dbase.h  psb_c_cbase.h  psb_c_zbase.h psb_c_scomm.h psb_c_dcomm.h psb_c_ccomm.h psb_c_zcomm.h ..
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cuda/spgpu»
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cuda/spgpu»
+/bin/cp -p *.mod ../modules
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cbind/base»
+cd prec && make objs LIBNAME=libpsb_cbind.a
+cd util && make objs LIBNAME=libpsb_cbind.a
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cbind/prec»
+/bin/cp -p  *.mod psb_prec_cbind.h psb_c_sprec.h psb_c_dprec.h psb_c_cprec.h psb_c_zprec.h ..
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cbind/util»
+/bin/cp -p *.mod psb_util_cbind.h psb_c_cutil.h psb_c_zutil.h psb_c_dutil.h psb_c_sutil.h ..
+/bin/cp -p *.h ../include
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cbind/prec»
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cbind/util»
+cd krylov && make objs LIBNAME=libpsb_cbind.a
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cbind/krylov»
+/bin/cp -p *.mod psb_krylov_cbind.h ..
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cbind/krylov»
+make -C impl lib LIBNAME=libpsb_cuda.a
+/bin/cp -p  *.h ../include
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cuda/impl»
+ar cur ../libpsb_cuda.a psb_d_cuda_cp_csrg_from_coo.o psb_d_cuda_cp_csrg_from_fmt.o psb_d_cuda_cp_elg_from_coo.o psb_d_cuda_cp_elg_from_fmt.o psb_s_cuda_cp_csrg_from_coo.o psb_s_cuda_cp_csrg_from_fmt.o psb_s_cuda_csrg_allocate_mnnz.o psb_s_cuda_csrg_csmm.o psb_s_cuda_csrg_csmv.o psb_s_cuda_csrg_mold.o psb_s_cuda_csrg_reallocate_nz.o psb_s_cuda_csrg_scal.o psb_s_cuda_csrg_scals.o psb_s_cuda_csrg_from_gpu.o psb_s_cuda_csrg_to_gpu.o psb_s_cuda_csrg_vect_mv.o psb_s_cuda_csrg_inner_vect_sv.o psb_d_cuda_csrg_allocate_mnnz.o psb_d_cuda_csrg_csmm.o psb_d_cuda_csrg_csmv.o psb_d_cuda_csrg_mold.o psb_d_cuda_csrg_reallocate_nz.o psb_d_cuda_csrg_scal.o psb_d_cuda_csrg_scals.o psb_d_cuda_csrg_from_gpu.o psb_d_cuda_csrg_to_gpu.o psb_d_cuda_csrg_vect_mv.o psb_d_cuda_csrg_inner_vect_sv.o psb_d_cuda_elg_allocate_mnnz.o psb_d_cuda_elg_asb.o psb_d_cuda_elg_csmm.o psb_d_cuda_elg_csmv.o psb_d_cuda_elg_csput.o psb_d_cuda_elg_from_gpu.o psb_d_cuda_elg_inner_vect_sv.o psb_d_cuda_elg_mold.o psb_d_cuda_elg_reallocate_nz.o psb_d_cuda_elg_scal.o psb_d_cuda_elg_scals.o psb_d_cuda_elg_to_gpu.o psb_d_cuda_elg_vect_mv.o psb_d_cuda_mv_csrg_from_coo.o psb_d_cuda_mv_csrg_from_fmt.o psb_d_cuda_mv_elg_from_coo.o psb_d_cuda_mv_elg_from_fmt.o psb_s_cuda_mv_csrg_from_coo.o psb_s_cuda_mv_csrg_from_fmt.o psb_s_cuda_cp_elg_from_coo.o psb_s_cuda_cp_elg_from_fmt.o psb_s_cuda_elg_allocate_mnnz.o psb_s_cuda_elg_asb.o psb_s_cuda_elg_csmm.o psb_s_cuda_elg_csmv.o psb_s_cuda_elg_csput.o psb_s_cuda_elg_inner_vect_sv.o psb_s_cuda_elg_mold.o psb_s_cuda_elg_reallocate_nz.o psb_s_cuda_elg_scal.o psb_s_cuda_elg_scals.o psb_s_cuda_elg_to_gpu.o psb_s_cuda_elg_from_gpu.o psb_s_cuda_elg_vect_mv.o psb_s_cuda_mv_elg_from_coo.o psb_s_cuda_mv_elg_from_fmt.o psb_s_cuda_cp_hlg_from_fmt.o psb_s_cuda_cp_hlg_from_coo.o psb_d_cuda_cp_hlg_from_fmt.o psb_d_cuda_cp_hlg_from_coo.o psb_d_cuda_hlg_allocate_mnnz.o psb_d_cuda_hlg_csmm.o psb_d_cuda_hlg_csmv.o psb_d_cuda_hlg_inner_vect_sv.o psb_d_cuda_hlg_mold.o psb_d_cuda_hlg_reallocate_nz.o psb_d_cuda_hlg_scal.o psb_d_cuda_hlg_scals.o psb_d_cuda_hlg_from_gpu.o psb_d_cuda_hlg_to_gpu.o psb_d_cuda_hlg_vect_mv.o psb_s_cuda_hlg_allocate_mnnz.o psb_s_cuda_hlg_csmm.o psb_s_cuda_hlg_csmv.o psb_s_cuda_hlg_inner_vect_sv.o psb_s_cuda_hlg_mold.o psb_s_cuda_hlg_reallocate_nz.o psb_s_cuda_hlg_scal.o psb_s_cuda_hlg_scals.o psb_s_cuda_hlg_from_gpu.o psb_s_cuda_hlg_to_gpu.o psb_s_cuda_hlg_vect_mv.o psb_s_cuda_mv_hlg_from_coo.o psb_s_cuda_cp_hlg_from_coo.o psb_s_cuda_mv_hlg_from_fmt.o psb_d_cuda_mv_hlg_from_coo.o psb_d_cuda_cp_hlg_from_coo.o psb_d_cuda_mv_hlg_from_fmt.o psb_s_cuda_hybg_allocate_mnnz.o psb_s_cuda_hybg_csmm.o psb_s_cuda_hybg_csmv.o psb_s_cuda_hybg_reallocate_nz.o psb_s_cuda_hybg_scal.o psb_s_cuda_hybg_scals.o psb_s_cuda_hybg_to_gpu.o psb_s_cuda_hybg_vect_mv.o psb_s_cuda_hybg_inner_vect_sv.o psb_s_cuda_cp_hybg_from_coo.o psb_s_cuda_cp_hybg_from_fmt.o psb_s_cuda_mv_hybg_from_fmt.o psb_s_cuda_mv_hybg_from_coo.o psb_s_cuda_hybg_mold.o psb_d_cuda_hybg_allocate_mnnz.o psb_d_cuda_hybg_csmm.o psb_d_cuda_hybg_csmv.o psb_d_cuda_hybg_reallocate_nz.o psb_d_cuda_hybg_scal.o psb_d_cuda_hybg_scals.o psb_d_cuda_hybg_to_gpu.o psb_d_cuda_hybg_vect_mv.o psb_d_cuda_hybg_inner_vect_sv.o psb_d_cuda_cp_hybg_from_coo.o psb_d_cuda_cp_hybg_from_fmt.o psb_d_cuda_mv_hybg_from_fmt.o psb_d_cuda_mv_hybg_from_coo.o psb_d_cuda_hybg_mold.o psb_z_cuda_cp_csrg_from_coo.o psb_z_cuda_cp_csrg_from_fmt.o psb_z_cuda_cp_elg_from_coo.o psb_z_cuda_cp_elg_from_fmt.o psb_c_cuda_cp_csrg_from_coo.o psb_c_cuda_cp_csrg_from_fmt.o psb_c_cuda_csrg_allocate_mnnz.o psb_c_cuda_csrg_csmm.o psb_c_cuda_csrg_csmv.o psb_c_cuda_csrg_mold.o psb_c_cuda_csrg_reallocate_nz.o psb_c_cuda_csrg_scal.o psb_c_cuda_csrg_scals.o psb_c_cuda_csrg_from_gpu.o psb_c_cuda_csrg_to_gpu.o psb_c_cuda_csrg_vect_mv.o psb_c_cuda_csrg_inner_vect_sv.o psb_z_cuda_csrg_allocate_mnnz.o psb_z_cuda_csrg_csmm.o psb_z_cuda_csrg_csmv.o psb_z_cuda_csrg_mold.o psb_z_cuda_csrg_reallocate_nz.o psb_z_cuda_csrg_scal.o psb_z_cuda_csrg_scals.o psb_z_cuda_csrg_from_gpu.o psb_z_cuda_csrg_to_gpu.o psb_z_cuda_csrg_vect_mv.o psb_z_cuda_csrg_inner_vect_sv.o psb_z_cuda_elg_allocate_mnnz.o psb_z_cuda_elg_asb.o psb_z_cuda_elg_csmm.o psb_z_cuda_elg_csmv.o psb_z_cuda_elg_csput.o psb_z_cuda_elg_inner_vect_sv.o psb_z_cuda_elg_mold.o psb_z_cuda_elg_reallocate_nz.o psb_z_cuda_elg_scal.o psb_z_cuda_elg_scals.o psb_z_cuda_elg_to_gpu.o psb_z_cuda_elg_from_gpu.o psb_z_cuda_elg_vect_mv.o psb_z_cuda_mv_csrg_from_coo.o psb_z_cuda_mv_csrg_from_fmt.o psb_z_cuda_mv_elg_from_coo.o psb_z_cuda_mv_elg_from_fmt.o psb_c_cuda_mv_csrg_from_coo.o psb_c_cuda_mv_csrg_from_fmt.o psb_c_cuda_cp_elg_from_coo.o psb_c_cuda_cp_elg_from_fmt.o psb_c_cuda_elg_allocate_mnnz.o psb_c_cuda_elg_asb.o psb_c_cuda_elg_csmm.o psb_c_cuda_elg_csmv.o psb_c_cuda_elg_csput.o psb_c_cuda_elg_inner_vect_sv.o psb_c_cuda_elg_mold.o psb_c_cuda_elg_reallocate_nz.o psb_c_cuda_elg_scal.o psb_c_cuda_elg_scals.o psb_c_cuda_elg_to_gpu.o psb_c_cuda_elg_from_gpu.o psb_c_cuda_elg_vect_mv.o psb_c_cuda_mv_elg_from_coo.o psb_c_cuda_mv_elg_from_fmt.o psb_c_cuda_cp_hlg_from_fmt.o psb_c_cuda_cp_hlg_from_coo.o psb_z_cuda_cp_hlg_from_fmt.o psb_z_cuda_cp_hlg_from_coo.o psb_z_cuda_hlg_allocate_mnnz.o psb_z_cuda_hlg_csmm.o psb_z_cuda_hlg_csmv.o psb_z_cuda_hlg_inner_vect_sv.o psb_z_cuda_hlg_mold.o psb_z_cuda_hlg_reallocate_nz.o psb_z_cuda_hlg_scal.o psb_z_cuda_hlg_scals.o psb_z_cuda_hlg_from_gpu.o psb_z_cuda_hlg_to_gpu.o psb_z_cuda_hlg_vect_mv.o psb_c_cuda_hlg_allocate_mnnz.o psb_c_cuda_hlg_csmm.o psb_c_cuda_hlg_csmv.o psb_c_cuda_hlg_inner_vect_sv.o psb_c_cuda_hlg_mold.o psb_c_cuda_hlg_reallocate_nz.o psb_c_cuda_hlg_scal.o psb_c_cuda_hlg_scals.o psb_c_cuda_hlg_from_gpu.o psb_c_cuda_hlg_to_gpu.o psb_c_cuda_hlg_vect_mv.o psb_c_cuda_mv_hlg_from_coo.o psb_c_cuda_cp_hlg_from_coo.o psb_c_cuda_mv_hlg_from_fmt.o psb_z_cuda_mv_hlg_from_coo.o psb_z_cuda_cp_hlg_from_coo.o psb_z_cuda_mv_hlg_from_fmt.o psb_c_cuda_hybg_allocate_mnnz.o psb_c_cuda_hybg_csmm.o psb_c_cuda_hybg_csmv.o psb_c_cuda_hybg_reallocate_nz.o psb_c_cuda_hybg_scal.o psb_c_cuda_hybg_scals.o psb_c_cuda_hybg_to_gpu.o psb_c_cuda_hybg_vect_mv.o psb_c_cuda_hybg_inner_vect_sv.o psb_c_cuda_cp_hybg_from_coo.o psb_c_cuda_cp_hybg_from_fmt.o psb_c_cuda_mv_hybg_from_fmt.o psb_c_cuda_mv_hybg_from_coo.o psb_c_cuda_hybg_mold.o psb_z_cuda_hybg_allocate_mnnz.o psb_z_cuda_hybg_csmm.o psb_z_cuda_hybg_csmv.o psb_z_cuda_hybg_reallocate_nz.o psb_z_cuda_hybg_scal.o psb_z_cuda_hybg_scals.o psb_z_cuda_hybg_to_gpu.o psb_z_cuda_hybg_vect_mv.o psb_z_cuda_hybg_inner_vect_sv.o psb_z_cuda_cp_hybg_from_coo.o psb_z_cuda_cp_hybg_from_fmt.o psb_z_cuda_mv_hybg_from_fmt.o psb_z_cuda_mv_hybg_from_coo.o psb_z_cuda_hybg_mold.o psb_d_cuda_cp_diag_from_coo.o psb_d_cuda_mv_diag_from_coo.o psb_d_cuda_diag_to_gpu.o psb_d_cuda_diag_csmv.o psb_d_cuda_diag_mold.o psb_d_cuda_diag_vect_mv.o psb_d_cuda_cp_hdiag_from_coo.o psb_d_cuda_mv_hdiag_from_coo.o psb_d_cuda_hdiag_to_gpu.o psb_d_cuda_hdiag_csmv.o psb_d_cuda_hdiag_mold.o psb_d_cuda_hdiag_vect_mv.o psb_s_cuda_cp_hdiag_from_coo.o psb_s_cuda_mv_hdiag_from_coo.o psb_s_cuda_hdiag_to_gpu.o psb_s_cuda_hdiag_csmv.o psb_s_cuda_hdiag_mold.o psb_s_cuda_hdiag_vect_mv.o psb_s_cuda_dnsg_mat_impl.o psb_d_cuda_dnsg_mat_impl.o psb_c_cuda_dnsg_mat_impl.o psb_z_cuda_dnsg_mat_impl.o 
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cuda/impl»
+make -C CUDA lib LIBNAME=libpsb_cuda.a
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cuda/CUDA»
+ar cur ../libpsb_cuda.a psi_cuda_c_CopyCooToElg.o psi_cuda_c_CopyCooToHlg.o psi_cuda_d_CopyCooToElg.o psi_cuda_d_CopyCooToHlg.o psi_cuda_s_CopyCooToElg.o psi_cuda_s_CopyCooToHlg.o psi_cuda_z_CopyCooToElg.o psi_cuda_z_CopyCooToHlg.o 
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cuda/CUDA»
+ar cur libpsb_cuda.a elldev.o hlldev.o diagdev.o hdiagdev.o vectordev.o  ivectordev.o dnsdev.o svectordev.o dvectordev.o cvectordev.o zvectordev.o cuda_util.o fcusparse.o scusparse.o dcusparse.o ccusparse.o zcusparse.o  cusparse_mod.o base_cusparse_mod.o s_cusparse_mod.o  d_cusparse_mod.o  c_cusparse_mod.o  z_cusparse_mod.o psb_vectordev_mod.o core_mod.o psb_s_vectordev_mod.o psb_d_vectordev_mod.o psb_i_vectordev_mod.o psb_c_vectordev_mod.o psb_z_vectordev_mod.o psb_base_vectordev_mod.o elldev_mod.o hlldev_mod.o diagdev_mod.o hdiagdev_mod.o psb_i_cuda_vect_mod.o psb_d_cuda_vect_mod.o  psb_s_cuda_vect_mod.o psb_z_cuda_vect_mod.o  psb_c_cuda_vect_mod.o psb_d_cuda_elg_mat_mod.o   psb_d_cuda_hlg_mat_mod.o psb_d_cuda_hybg_mat_mod.o  psb_d_cuda_csrg_mat_mod.o psb_s_cuda_elg_mat_mod.o   psb_s_cuda_hlg_mat_mod.o psb_s_cuda_hybg_mat_mod.o  psb_s_cuda_csrg_mat_mod.o psb_c_cuda_elg_mat_mod.o   psb_c_cuda_hlg_mat_mod.o psb_c_cuda_hybg_mat_mod.o  psb_c_cuda_csrg_mat_mod.o psb_z_cuda_elg_mat_mod.o   psb_z_cuda_hlg_mat_mod.o psb_z_cuda_hybg_mat_mod.o  psb_z_cuda_csrg_mat_mod.o psb_cuda_env_mod.o psb_cuda_mod.o psb_d_cuda_diag_mat_mod.o psb_d_cuda_hdiag_mat_mod.o psb_s_cuda_hdiag_mat_mod.o psb_s_cuda_dnsg_mat_mod.o psb_d_cuda_dnsg_mat_mod.o psb_c_cuda_dnsg_mat_mod.o psb_z_cuda_dnsg_mat_mod.o dnsdev_mod.o
+/bin/cp -p libpsb_cuda.a ../lib
+/bin/cp -p  *.mod ../modules/
+make[1]: uscita dalla directory «/home/stack/repackage/psblas3/cuda»
+make[1]: uscita dalla directory «/home/stack/repackage/psblas3/cbind»
+make -C base lib
+make[1]: ingresso nella directory «/home/stack/repackage/psblas3/base»
+make -C modules objs F90="" F90COPT=" "
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/base/modules»
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I../ -I. -I. -c comm/psi_s_comm_v_mod.f90 -o comm/psi_s_comm_v_mod.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I../ -I. -I. -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psi_s_mod.F90 -o psi_s_mod.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I../ -I. -I. -c psi_mod.f90 -o psi_mod.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I../ -I. -I. -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c tools/psb_cd_tools_mod.F90 -o tools/psb_cd_tools_mod.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I../ -I. -I. -c tools/psb_m_tools_a_mod.f90 -o tools/psb_m_tools_a_mod.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I../ -I. -I. -c tools/psb_e_tools_a_mod.f90 -o tools/psb_e_tools_a_mod.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I../ -I. -I. -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c tools/psb_s_tools_mod.F90 -o tools/psb_s_tools_mod.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I../ -I. -I. -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c tools/psb_d_tools_mod.F90 -o tools/psb_d_tools_mod.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I../ -I. -I. -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c tools/psb_c_tools_mod.F90 -o tools/psb_c_tools_mod.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I../ -I. -I. -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c tools/psb_z_tools_mod.F90 -o tools/psb_z_tools_mod.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I../ -I. -I. -c tools/psb_s_tools_a_mod.f90 -o tools/psb_s_tools_a_mod.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I../ -I. -I. -c tools/psb_d_tools_a_mod.f90 -o tools/psb_d_tools_a_mod.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I../ -I. -I. -c tools/psb_c_tools_a_mod.f90 -o tools/psb_c_tools_a_mod.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I../ -I. -I. -c tools/psb_z_tools_a_mod.f90 -o tools/psb_z_tools_a_mod.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I../ -I. -I. -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c tools/psb_i_tools_mod.F90 -o tools/psb_i_tools_mod.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I../ -I. -I. -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c tools/psb_l_tools_mod.F90 -o tools/psb_l_tools_mod.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I../ -I. -I. -c tools/psb_tools_mod.f90 -o tools/psb_tools_mod.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I../ -I. -I. -c error.f90 -o error.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I../ -I. -I. -c psb_base_mod.f90 -o psb_base_mod.o
+mpicc -g -O3    -I.  -DIPK4 -DLPK8 -DLowerUnderscore -DPtr64Bits  -c cutil.c -o cutil.o
+/bin/cp -p  *.mod ../../modules
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/base/modules»
+make -C serial objs 
+make -C comm objs 
+make -C internals objs 
+make -C psblas objs 
+make -C tools objs 
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/base/serial»
+make -C impl objs
+make -C sort objs
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/base/internals»
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/base/comm»
+(make psi_desc_index.o psi_fnd_owner.o psi_a2a_fnd_owner.o psi_graph_fnd_owner.o psi_adjcncy_fnd_owner.o psi_symm_dep_list.o FC="mpifort")	
+make -C internals objs
+make psb_dscatter.o psb_zscatter.o psb_iscatter.o psb_lscatter.o psb_cscatter.o psb_sscatter.o psb_dscatter_a.o psb_zscatter_a.o psb_mscatter_a.o psb_escatter_a.o psb_cscatter_a.o psb_sscatter_a.o psb_dspgather.o psb_sspgather.o psb_zspgather.o psb_cspgather.o FC="mpifort" 
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/base/tools»
+(make psb_icdasb.o psb_ssphalo.o  psb_dsphalo.o psb_csphalo.o psb_zsphalo.o psb_dcdbldext.o psb_zcdbldext.o psb_scdbldext.o psb_ccdbldext.o psb_s_remote_mat.o psb_d_remote_mat.o psb_c_remote_mat.o psb_z_remote_mat.o psb_s_remote_vect.o psb_d_remote_vect.o psb_c_remote_vect.o psb_z_remote_vect.o psb_e_remote_vect.o psb_m_remote_vect.o  FC="mpifort")
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../modules -I.. -c psi_crea_bnd_elem.f90 -o psi_crea_bnd_elem.o
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/base/psblas»
+make[2]: Nessuna operazione da eseguire per «objs».
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/base/psblas»
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../modules -I.. -c psi_crea_index.f90 -o psi_crea_index.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../modules -I.. -c psi_crea_ovr_elem.f90 -o psi_crea_ovr_elem.o
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/serial/impl»
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_base_mat_impl.f90 -o psb_base_mat_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../modules -I.. -c psi_bld_tmpovrl.f90 -o psi_bld_tmpovrl.o
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/serial/sort»
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_s_hsort_impl.f90 -o psb_s_hsort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_s_base_mat_impl.F90 -o psb_s_base_mat_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../modules -I.. -c psi_bld_tmphalo.f90 -o psi_bld_tmphalo.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_s_isort_impl.f90 -o psb_s_isort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_d_base_mat_impl.F90 -o psb_d_base_mat_impl.o
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/comm/internals»
+(make psi_dswapdata.o psi_dswaptran.o psi_sswapdata.o  psi_sswaptran.o psi_iswapdata.o psi_iswaptran.o psi_lswapdata.o psi_lswaptran.o psi_cswapdata.o psi_cswaptran.o psi_zswapdata.o psi_zswaptran.o psi_dswapdata_a.o psi_dswaptran_a.o psi_sswapdata_a.o  psi_sswaptran_a.o psi_mswapdata_a.o psi_mswaptran_a.o psi_eswapdata_a.o psi_eswaptran_a.o psi_cswapdata_a.o psi_cswaptran_a.o psi_zswapdata_a.o psi_zswaptran_a.o   FC="mpifort" )	
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_s_msort_impl.f90 -o psb_s_msort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../modules -I.. -c psi_sort_dl.f90 -o psi_sort_dl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_c_base_mat_impl.F90 -o psb_c_base_mat_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../modules -I.. -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psi_indx_map_fnd_owner.F90 -o psi_indx_map_fnd_owner.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_s_qsort_impl.f90 -o psb_s_qsort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_iovrl_restr.f90 -o psi_iovrl_restr.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_z_base_mat_impl.F90 -o psb_z_base_mat_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../modules -I.. -c psi_desc_impl.f90 -o psi_desc_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_d_hsort_impl.f90 -o psb_d_hsort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_iovrl_save.f90 -o psi_iovrl_save.o
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/internals»
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/comm»
+make[3]: «psi_desc_index.o» è aggiornato.
+make[3]: «psb_dscatter.o» è aggiornato.
+make[3]: «psb_zscatter.o» è aggiornato.
+make[3]: «psi_fnd_owner.o» è aggiornato.
+make[3]: «psb_iscatter.o» è aggiornato.
+make[3]: «psi_a2a_fnd_owner.o» è aggiornato.
+make[3]: «psb_lscatter.o» è aggiornato.
+make[3]: «psb_cscatter.o» è aggiornato.
+make[3]: «psi_graph_fnd_owner.o» è aggiornato.
+make[3]: «psb_sscatter.o» è aggiornato.
+make[3]: «psb_dscatter_a.o» è aggiornato.
+make[3]: «psi_adjcncy_fnd_owner.o» è aggiornato.
+make[3]: «psb_zscatter_a.o» è aggiornato.
+make[3]: «psi_symm_dep_list.o» è aggiornato.
+make[3]: «psb_mscatter_a.o» è aggiornato.
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/internals»
+make[3]: «psb_escatter_a.o» è aggiornato.
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/tools»
+make[3]: «psb_cscatter_a.o» è aggiornato.
+make[3]: «psb_sscatter_a.o» è aggiornato.
+make[3]: «psb_dspgather.o» è aggiornato.
+make[3]: «psb_sspgather.o» è aggiornato.
+make[3]: «psb_zspgather.o» è aggiornato.
+make[3]: «psb_cspgather.o» è aggiornato.
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/comm»
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_d_isort_impl.f90 -o psb_d_isort_impl.o
+make[4]: ingresso nella directory «/home/stack/repackage/psblas3/base/comm/internals»
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_d_msort_impl.f90 -o psb_d_msort_impl.o
+make[3]: «psb_icdasb.o» è aggiornato.
+make[3]: «psb_ssphalo.o» è aggiornato.
+make[3]: «psb_dsphalo.o» è aggiornato.
+make[3]: «psb_csphalo.o» è aggiornato.
+make[3]: «psb_zsphalo.o» è aggiornato.
+make[3]: «psb_dcdbldext.o» è aggiornato.
+make[3]: «psb_zcdbldext.o» è aggiornato.
+make[4]: «psi_dswapdata.o» è aggiornato.
+make[3]: «psb_scdbldext.o» è aggiornato.
+make[4]: «psi_dswaptran.o» è aggiornato.
+make[4]: «psi_sswapdata.o» è aggiornato.
+make[3]: «psb_ccdbldext.o» è aggiornato.
+make[4]: «psi_sswaptran.o» è aggiornato.
+make[3]: «psb_s_remote_mat.o» è aggiornato.
+make[4]: «psi_iswapdata.o» è aggiornato.
+make[4]: «psi_iswaptran.o» è aggiornato.
+make[3]: «psb_d_remote_mat.o» è aggiornato.
+make[4]: «psi_lswapdata.o» è aggiornato.
+make[4]: «psi_lswaptran.o» è aggiornato.
+make[3]: «psb_c_remote_mat.o» è aggiornato.
+make[4]: «psi_cswapdata.o» è aggiornato.
+make[3]: «psb_z_remote_mat.o» è aggiornato.
+make[4]: «psi_cswaptran.o» è aggiornato.
+make[4]: «psi_zswapdata.o» è aggiornato.
+make[3]: «psb_s_remote_vect.o» è aggiornato.
+make[4]: «psi_zswaptran.o» è aggiornato.
+make[3]: «psb_d_remote_vect.o» è aggiornato.
+make[4]: «psi_dswapdata_a.o» è aggiornato.
+make[4]: «psi_dswaptran_a.o» è aggiornato.
+make[3]: «psb_c_remote_vect.o» è aggiornato.
+make[4]: «psi_sswapdata_a.o» è aggiornato.
+make[3]: «psb_z_remote_vect.o» è aggiornato.
+make[4]: «psi_sswaptran_a.o» è aggiornato.
+make[4]: «psi_mswapdata_a.o» è aggiornato.
+make[3]: «psb_e_remote_vect.o» è aggiornato.
+make[4]: «psi_mswaptran_a.o» è aggiornato.
+make[3]: «psb_m_remote_vect.o» è aggiornato.
+make[4]: «psi_eswapdata_a.o» è aggiornato.
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/tools»
+make[4]: «psi_eswaptran_a.o» è aggiornato.
+make[4]: «psi_cswapdata_a.o» è aggiornato.
+make[4]: «psi_cswaptran_a.o» è aggiornato.
+make[4]: «psi_zswapdata_a.o» è aggiornato.
+make[4]: «psi_zswaptran_a.o» è aggiornato.
+make[4]: uscita dalla directory «/home/stack/repackage/psblas3/base/comm/internals»
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_iovrl_upd.f90 -o psi_iovrl_upd.o
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/base/tools»
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_d_qsort_impl.f90 -o psb_d_qsort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../modules -I.. -c psi_hash_impl.f90 -o psi_hash_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../modules -I.. -c psi_srtlist.f90 -o psi_srtlist.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_lovrl_restr.f90 -o psi_lovrl_restr.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_c_hsort_impl.f90 -o psb_c_hsort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_c_isort_impl.f90 -o psb_c_isort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_c_msort_impl.f90 -o psb_c_msort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_c_qsort_impl.f90 -o psb_c_qsort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_z_hsort_impl.f90 -o psb_z_hsort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_s_csr_impl.F90 -o psb_s_csr_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_z_isort_impl.f90 -o psb_z_isort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_lovrl_save.f90 -o psi_lovrl_save.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../modules -I.. -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psi_bld_glb_dep_list.F90 -o psi_bld_glb_dep_list.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../modules -I.. -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psi_xtr_loc_dl.F90 -o psi_xtr_loc_dl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_z_msort_impl.f90 -o psb_z_msort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_lovrl_upd.f90 -o psi_lovrl_upd.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_z_qsort_impl.f90 -o psb_z_qsort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_s_coo_impl.F90 -o psb_s_coo_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_m_hsort_impl.f90 -o psb_m_hsort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_sovrl_restr.f90 -o psi_sovrl_restr.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_sovrl_save.f90 -o psi_sovrl_save.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_s_csc_impl.F90 -o psb_s_csc_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_s_mat_impl.F90 -o psb_s_mat_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_m_isort_impl.f90 -o psb_m_isort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_m_msort_impl.f90 -o psb_m_msort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_sovrl_upd.f90 -o psi_sovrl_upd.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_dovrl_restr.f90 -o psi_dovrl_restr.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_dovrl_save.f90 -o psi_dovrl_save.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_s_rb_idx_tree_impl.F90 -o psb_s_rb_idx_tree_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_dovrl_upd.f90 -o psi_dovrl_upd.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_covrl_restr.f90 -o psi_covrl_restr.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_m_qsort_impl.f90 -o psb_m_qsort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_covrl_save.f90 -o psi_covrl_save.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_e_hsort_impl.f90 -o psb_e_hsort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_covrl_upd.f90 -o psi_covrl_upd.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_zovrl_restr.f90 -o psi_zovrl_restr.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_zovrl_save.f90 -o psi_zovrl_save.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_zovrl_upd.f90 -o psi_zovrl_upd.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_movrl_restr_a.f90 -o psi_movrl_restr_a.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_movrl_save_a.f90 -o psi_movrl_save_a.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_movrl_upd_a.f90 -o psi_movrl_upd_a.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_d_csr_impl.F90 -o psb_d_csr_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_eovrl_restr_a.f90 -o psi_eovrl_restr_a.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_eovrl_save_a.f90 -o psi_eovrl_save_a.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_eovrl_upd_a.f90 -o psi_eovrl_upd_a.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_sovrl_restr_a.f90 -o psi_sovrl_restr_a.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_sovrl_save_a.f90 -o psi_sovrl_save_a.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_sovrl_upd_a.f90 -o psi_sovrl_upd_a.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_dovrl_restr_a.f90 -o psi_dovrl_restr_a.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_d_coo_impl.F90 -o psb_d_coo_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_e_isort_impl.f90 -o psb_e_isort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_dovrl_save_a.f90 -o psi_dovrl_save_a.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_dovrl_upd_a.f90 -o psi_dovrl_upd_a.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_e_msort_impl.f90 -o psb_e_msort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_covrl_restr_a.f90 -o psi_covrl_restr_a.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -c psb_e_qsort_impl.f90 -o psb_e_qsort_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_covrl_save_a.f90 -o psi_covrl_save_a.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_covrl_upd_a.f90 -o psi_covrl_upd_a.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_zovrl_restr_a.f90 -o psi_zovrl_restr_a.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_d_csc_impl.F90 -o psb_d_csc_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_d_mat_impl.F90 -o psb_d_mat_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_d_rb_idx_tree_impl.F90 -o psb_d_rb_idx_tree_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_zovrl_save_a.f90 -o psi_zovrl_save_a.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../.. -c psi_zovrl_upd_a.f90 -o psi_zovrl_upd_a.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_c_csr_impl.F90 -o psb_c_csr_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_c_coo_impl.F90 -o psb_c_coo_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_c_csc_impl.F90 -o psb_c_csc_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_c_mat_impl.F90 -o psb_c_mat_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_c_rb_idx_tree_impl.F90 -o psb_c_rb_idx_tree_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_z_csr_impl.F90 -o psb_z_csr_impl.o
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/comm/internals»
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/base/comm»
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_z_coo_impl.F90 -o psb_z_coo_impl.o
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/serial/sort»
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_z_csc_impl.F90 -o psb_z_csc_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_z_mat_impl.F90 -o psb_z_mat_impl.o
+mpifort -fallow-argument-mismatch -frecursive -g -O3 -frecursive  -I. -I../../modules -I../..  -DHAVE_LAPACK -DHAVE_FLUSH_STMT -DLPK8 -DIPK4 -DMPI_MOD  -c psb_z_rb_idx_tree_impl.F90 -o psb_z_rb_idx_tree_impl.o
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/base/internals»
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/serial/impl»
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/base/serial»
+make -C modules lib LIBNAME=libpsb_base.a F90="" F90COPT=" "
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/base/modules»
+/bin/cp -p  *.mod ../../modules
+ar -cur ..//libpsb_base.a psb_const_mod.o psb_cbind_const_mod.o psb_error_mod.o psb_realloc_mod.o auxil/psb_string_mod.o auxil/psb_m_realloc_mod.o auxil/psb_e_realloc_mod.o auxil/psb_s_realloc_mod.o auxil/psb_d_realloc_mod.o auxil/psb_c_realloc_mod.o auxil/psb_z_realloc_mod.o serial/psb_s_serial_mod.o serial/psb_d_serial_mod.o serial/psb_c_serial_mod.o serial/psb_z_serial_mod.o serial/psb_serial_mod.o serial/psb_i_base_vect_mod.o serial/psb_i_vect_mod.o serial/psb_l_base_vect_mod.o serial/psb_l_vect_mod.o serial/psb_d_base_vect_mod.o serial/psb_d_vect_mod.o serial/psb_s_base_vect_mod.o serial/psb_s_vect_mod.o serial/psb_c_base_vect_mod.o serial/psb_c_vect_mod.o serial/psb_z_base_vect_mod.o serial/psb_z_vect_mod.o serial/psb_vect_mod.o auxil/psi_serial_mod.o auxil/psi_m_serial_mod.o auxil/psi_e_serial_mod.o auxil/psi_s_serial_mod.o auxil/psi_d_serial_mod.o auxil/psi_c_serial_mod.o auxil/psi_z_serial_mod.o psi_mod.o psi_i_mod.o psi_l_mod.o psi_s_mod.o psi_d_mod.o psi_c_mod.o psi_z_mod.o auxil/psb_ip_reord_mod.o auxil/psi_acx_mod.o auxil/psi_alcx_mod.o auxil/psi_lcx_mod.o auxil/psb_m_ip_reord_mod.o auxil/psb_e_ip_reord_mod.o auxil/psb_s_ip_reord_mod.o auxil/psb_d_ip_reord_mod.o auxil/psb_c_ip_reord_mod.o auxil/psb_z_ip_reord_mod.o auxil/psb_m_hsort_mod.o auxil/psb_m_isort_mod.o auxil/psb_m_msort_mod.o auxil/psb_m_qsort_mod.o auxil/psb_e_hsort_mod.o auxil/psb_e_isort_mod.o auxil/psb_e_msort_mod.o auxil/psb_e_qsort_mod.o auxil/psb_s_hsort_mod.o auxil/psb_s_isort_mod.o auxil/psb_s_msort_mod.o auxil/psb_s_qsort_mod.o auxil/psb_d_hsort_mod.o auxil/psb_d_isort_mod.o auxil/psb_d_msort_mod.o auxil/psb_d_qsort_mod.o auxil/psb_c_hsort_mod.o auxil/psb_c_isort_mod.o auxil/psb_c_msort_mod.o auxil/psb_c_qsort_mod.o auxil/psb_z_hsort_mod.o auxil/psb_z_isort_mod.o auxil/psb_z_msort_mod.o auxil/psb_z_qsort_mod.o auxil/psb_i_hsort_x_mod.o auxil/psb_l_hsort_x_mod.o auxil/psb_s_hsort_x_mod.o auxil/psb_d_hsort_x_mod.o auxil/psb_c_hsort_x_mod.o auxil/psb_z_hsort_x_mod.o auxil/psb_s_rb_idx_tree_mod.o auxil/psb_d_rb_idx_tree_mod.o auxil/psb_c_rb_idx_tree_mod.o auxil/psb_z_rb_idx_tree_mod.o auxil/psb_rb_idx_tree_mod.o serial/psb_base_mat_mod.o   serial/psb_mat_mod.o serial/psb_s_base_mat_mod.o serial/psb_s_csr_mat_mod.o serial/psb_s_csc_mat_mod.o serial/psb_s_mat_mod.o serial/psb_d_base_mat_mod.o serial/psb_d_csr_mat_mod.o serial/psb_d_csc_mat_mod.o serial/psb_d_mat_mod.o serial/psb_c_base_mat_mod.o serial/psb_c_csr_mat_mod.o serial/psb_c_csc_mat_mod.o serial/psb_c_mat_mod.o serial/psb_z_base_mat_mod.o serial/psb_z_csr_mat_mod.o serial/psb_z_csc_mat_mod.o serial/psb_z_mat_mod.o  desc/psb_desc_const_mod.o desc/psb_indx_map_mod.o desc/psb_gen_block_map_mod.o desc/psb_list_map_mod.o desc/psb_repl_map_mod.o desc/psb_glist_map_mod.o desc/psb_hash_map_mod.o desc/psb_hashval.o desc/psb_desc_mod.o auxil/psb_sort_mod.o tools/psb_cd_tools_mod.o tools/psb_i_tools_mod.o tools/psb_l_tools_mod.o tools/psb_s_tools_mod.o tools/psb_d_tools_mod.o tools/psb_c_tools_mod.o tools/psb_z_tools_mod.o tools/psb_m_tools_a_mod.o tools/psb_e_tools_a_mod.o tools/psb_s_tools_a_mod.o tools/psb_d_tools_a_mod.o tools/psb_c_tools_a_mod.o tools/psb_z_tools_a_mod.o tools/psb_tools_mod.o psb_penv_mod.o penv/psi_penv_mod.o penv/psi_p2p_mod.o penv/psi_m_p2p_mod.o penv/psi_e_p2p_mod.o penv/psi_s_p2p_mod.o penv/psi_d_p2p_mod.o penv/psi_c_p2p_mod.o penv/psi_z_p2p_mod.o penv/psi_collective_mod.o penv/psi_e_collective_mod.o penv/psi_m_collective_mod.o penv/psi_s_collective_mod.o penv/psi_d_collective_mod.o penv/psi_c_collective_mod.o penv/psi_z_collective_mod.o psb_error_impl.o  psb_timers_mod.o comm/psb_base_linmap_mod.o comm/psb_linmap_mod.o comm/psb_s_linmap_mod.o comm/psb_d_linmap_mod.o comm/psb_c_linmap_mod.o comm/psb_z_linmap_mod.o comm/psb_comm_mod.o comm/psb_i_comm_mod.o comm/psb_l_comm_mod.o comm/psb_s_comm_mod.o comm/psb_d_comm_mod.o comm/psb_c_comm_mod.o comm/psb_z_comm_mod.o comm/psb_m_comm_a_mod.o comm/psb_e_comm_a_mod.o comm/psb_s_comm_a_mod.o comm/psb_d_comm_a_mod.o comm/psb_c_comm_a_mod.o comm/psb_z_comm_a_mod.o comm/psi_e_comm_a_mod.o comm/psi_m_comm_a_mod.o comm/psi_s_comm_a_mod.o comm/psi_d_comm_a_mod.o comm/psi_c_comm_a_mod.o comm/psi_z_comm_a_mod.o comm/psi_i_comm_v_mod.o comm/psi_l_comm_v_mod.o comm/psi_s_comm_v_mod.o comm/psi_d_comm_v_mod.o comm/psi_c_comm_v_mod.o comm/psi_z_comm_v_mod.o psblas/psb_s_psblas_mod.o psblas/psb_c_psblas_mod.o psblas/psb_d_psblas_mod.o psblas/psb_z_psblas_mod.o psblas/psb_mx_psblas_mod.o psblas/psb_psblas_mod.o psb_check_mod.o desc/psb_hash_mod.o error.o psb_base_mod.o  cutil.o  
+ranlib ..//libpsb_base.a
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/base/modules»
+make -C serial lib LIBNAME=libpsb_base.a
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/base/serial»
+make -C impl objs
+make -C sort objs
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/serial/impl»
+make[3]: Nessuna operazione da eseguire per «objs».
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/serial/impl»
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/serial/sort»
+make[3]: Nessuna operazione da eseguire per «objs».
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/serial/sort»
+make -C impl lib
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/serial/impl»
+ar -cur ../../libpsb_base.a psb_base_mat_impl.o psb_s_base_mat_impl.o psb_d_base_mat_impl.o psb_c_base_mat_impl.o psb_z_base_mat_impl.o psb_s_csr_impl.o psb_s_coo_impl.o psb_s_csc_impl.o psb_s_mat_impl.o psb_s_rb_idx_tree_impl.o  psb_d_csr_impl.o psb_d_coo_impl.o psb_d_csc_impl.o psb_d_mat_impl.o psb_d_rb_idx_tree_impl.o  psb_c_csr_impl.o psb_c_coo_impl.o psb_c_csc_impl.o psb_c_mat_impl.o psb_c_rb_idx_tree_impl.o  psb_z_csr_impl.o psb_z_coo_impl.o psb_z_csc_impl.o psb_z_mat_impl.o psb_z_rb_idx_tree_impl.o 
+ranlib ../../libpsb_base.a
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/serial/impl»
+make -C sort lib
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/serial/sort»
+ar -cur ../../libpsb_base.a psb_s_hsort_impl.o psb_s_isort_impl.o psb_s_msort_impl.o psb_s_qsort_impl.o  psb_d_hsort_impl.o psb_d_isort_impl.o psb_d_msort_impl.o psb_d_qsort_impl.o  psb_c_hsort_impl.o psb_c_isort_impl.o psb_c_msort_impl.o psb_c_qsort_impl.o  psb_z_hsort_impl.o psb_z_isort_impl.o psb_z_msort_impl.o psb_z_qsort_impl.o  psb_m_hsort_impl.o psb_m_isort_impl.o psb_m_msort_impl.o psb_m_qsort_impl.o psb_e_hsort_impl.o psb_e_isort_impl.o psb_e_msort_impl.o psb_e_qsort_impl.o 
+ranlib ../../libpsb_base.a
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/serial/sort»
+ar -cur ../libpsb_base.a psb_lsame.o psi_m_serial_impl.o psi_e_serial_impl.o psi_s_serial_impl.o psi_d_serial_impl.o psi_c_serial_impl.o psi_z_serial_impl.o psb_srwextd.o psb_drwextd.o psb_crwextd.o psb_zrwextd.o psb_sspspmm.o psb_dspspmm.o psb_cspspmm.o psb_zspspmm.o psb_ssymbmm.o psb_dsymbmm.o psb_csymbmm.o psb_zsymbmm.o psb_snumbmm.o psb_dnumbmm.o psb_cnumbmm.o psb_znumbmm.o smmp.o lsmmp.o psb_sgeprt.o psb_dgeprt.o psb_cgeprt.o psb_zgeprt.o psb_spdot_srtd.o psb_aspxpby.o psb_spge_dot.o psb_samax_s.o psb_damax_s.o psb_camax_s.o psb_zamax_s.o psb_sasum_s.o psb_dasum_s.o psb_casum_s.o psb_zasum_s.o 
+ranlib ../libpsb_base.a
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/base/serial»
+make -C comm lib LIBNAME=libpsb_base.a
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/base/comm»
+make -C internals objs
+make psb_dscatter.o psb_zscatter.o psb_iscatter.o psb_lscatter.o psb_cscatter.o psb_sscatter.o psb_dscatter_a.o psb_zscatter_a.o psb_mscatter_a.o psb_escatter_a.o psb_cscatter_a.o psb_sscatter_a.o psb_dspgather.o psb_sspgather.o psb_zspgather.o psb_cspgather.o FC="mpifort" 
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/comm/internals»
+(make psi_dswapdata.o psi_dswaptran.o psi_sswapdata.o  psi_sswaptran.o psi_iswapdata.o psi_iswaptran.o psi_lswapdata.o psi_lswaptran.o psi_cswapdata.o psi_cswaptran.o psi_zswapdata.o psi_zswaptran.o psi_dswapdata_a.o psi_dswaptran_a.o psi_sswapdata_a.o  psi_sswaptran_a.o psi_mswapdata_a.o psi_mswaptran_a.o psi_eswapdata_a.o psi_eswaptran_a.o psi_cswapdata_a.o psi_cswaptran_a.o psi_zswapdata_a.o psi_zswaptran_a.o   FC="mpifort" )	
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/comm»
+make[3]: «psb_dscatter.o» è aggiornato.
+make[3]: «psb_zscatter.o» è aggiornato.
+make[3]: «psb_iscatter.o» è aggiornato.
+make[3]: «psb_lscatter.o» è aggiornato.
+make[3]: «psb_cscatter.o» è aggiornato.
+make[3]: «psb_sscatter.o» è aggiornato.
+make[3]: «psb_dscatter_a.o» è aggiornato.
+make[3]: «psb_zscatter_a.o» è aggiornato.
+make[3]: «psb_mscatter_a.o» è aggiornato.
+make[3]: «psb_escatter_a.o» è aggiornato.
+make[3]: «psb_cscatter_a.o» è aggiornato.
+make[3]: «psb_sscatter_a.o» è aggiornato.
+make[3]: «psb_dspgather.o» è aggiornato.
+make[3]: «psb_sspgather.o» è aggiornato.
+make[3]: «psb_zspgather.o» è aggiornato.
+make[3]: «psb_cspgather.o» è aggiornato.
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/comm»
+make[4]: ingresso nella directory «/home/stack/repackage/psblas3/base/comm/internals»
+make[4]: «psi_dswapdata.o» è aggiornato.
+make[4]: «psi_dswaptran.o» è aggiornato.
+make[4]: «psi_sswapdata.o» è aggiornato.
+make[4]: «psi_sswaptran.o» è aggiornato.
+make[4]: «psi_iswapdata.o» è aggiornato.
+make[4]: «psi_iswaptran.o» è aggiornato.
+make[4]: «psi_lswapdata.o» è aggiornato.
+make[4]: «psi_lswaptran.o» è aggiornato.
+make[4]: «psi_cswapdata.o» è aggiornato.
+make[4]: «psi_cswaptran.o» è aggiornato.
+make[4]: «psi_zswapdata.o» è aggiornato.
+make[4]: «psi_zswaptran.o» è aggiornato.
+make[4]: «psi_dswapdata_a.o» è aggiornato.
+make[4]: «psi_dswaptran_a.o» è aggiornato.
+make[4]: «psi_sswapdata_a.o» è aggiornato.
+make[4]: «psi_sswaptran_a.o» è aggiornato.
+make[4]: «psi_mswapdata_a.o» è aggiornato.
+make[4]: «psi_mswaptran_a.o» è aggiornato.
+make[4]: «psi_eswapdata_a.o» è aggiornato.
+make[4]: «psi_eswaptran_a.o» è aggiornato.
+make[4]: «psi_cswapdata_a.o» è aggiornato.
+make[4]: «psi_cswaptran_a.o» è aggiornato.
+make[4]: «psi_zswapdata_a.o» è aggiornato.
+make[4]: «psi_zswaptran_a.o» è aggiornato.
+make[4]: uscita dalla directory «/home/stack/repackage/psblas3/base/comm/internals»
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/comm/internals»
+make -C internals lib LIBNAME=libpsb_base.a
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/comm/internals»
+(make psi_dswapdata.o psi_dswaptran.o psi_sswapdata.o  psi_sswaptran.o psi_iswapdata.o psi_iswaptran.o psi_lswapdata.o psi_lswaptran.o psi_cswapdata.o psi_cswaptran.o psi_zswapdata.o psi_zswaptran.o psi_dswapdata_a.o psi_dswaptran_a.o psi_sswapdata_a.o  psi_sswaptran_a.o psi_mswapdata_a.o psi_mswaptran_a.o psi_eswapdata_a.o psi_eswaptran_a.o psi_cswapdata_a.o psi_cswaptran_a.o psi_zswapdata_a.o psi_zswaptran_a.o   FC="mpifort" )	
+make[4]: ingresso nella directory «/home/stack/repackage/psblas3/base/comm/internals»
+make[4]: «psi_dswapdata.o» è aggiornato.
+make[4]: «psi_dswaptran.o» è aggiornato.
+make[4]: «psi_sswapdata.o» è aggiornato.
+make[4]: «psi_sswaptran.o» è aggiornato.
+make[4]: «psi_iswapdata.o» è aggiornato.
+make[4]: «psi_iswaptran.o» è aggiornato.
+make[4]: «psi_lswapdata.o» è aggiornato.
+make[4]: «psi_lswaptran.o» è aggiornato.
+make[4]: «psi_cswapdata.o» è aggiornato.
+make[4]: «psi_cswaptran.o» è aggiornato.
+make[4]: «psi_zswapdata.o» è aggiornato.
+make[4]: «psi_zswaptran.o» è aggiornato.
+make[4]: «psi_dswapdata_a.o» è aggiornato.
+make[4]: «psi_dswaptran_a.o» è aggiornato.
+make[4]: «psi_sswapdata_a.o» è aggiornato.
+make[4]: «psi_sswaptran_a.o» è aggiornato.
+make[4]: «psi_mswapdata_a.o» è aggiornato.
+make[4]: «psi_mswaptran_a.o» è aggiornato.
+make[4]: «psi_eswapdata_a.o» è aggiornato.
+make[4]: «psi_eswaptran_a.o» è aggiornato.
+make[4]: «psi_cswapdata_a.o» è aggiornato.
+make[4]: «psi_cswaptran_a.o» è aggiornato.
+make[4]: «psi_zswapdata_a.o» è aggiornato.
+make[4]: «psi_zswaptran_a.o» è aggiornato.
+make[4]: uscita dalla directory «/home/stack/repackage/psblas3/base/comm/internals»
+ar -cur ../../libpsb_base.a psi_dswapdata.o psi_dswaptran.o psi_sswapdata.o  psi_sswaptran.o psi_iswapdata.o psi_iswaptran.o psi_lswapdata.o psi_lswaptran.o psi_cswapdata.o psi_cswaptran.o psi_zswapdata.o psi_zswaptran.o psi_dswapdata_a.o psi_dswaptran_a.o psi_sswapdata_a.o  psi_sswaptran_a.o psi_mswapdata_a.o psi_mswaptran_a.o psi_eswapdata_a.o psi_eswaptran_a.o psi_cswapdata_a.o psi_cswaptran_a.o psi_zswapdata_a.o psi_zswaptran_a.o    psi_iovrl_restr.o psi_iovrl_save.o psi_iovrl_upd.o psi_lovrl_restr.o psi_lovrl_save.o psi_lovrl_upd.o psi_sovrl_restr.o psi_sovrl_save.o psi_sovrl_upd.o psi_dovrl_restr.o psi_dovrl_save.o psi_dovrl_upd.o psi_covrl_restr.o psi_covrl_save.o psi_covrl_upd.o psi_zovrl_restr.o psi_zovrl_save.o psi_zovrl_upd.o psi_movrl_restr_a.o psi_movrl_save_a.o psi_movrl_upd_a.o psi_eovrl_restr_a.o psi_eovrl_save_a.o psi_eovrl_upd_a.o psi_sovrl_restr_a.o psi_sovrl_save_a.o psi_sovrl_upd_a.o psi_dovrl_restr_a.o psi_dovrl_save_a.o psi_dovrl_upd_a.o psi_covrl_restr_a.o psi_covrl_save_a.o psi_covrl_upd_a.o psi_zovrl_restr_a.o psi_zovrl_save_a.o psi_zovrl_upd_a.o   
+ranlib ../../libpsb_base.a
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/comm/internals»
+ar -cur ../libpsb_base.a psb_dscatter.o psb_zscatter.o psb_iscatter.o psb_lscatter.o psb_cscatter.o psb_sscatter.o psb_dscatter_a.o psb_zscatter_a.o psb_mscatter_a.o psb_escatter_a.o psb_cscatter_a.o psb_sscatter_a.o psb_dspgather.o psb_sspgather.o psb_zspgather.o psb_cspgather.o psb_dgather.o psb_dhalo.o psb_dovrl.o psb_sgather.o psb_shalo.o psb_sovrl.o psb_igather.o psb_ihalo.o psb_iovrl.o psb_lgather.o psb_lhalo.o psb_lovrl.o psb_cgather.o psb_chalo.o psb_covrl.o psb_zgather.o psb_zhalo.o psb_zovrl.o psb_dgather_a.o psb_dhalo_a.o psb_dovrl_a.o psb_sgather_a.o psb_shalo_a.o psb_sovrl_a.o psb_mgather_a.o psb_mhalo_a.o psb_movrl_a.o psb_egather_a.o psb_ehalo_a.o psb_eovrl_a.o psb_cgather_a.o psb_chalo_a.o psb_covrl_a.o psb_zgather_a.o psb_zhalo_a.o psb_zovrl_a.o 
+ranlib ../libpsb_base.a
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/base/comm»
+make -C internals lib LIBNAME=libpsb_base.a
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/base/internals»
+(make psi_desc_index.o psi_fnd_owner.o psi_a2a_fnd_owner.o psi_graph_fnd_owner.o psi_adjcncy_fnd_owner.o psi_symm_dep_list.o FC="mpifort")	
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/internals»
+make[3]: «psi_desc_index.o» è aggiornato.
+make[3]: «psi_fnd_owner.o» è aggiornato.
+make[3]: «psi_a2a_fnd_owner.o» è aggiornato.
+make[3]: «psi_graph_fnd_owner.o» è aggiornato.
+make[3]: «psi_adjcncy_fnd_owner.o» è aggiornato.
+make[3]: «psi_symm_dep_list.o» è aggiornato.
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/internals»
+ar -cur ../libpsb_base.a psi_desc_index.o psi_fnd_owner.o psi_a2a_fnd_owner.o psi_graph_fnd_owner.o psi_adjcncy_fnd_owner.o psi_symm_dep_list.o  psi_crea_bnd_elem.o psi_crea_index.o psi_crea_ovr_elem.o psi_bld_tmpovrl.o psi_bld_tmphalo.o psi_sort_dl.o psi_indx_map_fnd_owner.o psi_desc_impl.o psi_hash_impl.o psi_srtlist.o psi_bld_glb_dep_list.o psi_xtr_loc_dl.o  
+ranlib ../libpsb_base.a
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/base/internals»
+make -C psblas lib LIBNAME=libpsb_base.a
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/base/psblas»
+ar -cur ../libpsb_base.a psb_mx_spmv_vect.o psb_ddot.o psb_damax.o psb_dasum.o psb_daxpby.o psb_dnrm2.o psb_dnrmi.o psb_dspmm.o psb_dspsm.o psb_sspnrm1.o psb_dspnrm1.o psb_cspnrm1.o psb_zspnrm1.o psb_zamax.o psb_zasum.o psb_zaxpby.o psb_zdot.o psb_znrm2.o psb_znrmi.o psb_zspmm.o psb_zspsm.o psb_saxpby.o psb_sdot.o  psb_sasum.o psb_samax.o psb_snrm2.o psb_snrmi.o  psb_sspmm.o psb_sspsm.o psb_camax.o psb_casum.o psb_caxpby.o psb_cdot.o psb_cnrm2.o psb_cnrmi.o psb_cspmm.o psb_cspsm.o psb_cmlt_vect.o psb_dmlt_vect.o psb_zmlt_vect.o psb_smlt_vect.o psb_cdiv_vect.o psb_ddiv_vect.o psb_zdiv_vect.o psb_sdiv_vect.o psb_cinv_vect.o psb_dinv_vect.o psb_zinv_vect.o psb_sinv_vect.o psb_dcmp_vect.o psb_scmp_vect.o psb_ccmp_vect.o psb_zcmp_vect.o psb_cabs_vect.o psb_dabs_vect.o psb_sabs_vect.o psb_zabs_vect.o psb_cgetmatinfo.o psb_dgetmatinfo.o psb_sgetmatinfo.o psb_zgetmatinfo.o 
+ranlib ../libpsb_base.a
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/base/psblas»
+make -C tools lib LIBNAME=libpsb_base.a
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/base/tools»
+(make psb_icdasb.o psb_ssphalo.o  psb_dsphalo.o psb_csphalo.o psb_zsphalo.o psb_dcdbldext.o psb_zcdbldext.o psb_scdbldext.o psb_ccdbldext.o psb_s_remote_mat.o psb_d_remote_mat.o psb_c_remote_mat.o psb_z_remote_mat.o psb_s_remote_vect.o psb_d_remote_vect.o psb_c_remote_vect.o psb_z_remote_vect.o psb_e_remote_vect.o psb_m_remote_vect.o  FC="mpifort")
+make[3]: ingresso nella directory «/home/stack/repackage/psblas3/base/tools»
+make[3]: «psb_icdasb.o» è aggiornato.
+make[3]: «psb_ssphalo.o» è aggiornato.
+make[3]: «psb_dsphalo.o» è aggiornato.
+make[3]: «psb_csphalo.o» è aggiornato.
+make[3]: «psb_zsphalo.o» è aggiornato.
+make[3]: «psb_dcdbldext.o» è aggiornato.
+make[3]: «psb_zcdbldext.o» è aggiornato.
+make[3]: «psb_scdbldext.o» è aggiornato.
+make[3]: «psb_ccdbldext.o» è aggiornato.
+make[3]: «psb_s_remote_mat.o» è aggiornato.
+make[3]: «psb_d_remote_mat.o» è aggiornato.
+make[3]: «psb_c_remote_mat.o» è aggiornato.
+make[3]: «psb_z_remote_mat.o» è aggiornato.
+make[3]: «psb_s_remote_vect.o» è aggiornato.
+make[3]: «psb_d_remote_vect.o» è aggiornato.
+make[3]: «psb_c_remote_vect.o» è aggiornato.
+make[3]: «psb_z_remote_vect.o» è aggiornato.
+make[3]: «psb_e_remote_vect.o» è aggiornato.
+make[3]: «psb_m_remote_vect.o» è aggiornato.
+make[3]: uscita dalla directory «/home/stack/repackage/psblas3/base/tools»
+ar -cur ../libpsb_base.a psb_icdasb.o psb_ssphalo.o  psb_dsphalo.o psb_csphalo.o psb_zsphalo.o psb_dcdbldext.o psb_zcdbldext.o psb_scdbldext.o psb_ccdbldext.o psb_s_remote_mat.o psb_d_remote_mat.o psb_c_remote_mat.o psb_z_remote_mat.o psb_s_remote_vect.o psb_d_remote_vect.o psb_c_remote_vect.o psb_z_remote_vect.o psb_e_remote_vect.o psb_m_remote_vect.o  psb_cdall.o psb_cdals.o psb_cdalv.o psb_cd_inloc.o psb_cdins.o psb_cdprt.o psb_cdren.o psb_cdrep.o psb_get_overlap.o psb_cd_lstext.o psb_cd_remap.o psb_cdcpy.o psb_cd_reinit.o psb_cd_switch_ovl_indxmap.o psb_cd_renum_block.o psb_dspalloc.o psb_dspasb.o psb_d_remap.o psb_dspfree.o psb_dspins.o psb_dsprn.o psb_sspalloc.o psb_sspasb.o psb_s_remap.o psb_sspfree.o psb_sspins.o psb_ssprn.o psb_glob_to_loc.o psb_loc_to_glob.o psb_iallc.o psb_iasb.o psb_ifree.o psb_iins.o psb_lallc.o psb_lasb.o psb_lfree.o psb_lins.o psb_sallc.o psb_sasb.o psb_sfree.o psb_sins.o psb_dallc.o psb_dasb.o psb_dfree.o psb_dins.o psb_callc.o psb_casb.o psb_cfree.o psb_cins.o psb_zallc.o psb_zasb.o psb_zfree.o psb_zins.o psb_mallc_a.o psb_masb_a.o psb_mfree_a.o psb_mins_a.o psb_eallc_a.o psb_easb_a.o psb_efree_a.o psb_eins_a.o psb_sallc_a.o psb_sasb_a.o psb_sfree_a.o psb_sins_a.o psb_dallc_a.o psb_dasb_a.o psb_dfree_a.o psb_dins_a.o psb_callc_a.o psb_casb_a.o psb_cfree_a.o psb_cins_a.o psb_zallc_a.o psb_zasb_a.o psb_zfree_a.o psb_zins_a.o psb_zspalloc.o psb_zspasb.o psb_z_remap.o psb_zspfree.o psb_zspins.o psb_zsprn.o psb_cspalloc.o psb_cspasb.o psb_c_remap.o psb_cspfree.o psb_cspins.o psb_csprn.o psb_cd_set_bld.o psb_s_map.o psb_d_map.o psb_c_map.o psb_z_map.o psb_s_par_csr_spspmm.o psb_d_par_csr_spspmm.o psb_c_par_csr_spspmm.o psb_z_par_csr_spspmm.o psb_s_glob_transpose.o psb_d_glob_transpose.o psb_c_glob_transpose.o psb_z_glob_transpose.o psb_cgetelem.o psb_dgetelem.o psb_sgetelem.o psb_zgetelem.o   
+ranlib ../libpsb_base.a
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/base/tools»
+/bin/cp -p  ./libpsb_base.a ../lib
+make[1]: uscita dalla directory «/home/stack/repackage/psblas3/base»
+make -C prec lib
+make[1]: ingresso nella directory «/home/stack/repackage/psblas3/prec»
+make -C impl objs
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/prec/impl»
+make[2]: Nessuna operazione da eseguire per «objs».
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/prec/impl»
+/bin/cp -p  *.mod ../modules
+make -C impl lib
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/prec/impl»
+ar -cur ../libpsb_prec.a psb_s_prec_type_impl.o psb_d_prec_type_impl.o psb_c_prec_type_impl.o psb_z_prec_type_impl.o psb_d_diagprec_impl.o psb_d_bjacprec_impl.o psb_d_nullprec_impl.o psb_d_ilu0_fact.o psb_d_iluk_fact.o psb_d_ilut_fact.o psb_dprecbld.o psb_dprecinit.o psb_s_diagprec_impl.o psb_s_bjacprec_impl.o psb_s_nullprec_impl.o psb_s_ilu0_fact.o psb_s_iluk_fact.o psb_s_ilut_fact.o psb_sprecbld.o  psb_sprecinit.o psb_c_diagprec_impl.o psb_c_bjacprec_impl.o psb_c_nullprec_impl.o psb_c_ilu0_fact.o psb_c_iluk_fact.o psb_c_ilut_fact.o psb_cprecbld.o  psb_cprecinit.o psb_z_diagprec_impl.o psb_z_bjacprec_impl.o psb_z_nullprec_impl.o psb_z_ilu0_fact.o psb_z_iluk_fact.o psb_z_ilut_fact.o psb_zprecbld.o  psb_zprecinit.o psb_c_sparsify.o psb_d_sparsify.o psb_s_sparsify.o psb_z_sparsify.o psb_crwclip.o psb_drwclip.o psb_srwclip.o psb_zrwclip.o psb_c_sp_drop.o psb_d_sp_drop.o psb_s_sp_drop.o psb_z_sp_drop.o psb_dsparse_biconjg_llk_noth.o psb_dsparse_biconjg_llk.o psb_dsparse_biconjg_mlk.o psb_dsparse_biconjg_s_ft_llk.o psb_dsparse_biconjg_s_llk.o psb_csparse_biconjg_llk_noth.o psb_csparse_biconjg_llk.o psb_csparse_biconjg_mlk.o psb_csparse_biconjg_s_ft_llk.o psb_csparse_biconjg_s_llk.o psb_zsparse_biconjg_llk_noth.o psb_zsparse_biconjg_llk.o psb_zsparse_biconjg_mlk.o psb_zsparse_biconjg_s_ft_llk.o psb_zsparse_biconjg_s_llk.o psb_ssparse_biconjg_llk_noth.o psb_ssparse_biconjg_llk.o psb_ssparse_biconjg_mlk.o psb_ssparse_biconjg_s_ft_llk.o psb_ssparse_biconjg_s_llk.o psb_d_ainv_bld.o psb_c_ainv_bld.o psb_s_ainv_bld.o psb_z_ainv_bld.o psb_c_invt_fact.o psb_d_invt_fact.o psb_s_invt_fact.o psb_z_invt_fact.o psb_c_invk_fact.o psb_d_invk_fact.o psb_s_invk_fact.o psb_z_invk_fact.o
+ranlib ../libpsb_prec.a
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/prec/impl»
+ar -cur ./libpsb_prec.a    psb_prec_const_mod.o psb_s_prec_type.o psb_d_prec_type.o psb_c_prec_type.o psb_z_prec_type.o psb_s_base_prec_mod.o psb_d_base_prec_mod.o psb_c_base_prec_mod.o psb_z_base_prec_mod.o psb_prec_type.o psb_prec_mod.o psb_s_prec_mod.o psb_d_prec_mod.o psb_c_prec_mod.o psb_z_prec_mod.o psb_d_diagprec.o psb_d_nullprec.o psb_d_bjacprec.o psb_s_ilu_fact_mod.o psb_s_diagprec.o psb_s_nullprec.o psb_s_bjacprec.o psb_d_ilu_fact_mod.o psb_c_diagprec.o psb_c_nullprec.o psb_c_bjacprec.o psb_c_ilu_fact_mod.o psb_z_diagprec.o psb_z_nullprec.o psb_z_bjacprec.o psb_z_ilu_fact_mod.o psb_c_ainv_fact_mod.o psb_d_ainv_fact_mod.o psb_s_ainv_fact_mod.o psb_z_ainv_fact_mod.o psb_c_ainv_tools_mod.o psb_d_ainv_tools_mod.o psb_s_ainv_tools_mod.o psb_z_ainv_tools_mod.o psb_ainv_tools_mod.o psb_biconjg_mod.o psb_c_biconjg_mod.o psb_d_biconjg_mod.o psb_s_biconjg_mod.o psb_z_biconjg_mod.o psb_c_invt_fact_mod.o psb_d_invt_fact_mod.o psb_s_invt_fact_mod.o psb_z_invt_fact_mod.o psb_c_invk_fact_mod.o psb_d_invk_fact_mod.o psb_s_invk_fact_mod.o psb_z_invk_fact_mod.o
+ranlib ./libpsb_prec.a
+/bin/cp -p  ./libpsb_prec.a ../lib
+make[1]: uscita dalla directory «/home/stack/repackage/psblas3/prec»
+make -C krylov lib
+make[1]: ingresso nella directory «/home/stack/repackage/psblas3/krylov»
+/bin/cp -p  *.mod ../modules
+ar -cur ./libpsb_krylov.a	 psb_dkrylov.o psb_skrylov.o psb_ckrylov.o psb_zkrylov.o psb_dcgstab.o psb_dcg.o psb_dfcg.o psb_dgcr.o psb_dcgs.o psb_dbicg.o psb_dcgstabl.o psb_drgmres.o psb_scgstab.o psb_scg.o psb_sfcg.o psb_sgcr.o psb_scgs.o psb_sbicg.o psb_scgstabl.o psb_srgmres.o psb_ccgstab.o psb_ccg.o psb_cfcg.o psb_cgcr.o psb_ccgs.o psb_cbicg.o psb_ccgstabl.o psb_crgmres.o psb_zcgstab.o psb_zcg.o psb_zfcg.o psb_zgcr.o psb_zcgs.o psb_zbicg.o psb_zcgstabl.o psb_zrgmres.o psb_base_krylov_conv_mod.o psb_s_krylov_conv_mod.o psb_c_krylov_conv_mod.o psb_d_krylov_conv_mod.o psb_z_krylov_conv_mod.o psb_krylov_mod.o
+ranlib ./libpsb_krylov.a	
+/bin/cp -p  ./libpsb_krylov.a	 ../lib
+make[1]: uscita dalla directory «/home/stack/repackage/psblas3/krylov»
+make -C util lib 
+make[1]: ingresso nella directory «/home/stack/repackage/psblas3/util»
+/bin/cp -p  *.mod ../modules
+ar -cur ./libpsb_util.a psb_metis_int.o psb_amd_order.o psb_util_mod.o psb_blockpart_mod.o psb_metispart_mod.o psb_partidx_mod.o psb_hbio_mod.o psb_mmio_mod.o psb_mat_dist_mod.o psb_s_mat_dist_mod.o psb_d_mat_dist_mod.o psb_c_mat_dist_mod.o psb_z_mat_dist_mod.o psb_renum_mod.o psb_gps_mod.o psb_s_renum_mod.o psb_d_renum_mod.o psb_c_renum_mod.o psb_z_renum_mod.o psb_s_hbio_impl.o psb_d_hbio_impl.o psb_c_hbio_impl.o psb_z_hbio_impl.o psb_s_mmio_impl.o psb_d_mmio_impl.o psb_c_mmio_impl.o psb_z_mmio_impl.o psb_i_mmio_impl.o psb_s_mat_dist_impl.o psb_d_mat_dist_impl.o psb_c_mat_dist_impl.o psb_z_mat_dist_impl.o psb_s_renum_impl.o psb_d_renum_impl.o psb_c_renum_impl.o psb_z_renum_impl.o psi_build_mtpart.o
+ranlib ./libpsb_util.a
+/bin/cp -p  ./libpsb_util.a ../lib
+make[1]: uscita dalla directory «/home/stack/repackage/psblas3/util»
+make -C cbind lib
+make[1]: ingresso nella directory «/home/stack/repackage/psblas3/cbind»
+cd base && make objs LIBNAME=libpsb_cbind.a
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cbind/base»
+/bin/cp -p  *.mod psb_base_cbind.h psb_c_base.h psb_c_sbase.h  psb_c_dbase.h  psb_c_cbase.h  psb_c_zbase.h psb_c_scomm.h psb_c_dcomm.h psb_c_ccomm.h psb_c_zcomm.h ..
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cbind/base»
+cd prec && make objs LIBNAME=libpsb_cbind.a
+cd util && make objs LIBNAME=libpsb_cbind.a
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cbind/prec»
+/bin/cp -p  *.mod psb_prec_cbind.h psb_c_sprec.h psb_c_dprec.h psb_c_cprec.h psb_c_zprec.h ..
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cbind/util»
+/bin/cp -p *.mod psb_util_cbind.h psb_c_cutil.h psb_c_zutil.h psb_c_dutil.h psb_c_sutil.h ..
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cbind/prec»
+cd krylov && make objs LIBNAME=libpsb_cbind.a
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cbind/krylov»
+/bin/cp -p *.mod psb_krylov_cbind.h ..
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cbind/util»
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cbind/krylov»
+/bin/cp -p  *.h ../include
+/bin/cp -p  *.mod ../modules/
+cd base && make lib LIBNAME=libpsb_cbind.a
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cbind/base»
+/bin/cp -p  *.mod psb_base_cbind.h psb_c_base.h psb_c_sbase.h  psb_c_dbase.h  psb_c_cbase.h  psb_c_zbase.h psb_c_scomm.h psb_c_dcomm.h psb_c_ccomm.h psb_c_zcomm.h ..
+ar -cur ../libpsb_cbind.a psb_objhandle_mod.o psb_base_cbind_mod.o psb_cpenv_mod.o psb_base_tools_cbind_mod.o psb_base_string_cbind_mod.o psb_base_psblas_cbind_mod.o psb_s_tools_cbind_mod.o  psb_s_serial_cbind_mod.o psb_s_psblas_cbind_mod.o psb_d_tools_cbind_mod.o  psb_d_serial_cbind_mod.o psb_d_psblas_cbind_mod.o psb_c_tools_cbind_mod.o  psb_c_serial_cbind_mod.o psb_c_psblas_cbind_mod.o psb_z_tools_cbind_mod.o  psb_z_serial_cbind_mod.o psb_z_psblas_cbind_mod.o psb_s_comm_cbind_mod.o psb_d_comm_cbind_mod.o psb_c_comm_cbind_mod.o psb_z_comm_cbind_mod.o  psb_c_base.o psb_c_sbase.o psb_c_dbase.o psb_c_cbase.o psb_c_zbase.o psb_c_scomm.o psb_c_dcomm.o psb_c_ccomm.o psb_c_zcomm.o
+ranlib ../libpsb_cbind.a
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cbind/base»
+cd prec && make lib LIBNAME=libpsb_cbind.a
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cbind/prec»
+/bin/cp -p  *.mod psb_prec_cbind.h psb_c_sprec.h psb_c_dprec.h psb_c_cprec.h psb_c_zprec.h ..
+ar -cur ../libpsb_cbind.a psb_prec_cbind_mod.o psb_sprec_cbind_mod.o psb_dprec_cbind_mod.o psb_cprec_cbind_mod.o psb_zprec_cbind_mod.o psb_c_sprec.o psb_c_dprec.o psb_c_cprec.o psb_c_zprec.o
+ranlib ../libpsb_cbind.a
+/bin/cp -p ../libpsb_cbind.a ../../lib
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cbind/prec»
+cd krylov && make lib LIBNAME=libpsb_cbind.a
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cbind/krylov»
+/bin/cp -p *.mod psb_krylov_cbind.h ..
+ar -cur ../libpsb_cbind.a psb_base_krylov_cbind_mod.o psb_skrylov_cbind_mod.o psb_dkrylov_cbind_mod.o psb_ckrylov_cbind_mod.o psb_zkrylov_cbind_mod.o 
+ranlib ../libpsb_cbind.a
+/bin/cp -p ../libpsb_cbind.a ../../lib
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cbind/krylov»
+cd util && make lib LIBNAME=libpsb_cbind.a
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/cbind/util»
+/bin/cp -p *.mod psb_util_cbind.h psb_c_cutil.h psb_c_zutil.h psb_c_dutil.h psb_c_sutil.h ..
+ar -cur ../libpsb_cbind.a psb_util_cbind_mod.o psb_c_util_cbind_mod.o psb_d_util_cbind_mod.o psb_s_util_cbind_mod.o psb_z_util_cbind_mod.o
+ranlib ../libpsb_cbind.a
+/bin/cp -p ../libpsb_cbind.a ../../lib
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/cbind/util»
+/bin/cp -p  ./libpsb_cbind.a ../lib
+make[1]: uscita dalla directory «/home/stack/repackage/psblas3/cbind»
+make -C ext lib
+make[1]: ingresso nella directory «/home/stack/repackage/psblas3/ext»
+make -C impl objs 
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/ext/impl»
+make[2]: Nessuna operazione da eseguire per «objs».
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/ext/impl»
+/bin/cp -p *.mod ../modules
+make -C impl lib LIBNAME=libpsb_ext.a
+make[2]: ingresso nella directory «/home/stack/repackage/psblas3/ext/impl»
+ar cur ../libpsb_ext.a psb_s_cp_dia_from_coo.o psb_s_cp_dia_to_coo.o psb_s_cp_ell_from_coo.o psb_s_cp_ell_from_fmt.o psb_s_cp_ell_to_coo.o psb_s_cp_ell_to_fmt.o psb_s_cp_hdia_from_coo.o psb_s_cp_hdia_to_coo.o psb_s_cp_hll_from_coo.o psb_s_cp_hll_from_fmt.o psb_s_cp_hll_to_coo.o psb_s_cp_hll_to_fmt.o psb_s_dia_aclsum.o psb_s_dia_allocate_mnnz.o psb_s_dia_arwsum.o psb_s_dia_colsum.o psb_s_dia_csgetptn.o psb_s_dia_csgetrow.o psb_s_dia_csmm.o psb_s_dia_csmv.o psb_s_dia_get_diag.o psb_s_dia_maxval.o psb_s_dia_mold.o psb_s_dia_print.o psb_s_dia_reallocate_nz.o psb_s_dia_reinit.o psb_s_dia_rowsum.o psb_s_dia_scal.o psb_s_dia_scals.o psb_s_ell_aclsum.o psb_s_ell_allocate_mnnz.o psb_s_ell_arwsum.o psb_s_ell_colsum.o psb_s_ell_csgetblk.o psb_s_ell_csgetptn.o psb_s_ell_csgetrow.o psb_s_ell_csmm.o psb_s_ell_csmv.o psb_s_ell_csnm1.o psb_s_ell_csnmi.o psb_s_ell_csput.o psb_s_ell_cssm.o psb_s_ell_cssv.o psb_s_ell_get_diag.o psb_s_ell_maxval.o psb_s_ell_mold.o psb_s_ell_print.o psb_s_ell_reallocate_nz.o psb_s_ell_reinit.o psb_s_ell_rowsum.o psb_s_ell_scal.o psb_s_ell_scals.o psb_s_ell_trim.o psb_s_hdia_allocate_mnnz.o psb_s_hdia_csmv.o psb_s_hdia_mold.o psb_s_hdia_print.o psb_s_hll_aclsum.o psb_s_hll_allocate_mnnz.o psb_s_hll_arwsum.o psb_s_hll_colsum.o psb_s_hll_csgetblk.o psb_s_hll_csgetptn.o psb_s_hll_csgetrow.o psb_s_hll_csmm.o psb_s_hll_csmv.o psb_s_hll_csnm1.o psb_s_hll_csnmi.o psb_s_hll_csput.o psb_s_hll_cssm.o psb_s_hll_cssv.o psb_s_hll_get_diag.o psb_s_hll_maxval.o psb_s_hll_mold.o psb_s_hll_print.o psb_s_hll_reallocate_nz.o psb_s_hll_reinit.o psb_s_hll_rowsum.o psb_s_hll_scal.o psb_s_hll_scals.o psb_s_mv_dia_from_coo.o psb_s_mv_ell_from_coo.o psb_s_mv_ell_from_fmt.o psb_s_mv_ell_to_coo.o psb_s_mv_ell_to_fmt.o psb_s_mv_hdia_from_coo.o psb_s_mv_hdia_to_coo.o psb_s_mv_hll_from_coo.o psb_s_mv_hll_from_fmt.o psb_s_mv_hll_to_coo.o psb_s_mv_hll_to_fmt.o psb_c_cp_dia_from_coo.o psb_c_cp_dia_to_coo.o psb_c_cp_ell_from_coo.o psb_c_cp_ell_from_fmt.o psb_c_cp_ell_to_coo.o psb_c_cp_ell_to_fmt.o psb_c_cp_hdia_from_coo.o psb_c_cp_hdia_to_coo.o psb_c_cp_hll_from_coo.o psb_c_cp_hll_from_fmt.o psb_c_cp_hll_to_coo.o psb_c_cp_hll_to_fmt.o psb_c_dia_aclsum.o psb_c_dia_allocate_mnnz.o psb_c_dia_arwsum.o psb_c_dia_colsum.o psb_c_dia_csgetptn.o psb_c_dia_csgetrow.o psb_c_dia_csmm.o psb_c_dia_csmv.o psb_c_dia_get_diag.o psb_c_dia_maxval.o psb_c_dia_mold.o psb_c_dia_print.o psb_c_dia_reallocate_nz.o psb_c_dia_reinit.o psb_c_dia_rowsum.o psb_c_dia_scal.o psb_c_dia_scals.o psb_c_ell_aclsum.o psb_c_ell_allocate_mnnz.o psb_c_ell_arwsum.o psb_c_ell_colsum.o psb_c_ell_csgetblk.o psb_c_ell_csgetptn.o psb_c_ell_csgetrow.o psb_c_ell_csmm.o psb_c_ell_csmv.o psb_c_ell_csnm1.o psb_c_ell_csnmi.o psb_c_ell_csput.o psb_c_ell_cssm.o psb_c_ell_cssv.o psb_c_ell_get_diag.o psb_c_ell_maxval.o psb_c_ell_mold.o psb_c_ell_print.o psb_c_ell_reallocate_nz.o psb_c_ell_reinit.o psb_c_ell_rowsum.o psb_c_ell_scal.o psb_c_ell_scals.o psb_c_ell_trim.o psb_c_hdia_allocate_mnnz.o psb_c_hdia_csmv.o psb_c_hdia_mold.o psb_c_hdia_print.o psb_c_hll_aclsum.o psb_c_hll_allocate_mnnz.o psb_c_hll_arwsum.o psb_c_hll_colsum.o psb_c_hll_csgetblk.o psb_c_hll_csgetptn.o psb_c_hll_csgetrow.o psb_c_hll_csmm.o psb_c_hll_csmv.o psb_c_hll_csnm1.o psb_c_hll_csnmi.o psb_c_hll_csput.o psb_c_hll_cssm.o psb_c_hll_cssv.o psb_c_hll_get_diag.o psb_c_hll_maxval.o psb_c_hll_mold.o psb_c_hll_print.o psb_c_hll_reallocate_nz.o psb_c_hll_reinit.o psb_c_hll_rowsum.o psb_c_hll_scal.o psb_c_hll_scals.o psb_c_mv_dia_from_coo.o psb_c_mv_ell_from_coo.o psb_c_mv_ell_from_fmt.o psb_c_mv_ell_to_coo.o psb_c_mv_ell_to_fmt.o psb_c_mv_hdia_from_coo.o psb_c_mv_hdia_to_coo.o psb_c_mv_hll_from_coo.o psb_c_mv_hll_from_fmt.o psb_c_mv_hll_to_coo.o psb_c_mv_hll_to_fmt.o psb_d_cp_dia_from_coo.o psb_d_cp_dia_to_coo.o psb_d_cp_ell_from_coo.o psb_d_cp_ell_from_fmt.o psb_d_cp_ell_to_coo.o psb_d_cp_ell_to_fmt.o psb_d_cp_hdia_from_coo.o psb_d_cp_hdia_to_coo.o psb_d_cp_hll_from_coo.o psb_d_cp_hll_from_fmt.o psb_d_cp_hll_to_coo.o psb_d_cp_hll_to_fmt.o psb_d_dia_aclsum.o psb_d_dia_allocate_mnnz.o psb_d_dia_arwsum.o psb_d_dia_colsum.o psb_d_dia_csgetptn.o psb_d_dia_csgetrow.o psb_d_dia_csmm.o psb_d_dia_csmv.o psb_d_dia_get_diag.o psb_d_dia_maxval.o psb_d_dia_mold.o psb_d_dia_print.o psb_d_dia_reallocate_nz.o psb_d_dia_reinit.o psb_d_dia_rowsum.o psb_d_dia_scal.o psb_d_dia_scals.o psb_d_ell_aclsum.o psb_d_ell_allocate_mnnz.o psb_d_ell_arwsum.o psb_d_ell_colsum.o psb_d_ell_csgetblk.o psb_d_ell_csgetptn.o psb_d_ell_csgetrow.o psb_d_ell_csmm.o psb_d_ell_csmv.o psb_d_ell_csnm1.o psb_d_ell_csnmi.o psb_d_ell_csput.o psb_d_ell_cssm.o psb_d_ell_cssv.o psb_d_ell_get_diag.o psb_d_ell_maxval.o psb_d_ell_mold.o psb_d_ell_print.o psb_d_ell_reallocate_nz.o psb_d_ell_reinit.o psb_d_ell_rowsum.o psb_d_ell_scal.o psb_d_ell_scals.o psb_d_ell_trim.o psb_d_hdia_allocate_mnnz.o psb_d_hdia_csmv.o psb_d_hdia_mold.o psb_d_hdia_print.o psb_d_hll_aclsum.o psb_d_hll_allocate_mnnz.o psb_d_hll_arwsum.o psb_d_hll_colsum.o psb_d_hll_csgetblk.o psb_d_hll_csgetptn.o psb_d_hll_csgetrow.o psb_d_hll_csmm.o psb_d_hll_csmv.o psb_d_hll_csnm1.o psb_d_hll_csnmi.o psb_d_hll_csput.o psb_d_hll_cssm.o psb_d_hll_cssv.o psb_d_hll_get_diag.o psb_d_hll_maxval.o psb_d_hll_mold.o psb_d_hll_print.o psb_d_hll_reallocate_nz.o psb_d_hll_reinit.o psb_d_hll_rowsum.o psb_d_hll_scal.o psb_d_hll_scals.o psb_d_mv_dia_from_coo.o psb_d_mv_ell_from_coo.o psb_d_mv_ell_from_fmt.o psb_d_mv_ell_to_coo.o psb_d_mv_ell_to_fmt.o psb_d_mv_hdia_from_coo.o psb_d_mv_hdia_to_coo.o psb_d_mv_hll_from_coo.o psb_d_mv_hll_from_fmt.o psb_d_mv_hll_to_coo.o psb_d_mv_hll_to_fmt.o psb_z_cp_dia_from_coo.o psb_z_cp_dia_to_coo.o psb_z_cp_ell_from_coo.o psb_z_cp_ell_from_fmt.o psb_z_cp_ell_to_coo.o psb_z_cp_ell_to_fmt.o psb_z_cp_hdia_from_coo.o psb_z_cp_hdia_to_coo.o psb_z_cp_hll_from_coo.o psb_z_cp_hll_from_fmt.o psb_z_cp_hll_to_coo.o psb_z_cp_hll_to_fmt.o psb_z_dia_aclsum.o psb_z_dia_allocate_mnnz.o psb_z_dia_arwsum.o psb_z_dia_colsum.o psb_z_dia_csgetptn.o psb_z_dia_csgetrow.o psb_z_dia_csmm.o psb_z_dia_csmv.o psb_z_dia_get_diag.o psb_z_dia_maxval.o psb_z_dia_mold.o psb_z_dia_print.o psb_z_dia_reallocate_nz.o psb_z_dia_reinit.o psb_z_dia_rowsum.o psb_z_dia_scal.o psb_z_dia_scals.o psb_z_ell_aclsum.o psb_z_ell_allocate_mnnz.o psb_z_ell_arwsum.o psb_z_ell_colsum.o psb_z_ell_csgetblk.o psb_z_ell_csgetptn.o psb_z_ell_csgetrow.o psb_z_ell_csmm.o psb_z_ell_csmv.o psb_z_ell_csnm1.o psb_z_ell_csnmi.o psb_z_ell_csput.o psb_z_ell_cssm.o psb_z_ell_cssv.o psb_z_ell_get_diag.o psb_z_ell_maxval.o psb_z_ell_mold.o psb_z_ell_print.o psb_z_ell_reallocate_nz.o psb_z_ell_reinit.o psb_z_ell_rowsum.o psb_z_ell_scal.o psb_z_ell_scals.o psb_z_ell_trim.o psb_z_hdia_allocate_mnnz.o psb_z_hdia_csmv.o psb_z_hdia_mold.o psb_z_hdia_print.o psb_z_hll_aclsum.o psb_z_hll_allocate_mnnz.o psb_z_hll_arwsum.o psb_z_hll_colsum.o psb_z_hll_csgetblk.o psb_z_hll_csgetptn.o psb_z_hll_csgetrow.o psb_z_hll_csmm.o psb_z_hll_csmv.o psb_z_hll_csnm1.o psb_z_hll_csnmi.o psb_z_hll_csput.o psb_z_hll_cssm.o psb_z_hll_cssv.o psb_z_hll_get_diag.o psb_z_hll_maxval.o psb_z_hll_mold.o psb_z_hll_print.o psb_z_hll_reallocate_nz.o psb_z_hll_reinit.o psb_z_hll_rowsum.o psb_z_hll_scal.o psb_z_hll_scals.o psb_z_mv_dia_from_coo.o psb_z_mv_ell_from_coo.o psb_z_mv_ell_from_fmt.o psb_z_mv_ell_to_coo.o psb_z_mv_ell_to_fmt.o psb_z_mv_hdia_from_coo.o psb_z_mv_hdia_to_coo.o psb_z_mv_hll_from_coo.o psb_z_mv_hll_from_fmt.o psb_z_mv_hll_to_coo.o psb_z_mv_hll_to_fmt.o psi_s_xtr_ell_from_coo.o psi_c_xtr_ell_from_coo.o psi_d_xtr_ell_from_coo.o psi_z_xtr_ell_from_coo.o psi_s_convert_ell_from_coo.o psi_c_convert_ell_from_coo.o psi_d_convert_ell_from_coo.o psi_z_convert_ell_from_coo.o psi_s_convert_hll_from_coo.o psi_c_convert_hll_from_coo.o psi_d_convert_hll_from_coo.o psi_z_convert_hll_from_coo.o psi_s_xtr_dia_from_coo.o psi_c_xtr_dia_from_coo.o psi_d_xtr_dia_from_coo.o psi_z_xtr_dia_from_coo.o psi_s_xtr_coo_from_dia.o psi_d_xtr_coo_from_dia.o psi_c_xtr_coo_from_dia.o psi_z_xtr_coo_from_dia.o psi_s_convert_dia_from_coo.o psi_c_convert_dia_from_coo.o psi_d_convert_dia_from_coo.o psi_z_convert_dia_from_coo.o psb_s_dns_mat_impl.o psb_d_dns_mat_impl.o psb_c_dns_mat_impl.o psb_z_dns_mat_impl.o 
+make[2]: uscita dalla directory «/home/stack/repackage/psblas3/ext/impl»
+ar cur libpsb_ext.a  psb_d_ell_mat_mod.o psb_d_hll_mat_mod.o psb_s_hll_mat_mod.o psb_s_ell_mat_mod.o psb_c_hll_mat_mod.o psb_c_ell_mat_mod.o psb_z_hll_mat_mod.o psb_z_ell_mat_mod.o psb_d_dia_mat_mod.o psb_d_hdia_mat_mod.o psb_s_dia_mat_mod.o psb_s_hdia_mat_mod.o psb_c_dia_mat_mod.o psb_c_hdia_mat_mod.o psb_z_dia_mat_mod.o psb_z_hdia_mat_mod.o psb_s_dns_mat_mod.o psb_d_dns_mat_mod.o psb_c_dns_mat_mod.o psb_z_dns_mat_mod.o psi_ext_util_mod.o psi_i_ext_util_mod.o psi_s_ext_util_mod.o psi_c_ext_util_mod.o psi_d_ext_util_mod.o psi_z_ext_util_mod.o psb_ext_mod.o
+/bin/cp -p libpsb_ext.a ../lib
+make[1]: uscita dalla directory «/home/stack/repackage/psblas3/ext»
+=====================================
+PSBLAS libraries Compilation Successful.

@@ -107,6 +107,7 @@ UTIL_MODS = desc/psb_desc_const_mod.o desc/psb_indx_map_mod.o\
 	comm/psi_c_comm_v_mod.o comm/psi_z_comm_v_mod.o \
 	psblas/psb_s_psblas_mod.o psblas/psb_c_psblas_mod.o \
 	psblas/psb_d_psblas_mod.o psblas/psb_z_psblas_mod.o \
+	psblas/psb_mx_psblas_mod.o \
 	psblas/psb_psblas_mod.o \
 	psb_check_mod.o desc/psb_hash_mod.o
 
@@ -386,12 +387,13 @@ tools/psb_d_tools_mod.o: serial/psb_d_vect_mod.o
 tools/psb_c_tools_mod.o: serial/psb_c_vect_mod.o 
 tools/psb_z_tools_mod.o: serial/psb_z_vect_mod.o 
 
+psblas/psb_mx_psblas_mod.o: serial/psb_s_vect_mod.o serial/psb_s_mat_mod.o serial/psb_d_vect_mod.o serial/psb_d_mat_mod.o
 psblas/psb_s_psblas_mod.o: serial/psb_s_vect_mod.o serial/psb_s_mat_mod.o
 psblas/psb_d_psblas_mod.o: serial/psb_d_vect_mod.o serial/psb_d_mat_mod.o
 psblas/psb_c_psblas_mod.o: serial/psb_c_vect_mod.o serial/psb_c_mat_mod.o
 psblas/psb_z_psblas_mod.o: serial/psb_z_vect_mod.o serial/psb_z_mat_mod.o
-psblas/psb_psblas_mod.o: psblas/psb_s_psblas_mod.o psblas/psb_c_psblas_mod.o  psblas/psb_d_psblas_mod.o psblas/psb_z_psblas_mod.o
-psblas/psb_s_psblas_mod.o psblas/psb_c_psblas_mod.o psblas/psb_d_psblas_mod.o psblas/psb_z_psblas_mod.o: serial/psb_mat_mod.o desc/psb_desc_mod.o
+psblas/psb_psblas_mod.o: psblas/psb_s_psblas_mod.o psblas/psb_c_psblas_mod.o  psblas/psb_d_psblas_mod.o psblas/psb_z_psblas_mod.o psblas/psb_mx_psblas_mod.o
+psblas/psb_mx_psblas_mod.o psblas/psb_s_psblas_mod.o psblas/psb_c_psblas_mod.o psblas/psb_d_psblas_mod.o psblas/psb_z_psblas_mod.o: serial/psb_mat_mod.o desc/psb_desc_mod.o
 
 
 psb_base_mod.o: $(MODULES)

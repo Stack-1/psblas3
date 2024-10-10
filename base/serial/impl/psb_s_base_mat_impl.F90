@@ -1174,6 +1174,35 @@ subroutine psb_s_base_csmm(alpha,a,x,beta,y,info,trans)
 end subroutine psb_s_base_csmm
 
 
+subroutine psb_s_base_csmm_mx(alpha,a,x,beta,y,info,trans)
+  use psb_s_base_mat_mod, psb_protect_name => psb_s_base_csmm_mx
+  use psb_error_mod
+
+  implicit none
+  ! Computation variables
+  class(psb_s_base_sparse_mat), intent(in)          :: a
+  real(psb_spk_), intent(in)                        :: alpha, beta, x(:,:)
+  real(psb_dpk_), intent(inout)                     :: y(:,:)
+  integer(psb_ipk_), intent(out)                    :: info
+  character, optional, intent(in)                   :: trans
+
+  ! Environmental variables
+  integer(psb_ipk_)                                 :: err_act
+  character(len=20)                                 :: name='s_base_csmm_mx'
+  logical, parameter                                :: debug=.false.
+
+  call psb_erractionsave(err_act)
+  ! This is the base version. If we get here
+  ! it means the derived class is incomplete,
+  ! so we throw an error.
+  info = psb_err_missing_override_method_
+  call psb_errpush(info,name,a_err=a%get_fmt())
+
+  call psb_error_handler(err_act)
+
+end subroutine psb_s_base_csmm_mx
+
+
 subroutine psb_s_base_csmv(alpha,a,x,beta,y,info,trans)
   use psb_s_base_mat_mod, psb_protect_name => psb_s_base_csmv
   use psb_error_mod
@@ -1200,6 +1229,32 @@ subroutine psb_s_base_csmv(alpha,a,x,beta,y,info,trans)
 
 end subroutine psb_s_base_csmv
 
+subroutine psb_s_base_csmv_mx(alpha,a,x,beta,y,info,trans)
+  use psb_s_base_mat_mod, psb_protect_name => psb_s_base_csmv_mx
+  use psb_error_mod
+
+  implicit none
+  ! Computation variables
+  class(psb_s_base_sparse_mat), intent(in)          :: a
+  real(psb_spk_), intent(in)                        :: alpha, beta, x(:)
+  real(psb_dpk_), intent(inout)                     :: y(:)
+  integer(psb_ipk_), intent(out)                    :: info
+  character, optional, intent(in)                   :: trans
+
+  ! Environmental variables
+  integer(psb_ipk_)                                 :: err_act
+  character(len=20)                                 :: name='s_base_csmv_mx'
+  logical, parameter                                :: debug=.false.
+
+  call psb_erractionsave(err_act)
+  ! This is the base version. If we get here
+  ! it means the derived class is incomplete,
+  ! so we throw an error.
+  info = psb_err_missing_override_method_
+  call psb_errpush(info,name,a_err=a%get_fmt())
+
+  call psb_error_handler(err_act)
+end subroutine psb_s_base_csmv_mx
 
 subroutine psb_s_base_inner_cssm(alpha,a,x,beta,y,info,trans)
   use psb_s_base_mat_mod, psb_protect_name => psb_s_base_inner_cssm
@@ -2017,14 +2072,15 @@ subroutine psb_s_base_vect_mv_mx(alpha,a,x,beta,y,info,trans)
   use psb_const_mod
   use psb_s_base_mat_mod, psb_protect_name => psb_s_base_vect_mv_mx
   use psb_d_base_vect_mod
+  
   implicit none 
 
-  class(psb_s_base_sparse_mat), intent(in) :: a
-  real(psb_dpk_), intent(in)       :: alpha, beta
-  class(psb_d_base_vect_type), intent(inout) :: x
-  class(psb_d_base_vect_type), intent(inout) :: y
-  integer(psb_ipk_), intent(out)             :: info
-  character, optional, intent(in)  :: trans
+  class(psb_s_base_sparse_mat), intent(in)        :: a
+  real(psb_spk_), intent(in)                      :: alpha, beta
+  class(psb_s_base_vect_type), intent(inout)      :: x
+  class(psb_d_base_vect_type), intent(inout)      :: y
+  integer(psb_ipk_), intent(out)                  :: info
+  character, optional, intent(in)                 :: trans
   ! For the time being we just throw everything back
   ! onto the normal routines.
   if (x%is_dev()) call x%sync()

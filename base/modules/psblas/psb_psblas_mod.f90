@@ -35,6 +35,6 @@ module psb_psblas_mod
   use psb_c_psblas_mod
   use psb_d_psblas_mod
   use psb_z_psblas_mod
-  use psb_mixed_psblas_mod
+  use psb_mx_psblas_mod
 
 end module psb_psblas_mod

@@ -29,7 +29,7 @@
 !    POSSIBILITY OF SUCH DAMAGE.
 !
 !
-module psb_mixed_psblas_mod
+module psb_mx_psblas_mod
   use psb_desc_mod, only : psb_desc_type, psb_spk_, psb_dpk_, psb_ipk_, psb_lpk_
   use psb_s_vect_mod, only : psb_s_vect_type
   use psb_s_mat_mod, only : psb_sspmat_type
@@ -37,19 +37,19 @@ module psb_mixed_psblas_mod
   use psb_d_mat_mod, only : psb_dspmat_type
 
   interface psb_spmm
-    subroutine psb_mx_sd_spmv_vect(alpha, a, x, beta, y,&
+    subroutine psb_mx_spmv_vect(alpha, a, x, beta, y,&
          & desc_a, info, trans, work,doswap)
       import 
-      type(psb_sspmat_type), intent(in)    :: a
-      type(psb_d_vect_type), intent(inout) :: x
-      type(psb_d_vect_type), intent(inout) :: y
-      real(psb_dpk_), intent(in)        :: alpha, beta
-      type(psb_desc_type), intent(in)      :: desc_a
-      character, optional, intent(in)      :: trans
-      real(psb_dpk_), optional, intent(inout),target :: work(:)
-      logical, optional, intent(in)        :: doswap
-      integer(psb_ipk_), intent(out)                 :: info
-    end subroutine psb_mx_sd_spmv_vect
+      type(psb_sspmat_type), intent(in)               :: a
+      type(psb_s_vect_type), intent(inout)            :: x
+      type(psb_d_vect_type), intent(inout)            :: y
+      real(psb_spk_), intent(in)                      :: alpha, beta
+      type(psb_desc_type), intent(in)                 :: desc_a
+      character, optional, intent(in)                 :: trans
+      real(psb_spk_), optional, intent(inout),target  :: work(:)
+      logical, optional, intent(in)                   :: doswap
+      integer(psb_ipk_), intent(out)                  :: info
+    end subroutine psb_mx_spmv_vect
   end interface
 
-end module psb_mixed_psblas_mod
+end module psb_mx_psblas_mod

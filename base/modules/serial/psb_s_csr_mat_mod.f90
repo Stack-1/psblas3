@@ -69,6 +69,7 @@ module psb_s_csr_mat_mod
     procedure, pass(a) :: sizeof      => s_csr_sizeof
     procedure, pass(a) :: csmm        => psb_s_csr_csmm
     procedure, pass(a) :: csmv        => psb_s_csr_csmv
+    procedure, pass(a) :: csmv_mx     => psb_s_csr_csmv_mx
     procedure, pass(a) :: inner_cssm  => psb_s_csr_cssm
     procedure, pass(a) :: inner_cssv  => psb_s_csr_cssv
     procedure, pass(a) :: scals       => psb_s_csr_scals
@@ -469,6 +470,20 @@ module psb_s_csr_mat_mod
       integer(psb_ipk_), intent(out)                :: info
       character, optional, intent(in)     :: trans
     end subroutine psb_s_csr_csmv
+  end interface
+
+
+  !> \memberof psb_s_csr_sparse_mat
+  !! \see psb_s_base_mat_mod::psb_s_base_csmv_mx
+  interface
+    subroutine psb_s_csr_csmv_mx(alpha,a,x,beta,y,info,trans)
+      import
+      class(psb_s_csr_sparse_mat), intent(in)   :: a
+      real(psb_spk_), intent(in)                :: alpha, beta, x(:)
+      real(psb_dpk_), intent(inout)             :: y(:)
+      integer(psb_ipk_), intent(out)            :: info
+      character, optional, intent(in)           :: trans
+    end subroutine psb_s_csr_csmv_mx
   end interface
 
   !> \memberof psb_s_csr_sparse_mat

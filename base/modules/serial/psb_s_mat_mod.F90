@@ -226,31 +226,31 @@ module psb_s_mat_mod
     generic, public    :: cp_to       => cp_to_lb, cp_to_l
 
     ! Computational routines
-    procedure, pass(a) :: get_diag => psb_s_get_diag
-    procedure, pass(a) :: maxval   => psb_s_maxval
-    procedure, pass(a) :: spnmi    => psb_s_csnmi
-    procedure, pass(a) :: spnm1    => psb_s_csnm1
-    procedure, pass(a) :: rowsum   => psb_s_rowsum
-    procedure, pass(a) :: arwsum   => psb_s_arwsum
-    procedure, pass(a) :: colsum   => psb_s_colsum
-    procedure, pass(a) :: aclsum   => psb_s_aclsum
-    procedure, pass(a) :: csmv_v   => psb_s_csmv_vect
-    procedure, pass(a) :: csmv     => psb_s_csmv
-    procedure, pass(a) :: csmm     => psb_s_csmm
-    procedure, pass(a) :: csmm_mx  => psb_s_csmv_vect_mx
-    generic, public    :: spmm     => csmm, csmv, csmv_v
-    procedure, pass(a) :: scals    => psb_s_scals
-    procedure, pass(a) :: scalv    => psb_s_scal
-    generic, public    :: scal     => scals, scalv
-    procedure, pass(a) :: cssv_v   => psb_s_cssv_vect
-    procedure, pass(a) :: cssv     => psb_s_cssv
-    procedure, pass(a) :: cssm     => psb_s_cssm
-    generic, public    :: spsm     => cssm, cssv, cssv_v
-    procedure, pass(a) :: scalpid  => psb_s_scalplusidentity
-    procedure, pass(a) :: spaxpby  => psb_s_spaxpby
-    procedure, pass(a) :: cmpval   => psb_s_cmpval
-    procedure, pass(a) :: cmpmat   => psb_s_cmpmat
-    generic, public    :: spcmp    => cmpval, cmpmat
+    procedure, pass(a) :: get_diag  => psb_s_get_diag
+    procedure, pass(a) :: maxval    => psb_s_maxval
+    procedure, pass(a) :: spnmi     => psb_s_csnmi
+    procedure, pass(a) :: spnm1     => psb_s_csnm1
+    procedure, pass(a) :: rowsum    => psb_s_rowsum
+    procedure, pass(a) :: arwsum    => psb_s_arwsum
+    procedure, pass(a) :: colsum    => psb_s_colsum
+    procedure, pass(a) :: aclsum    => psb_s_aclsum
+    procedure, pass(a) :: csmv_v    => psb_s_csmv_vect
+    procedure, pass(a) :: csmv      => psb_s_csmv
+    procedure, pass(a) :: csmm      => psb_s_csmm
+    procedure, pass(a) :: csmv_v_mx => psb_s_csmv_vect_mx
+    generic, public    :: spmm      => csmm, csmv, csmv_v, csmv_v_mx
+    procedure, pass(a) :: scals     => psb_s_scals
+    procedure, pass(a) :: scalv     => psb_s_scal
+    generic, public    :: scal      => scals, scalv
+    procedure, pass(a) :: cssv_v    => psb_s_cssv_vect
+    procedure, pass(a) :: cssv      => psb_s_cssv
+    procedure, pass(a) :: cssm      => psb_s_cssm
+    generic, public    :: spsm      => cssm, cssv, cssv_v
+    procedure, pass(a) :: scalpid   => psb_s_scalplusidentity
+    procedure, pass(a) :: spaxpby   => psb_s_spaxpby
+    procedure, pass(a) :: cmpval    => psb_s_cmpval
+    procedure, pass(a) :: cmpmat    => psb_s_cmpmat
+    generic, public    :: spcmp     => cmpval, cmpmat
 
   end type psb_sspmat_type
 
@@ -1094,12 +1094,12 @@ module psb_s_mat_mod
     subroutine psb_s_csmv_vect_mx(alpha,a,x,beta,y,info,trans)
       use psb_s_vect_mod, only : psb_s_vect_type
       import ! :: psb_ipk_, psb_lpk_, psb_sspmat_type, psb_spk_
-      class(psb_sspmat_type), intent(in)   :: a
-      real(psb_dpk_), intent(in)        :: alpha, beta
-      type(psb_d_vect_type), intent(inout) :: x
-      type(psb_d_vect_type), intent(inout) :: y
-      integer(psb_ipk_), intent(out)                 :: info
-      character, optional, intent(in)      :: trans
+      class(psb_sspmat_type), intent(in)    :: a
+      real(psb_spk_), intent(in)            :: alpha, beta
+      type(psb_s_vect_type), intent(inout)  :: x
+      type(psb_d_vect_type), intent(inout)  :: y
+      integer(psb_ipk_), intent(out)        :: info
+      character, optional, intent(in)       :: trans
     end subroutine psb_s_csmv_vect_mx
   end interface
 

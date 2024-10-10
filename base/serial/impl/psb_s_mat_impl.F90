@@ -2328,14 +2328,49 @@ end subroutine psb_s_csmv_vect
 subroutine psb_s_csmv_vect_mx(alpha,a,x,beta,y,info,trans)
   use psb_s_mat_mod, psb_protect_name => psb_s_csmv_vect_mx
   use psb_s_vect_mod, only : psb_s_vect_type
-  class(psb_sspmat_type), intent(in)   :: a
-  real(psb_dpk_), intent(in)        :: alpha, beta
-  type(psb_d_vect_type), intent(inout) :: x
-  type(psb_d_vect_type), intent(inout) :: y
-  integer(psb_ipk_), intent(out)                 :: info
-  character, optional, intent(in)      :: trans
+  
+  ! Computation variables
+  class(psb_sspmat_type), intent(in)        :: a
+  real(psb_spk_), intent(in)                :: alpha, beta
+  type(psb_s_vect_type), intent(inout)      :: x
+  type(psb_d_vect_type), intent(inout)      :: y
+  integer(psb_ipk_), intent(out)            :: info
+  character, optional, intent(in)           :: trans
+
+  ! Environment variables
+  integer(psb_ipk_)                         :: err_act
+  character(len=20)                         :: name='psb_csmv_mx'
+  logical, parameter                        :: debug=.false.
+
+
+  info = psb_success_
+  call psb_erractionsave(err_act)
+  if (.not.allocated(a%a)) then
+    info = psb_err_invalid_mat_state_
+    call psb_errpush(info,name)
+    goto 9999
+  endif
+  if (.not.allocated(x%v)) then
+    info = psb_err_invalid_vect_state_
+    call psb_errpush(info,name)
+    goto 9999
+  endif
+  if (.not.allocated(y%v)) then
+    info = psb_err_invalid_vect_state_
+    call psb_errpush(info,name)
+    goto 9999
+  endif
 
   call a%a%spmm(alpha,x%v,beta,y%v,info,trans)
+
+  if (info /= psb_success_) goto 9999
+
+  call psb_erractionrestore(err_act)
+  return
+
+9999 call psb_error_handler(err_act)
+
+  return
   
 end subroutine psb_s_csmv_vect_mx
 

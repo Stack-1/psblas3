@@ -106,8 +106,10 @@ module psb_s_base_mat_mod
     procedure, pass(a) :: vect_mv_mx  => psb_s_base_vect_mv_mx
     procedure, pass(a) :: vect_mv     => psb_s_base_vect_mv
     procedure, pass(a) :: csmv        => psb_s_base_csmv
+    procedure, pass(a) :: csmv_mx     => psb_s_base_csmv_mx
+    procedure, pass(a) :: csmm_mx     => psb_s_base_csmm_mx
     procedure, pass(a) :: csmm        => psb_s_base_csmm
-    generic, public    :: spmm        => csmm, csmv, vect_mv, vect_mv_mx
+    generic, public    :: spmm        => csmm, csmm_mx, csmv, csmv_mx, vect_mv, vect_mv_mx
     procedure, pass(a) :: in_vect_sv  => psb_s_base_inner_vect_sv
     procedure, pass(a) :: inner_cssv  => psb_s_base_inner_cssv
     procedure, pass(a) :: inner_cssm  => psb_s_base_inner_cssm
@@ -162,55 +164,55 @@ module psb_s_base_mat_mod
     !
     ! Data management methods.
     !
-    procedure, pass(a) :: get_size     => s_coo_get_size
-    procedure, pass(a) :: get_nzeros   => s_coo_get_nzeros
-    procedure, nopass  :: get_fmt      => s_coo_get_fmt
-    procedure, pass(a) :: sizeof       => s_coo_sizeof
+    procedure, pass(a) :: get_size      => s_coo_get_size
+    procedure, pass(a) :: get_nzeros    => s_coo_get_nzeros
+    procedure, nopass  :: get_fmt       => s_coo_get_fmt
+    procedure, pass(a) :: sizeof        => s_coo_sizeof
     procedure, pass(a) :: reallocate_nz => psb_s_coo_reallocate_nz
     procedure, pass(a) :: allocate_mnnz => psb_s_coo_allocate_mnnz
-    procedure, pass(a) :: ensure_size  => psb_s_coo_ensure_size
+    procedure, pass(a) :: ensure_size   => psb_s_coo_ensure_size
     procedure, pass(a) :: tril          => psb_s_coo_tril
     procedure, pass(a) :: triu          => psb_s_coo_triu
-    procedure, pass(a) :: cp_to_coo    => psb_s_cp_coo_to_coo
-    procedure, pass(a) :: cp_from_coo  => psb_s_cp_coo_from_coo
-    procedure, pass(a) :: cp_to_fmt    => psb_s_cp_coo_to_fmt
-    procedure, pass(a) :: cp_from_fmt  => psb_s_cp_coo_from_fmt
-    procedure, pass(a) :: mv_to_coo    => psb_s_mv_coo_to_coo
-    procedure, pass(a) :: mv_from_coo  => psb_s_mv_coo_from_coo
-    procedure, pass(a) :: mv_to_fmt    => psb_s_mv_coo_to_fmt
-    procedure, pass(a) :: mv_from_fmt  => psb_s_mv_coo_from_fmt
+    procedure, pass(a) :: cp_to_coo     => psb_s_cp_coo_to_coo
+    procedure, pass(a) :: cp_from_coo   => psb_s_cp_coo_from_coo
+    procedure, pass(a) :: cp_to_fmt     => psb_s_cp_coo_to_fmt
+    procedure, pass(a) :: cp_from_fmt   => psb_s_cp_coo_from_fmt
+    procedure, pass(a) :: mv_to_coo     => psb_s_mv_coo_to_coo
+    procedure, pass(a) :: mv_from_coo   => psb_s_mv_coo_from_coo
+    procedure, pass(a) :: mv_to_fmt     => psb_s_mv_coo_to_fmt
+    procedure, pass(a) :: mv_from_fmt   => psb_s_mv_coo_from_fmt
 
     !
     ! Convert internal indices
     !
-    procedure, pass(a) :: cp_to_lcoo     => psb_s_cp_coo_to_lcoo
-    procedure, pass(a) :: cp_from_lcoo   => psb_s_cp_coo_from_lcoo
+    procedure, pass(a) :: cp_to_lcoo      => psb_s_cp_coo_to_lcoo
+    procedure, pass(a) :: cp_from_lcoo    => psb_s_cp_coo_from_lcoo
 
-    procedure, pass(a) :: csput_a      => psb_s_coo_csput_a
-    procedure, pass(a) :: get_diag     => psb_s_coo_get_diag
-    procedure, pass(a) :: csgetrow     => psb_s_coo_csgetrow
-    procedure, pass(a) :: csgetptn     => psb_s_coo_csgetptn
-    procedure, pass(a) :: reinit       => psb_s_coo_reinit
-    procedure, pass(a) :: get_nz_row   => psb_s_coo_get_nz_row
-    procedure, pass(a) :: fix          => psb_s_fix_coo
-    procedure, pass(a) :: trim         => psb_s_coo_trim
-    procedure, pass(a) :: clean_zeros  => psb_s_coo_clean_zeros
-    procedure, pass(a) :: clean_negidx => psb_s_coo_clean_negidx
-    procedure, pass(a) :: print        => psb_s_coo_print
-    procedure, pass(a) :: free         => s_coo_free
-    procedure, pass(a) :: mold         => psb_s_coo_mold
-    procedure, pass(a) :: is_sorted    => s_coo_is_sorted
-    procedure, pass(a) :: is_by_rows   => s_coo_is_by_rows
-    procedure, pass(a) :: is_by_cols   => s_coo_is_by_cols
-    procedure, pass(a) :: set_by_rows  => s_coo_set_by_rows
-    procedure, pass(a) :: set_by_cols  => s_coo_set_by_cols
+    procedure, pass(a) :: csput_a         => psb_s_coo_csput_a
+    procedure, pass(a) :: get_diag        => psb_s_coo_get_diag
+    procedure, pass(a) :: csgetrow        => psb_s_coo_csgetrow
+    procedure, pass(a) :: csgetptn        => psb_s_coo_csgetptn
+    procedure, pass(a) :: reinit          => psb_s_coo_reinit
+    procedure, pass(a) :: get_nz_row      => psb_s_coo_get_nz_row
+    procedure, pass(a) :: fix             => psb_s_fix_coo
+    procedure, pass(a) :: trim            => psb_s_coo_trim
+    procedure, pass(a) :: clean_zeros     => psb_s_coo_clean_zeros
+    procedure, pass(a) :: clean_negidx    => psb_s_coo_clean_negidx
+    procedure, pass(a) :: print           => psb_s_coo_print
+    procedure, pass(a) :: free            => s_coo_free
+    procedure, pass(a) :: mold            => psb_s_coo_mold
+    procedure, pass(a) :: is_sorted       => s_coo_is_sorted
+    procedure, pass(a) :: is_by_rows      => s_coo_is_by_rows
+    procedure, pass(a) :: is_by_cols      => s_coo_is_by_cols
+    procedure, pass(a) :: set_by_rows     => s_coo_set_by_rows
+    procedure, pass(a) :: set_by_cols     => s_coo_set_by_cols
     procedure, pass(a) :: set_sort_status => s_coo_set_sort_status
     procedure, pass(a) :: get_sort_status => s_coo_get_sort_status
 
     !
     ! This is COO specific
     !
-    procedure, pass(a) :: set_nzeros   => s_coo_set_nzeros
+    procedure, pass(a) :: set_nzeros      => s_coo_set_nzeros
 
     !
     ! Transpose methods. These are the base of all
@@ -225,6 +227,7 @@ module psb_s_base_mat_mod
     !
     procedure, pass(a) :: csmm       => psb_s_coo_csmm
     procedure, pass(a) :: csmv       => psb_s_coo_csmv
+    procedure, pass(a) :: csmv_mx    => psb_s_coo_csmv_mx
     procedure, pass(a) :: inner_cssm => psb_s_coo_cssm
     procedure, pass(a) :: inner_cssv => psb_s_coo_cssv
     procedure, pass(a) :: scals      => psb_s_coo_scals
@@ -1176,6 +1179,37 @@ module psb_s_base_mat_mod
     end subroutine psb_s_base_csmm
   end interface
 
+
+  !
+  !> Function  csmm_mx:
+  !! \memberof  psb_s_base_sparse_mat
+  !! \brief Product by a dense rank 2 array.
+  !!
+  !!        Compute
+  !!           Y = alpha*op(A)*X + beta*Y
+  !!
+  !! \param alpha  Scaling factor for Ax
+  !! \param A      the input sparse matrix
+  !! \param x(:,:) the input dense X
+  !! \param beta   Scaling factor for y
+  !! \param y(:,:) the input/output dense Y
+  !! \param info   return code
+  !! \param trans  [N] Whether to use A (N), its transpose (T)
+  !!               or its conjugate transpose (C)
+  !! This is the base mixed precision version, it should never be called
+  !
+  interface
+    subroutine psb_s_base_csmm_mx(alpha,a,x,beta,y,info,trans)
+      import
+      class(psb_s_base_sparse_mat), intent(in)          :: a
+      real(psb_spk_), intent(in)                        :: alpha, beta, x(:,:)
+      real(psb_dpk_), intent(inout)                     :: y(:,:)
+      integer(psb_ipk_), intent(out)                    :: info
+      character, optional, intent(in)                   :: trans
+    end subroutine psb_s_base_csmm_mx
+  end interface
+
+
   !> Function  csmv:
   !! \memberof  psb_s_base_sparse_mat
   !! \brief Product by a dense rank 1 array.
@@ -1203,6 +1237,39 @@ module psb_s_base_mat_mod
       character, optional, intent(in) :: trans
     end subroutine psb_s_base_csmv
   end interface
+
+
+  !
+  !> Function  csmm_mx:
+  !! \memberof  psb_s_base_sparse_mat
+  !! \brief Product by a dense rank 1 array.
+  !!
+  !!        Compute
+  !!           Y = alpha*op(A)*X + beta*Y
+  !!
+  !! \param alpha  Scaling factor for Ax
+  !! \param A      the input sparse matrix
+  !! \param x(:,:) the input dense X
+  !! \param beta   Scaling factor for y
+  !! \param y(:,:) the input/output dense Y
+  !! \param info   return code
+  !! \param trans  [N] Whether to use A (N), its transpose (T)
+  !!               or its conjugate transpose (C)
+  !! This is the base mixed precision version, it should never be called
+  !
+  interface
+    subroutine psb_s_base_csmv_mx(alpha,a,x,beta,y,info,trans)
+      import
+      class(psb_s_base_sparse_mat), intent(in)          :: a
+      real(psb_spk_), intent(in)                        :: alpha, beta, x(:)
+      real(psb_dpk_), intent(inout)                     :: y(:)
+      integer(psb_ipk_), intent(out)                    :: info
+      character, optional, intent(in)                   :: trans
+    end subroutine psb_s_base_csmv_mx
+  end interface
+
+
+
 
   !> Function  vect_mv:
   !! \memberof  psb_s_base_sparse_mat
@@ -1243,12 +1310,12 @@ module psb_s_base_mat_mod
   interface
     subroutine psb_s_base_vect_mv_mx(alpha,a,x,beta,y,info,trans)
       import
-      class(psb_s_base_sparse_mat), intent(in) :: a
-      real(psb_dpk_), intent(in)       :: alpha, beta
-      class(psb_d_base_vect_type), intent(inout) :: x
-      class(psb_d_base_vect_type), intent(inout) :: y
-      integer(psb_ipk_), intent(out)             :: info
-      character, optional, intent(in)  :: trans
+      class(psb_s_base_sparse_mat), intent(in)    :: a
+      real(psb_spk_), intent(in)                  :: alpha, beta
+      class(psb_s_base_vect_type), intent(inout)  :: x
+      class(psb_d_base_vect_type), intent(inout)  :: y
+      integer(psb_ipk_), intent(out)              :: info
+      character, optional, intent(in)             :: trans
     end subroutine psb_s_base_vect_mv_mx
   end interface
 
@@ -2241,6 +2308,22 @@ module psb_s_base_mat_mod
       character, optional, intent(in)     :: trans
     end subroutine psb_s_coo_csmv
   end interface
+
+
+    !>
+  !! \memberof  psb_s_coo_sparse_mat
+  !! \see psb_s_base_mat_mod::psb_s_base_csmv_mx
+  interface
+    subroutine psb_s_coo_csmv_mx(alpha,a,x,beta,y,info,trans)
+      import
+      class(psb_s_coo_sparse_mat), intent(in)     :: a
+      real(psb_spk_), intent(in)                  :: alpha, beta, x(:)
+      real(psb_dpk_), intent(inout)               :: y(:)
+      integer(psb_ipk_), intent(out)              :: info
+      character, optional, intent(in)             :: trans
+    end subroutine psb_s_coo_csmv_mx
+  end interface
+
 
   !>
   !! \memberof  psb_s_coo_sparse_mat

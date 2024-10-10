@@ -416,6 +416,384 @@ contains
 
 end subroutine psb_s_csr_csmv
 
+
+subroutine psb_s_csr_csmv_mx(alpha,a,x,beta,y,info,trans)
+  use psb_error_mod
+  use psb_string_mod
+  use psb_s_csr_mat_mod, psb_protect_name => psb_s_csr_csmv_mx
+  implicit none
+  class(psb_s_csr_sparse_mat), intent(in)       :: a
+  real(psb_spk_), intent(in)                    :: alpha, beta, x(:)
+  real(psb_dpk_), intent(inout)                 :: y(:)
+  integer(psb_ipk_), intent(out)                :: info
+  character, optional, intent(in)               :: trans
+
+  character                                     :: trans_
+  integer(psb_ipk_)                             :: m, n
+  logical                                       :: tra, ctra
+  integer(psb_ipk_)                             :: err_act
+  integer(psb_ipk_)                             :: ierr(5)
+  character(len=20)                             :: name='s_csr_csmv_mx'
+  logical, parameter                            :: debug=.false.
+
+  call psb_erractionsave(err_act)
+  info = psb_success_
+  if (a%is_dev())   call a%sync()
+
+  if (present(trans)) then
+    trans_ = trans
+  else
+    trans_ = 'N'
+  end if
+
+  if (.not.a%is_asb()) then
+    info = psb_err_invalid_mat_state_
+    call psb_errpush(info,name)
+    goto 9999
+  endif
+
+
+  tra  = (psb_toupper(trans_) == 'T')
+  ctra = (psb_toupper(trans_) == 'C')
+
+  if (tra.or.ctra) then
+    m = a%get_ncols()
+    n = a%get_nrows()
+  else
+    n = a%get_ncols()
+    m = a%get_nrows()
+  end if
+
+  if (size(x,1)<n) then
+    info = psb_err_input_asize_small_i_
+    ierr(1) = 3; ierr(2) = size(x); ierr(3) = n;
+    call psb_errpush(info,name,i_err=ierr)
+    goto 9999
+  end if
+
+  if (size(y,1)<m) then
+    info = psb_err_input_asize_small_i_
+    ierr(1) = 5; ierr(2) = size(y); ierr(3) =m;
+    call psb_errpush(info,name,i_err=ierr)
+    goto 9999
+  end if
+
+
+  call psb_s_csr_csmv_mx_inner(m,n,alpha,a%irp,a%ja,a%val,&
+       & a%is_triangle(),a%is_unit(),&
+       & x,beta,y,tra,ctra)
+
+  call psb_erractionrestore(err_act)
+  return
+
+9999 call psb_error_handler(err_act)
+
+  return
+
+contains
+  subroutine psb_s_csr_csmv_mx_inner(m,n,alpha,irp,ja,val,is_triangle,is_unit,&
+       & x,beta,y,tra,ctra)
+    integer(psb_ipk_), intent(in)             :: m,n,irp(*),ja(*)
+    real(psb_spk_), intent(in)                :: alpha, beta, x(*),val(*)
+    real(psb_dpk_), intent(inout)             :: y(*)
+    logical, intent(in)                       :: is_triangle,is_unit,tra, ctra
+
+
+    integer(psb_ipk_)                         :: i,j,ir
+    real(psb_dpk_)                            :: acc
+
+    if (alpha == szero) then
+      if (beta == szero) then
+        !$omp parallel do private(i)
+        do i = 1, m
+          y(i) = dzero
+        enddo
+      else
+        !$omp parallel do private(i)
+        do  i = 1, m
+          y(i) = real(beta,8)*y(i)
+        end do
+      endif
+      return
+    end if
+
+
+    if ((.not.tra).and.(.not.ctra)) then
+
+      if (beta == szero) then
+
+        if (alpha == sone) then
+          !$omp parallel do private(i,j, acc) schedule(static)
+          do i=1,m
+            acc  = dzero
+            !$omp  simd
+            do j=irp(i), irp(i+1)-1
+              acc  = acc + real(val(j),8) * real(x(ja(j)),8)
+            enddo
+            y(i) = acc
+          end do
+
+        else if (alpha == -sone) then
+
+          !$omp parallel do private(i,j, acc)
+          do i=1,m
+            acc  = dzero
+            !$omp  simd
+            do j=irp(i), irp(i+1)-1
+              acc  = acc + real(val(j),8) * real(x(ja(j)),8)
+            enddo
+            y(i) = -acc
+          end do
+
+        else
+
+          !$omp parallel do private(i,j,acc)
+          do i=1,m
+            acc  = dzero
+            !$omp  simd
+            do j=irp(i), irp(i+1)-1
+              acc  = acc + real(val(j),8) * real(x(ja(j)),8)
+            enddo
+            y(i) = real(alpha,8)*acc
+          end do
+
+        end if
+
+
+      else if (beta == sone) then
+
+        if (alpha == sone) then
+          !$omp parallel do private(i,j,acc)
+          do i=1,m
+            acc  = dzero
+            !$omp  simd
+            do j=irp(i), irp(i+1)-1
+              acc  = acc + real(val(j),8) * real(x(ja(j)),8)
+            enddo
+            y(i) = y(i) + acc
+          end do
+
+        else if (alpha == -sone) then
+
+          !$omp parallel do private(i,j,acc)
+          do i=1,m
+            acc  = dzero
+            !$omp  simd
+            do j=irp(i), irp(i+1)-1
+              acc  = acc + real(val(j),8) * real(x(ja(j)),8)
+            enddo
+            y(i) = y(i) - acc
+          end do
+
+        else
+
+          !$omp parallel do private(i,j,acc)
+          do i=1,m
+            acc  = dzero
+            !$omp  simd
+            do j=irp(i), irp(i+1)-1
+              acc  = acc + real(val(j),8) * real(x(ja(j)),8)
+            enddo
+            y(i) = y(i) + real(alpha,8)*acc
+          end do
+
+        end if
+
+      else if (beta == -sone) then
+
+        if (alpha == sone) then
+          !$omp parallel do private(i,j,acc)
+          do i=1,m
+            acc  = dzero
+            !$omp  simd
+            do j=irp(i), irp(i+1)-1
+              acc  = acc + real(val(j),8) * real(x(ja(j)),8)
+            enddo
+            y(i) = -y(i) + acc
+          end do
+
+        else if (alpha == -sone) then
+
+          !$omp parallel do private(i,j,acc)
+          do i=1,m
+            acc  = dzero
+            !$omp  simd
+            do j=irp(i), irp(i+1)-1
+              acc  = acc + real(val(j),8) * real(x(ja(j)),8)
+            enddo
+            y(i) = -y(i) - acc
+          end do
+
+        else
+
+          !$omp parallel do private(i,j,acc)
+          do i=1,m
+            acc  = dzero
+            !$omp  simd
+            do j=irp(i), irp(i+1)-1
+              acc  = acc + real(val(j),8) * real(x(ja(j)),8)
+            enddo
+            y(i) = -y(i) + real(alpha,8)*acc
+          end do
+
+        end if
+
+      else
+
+        if (alpha == sone) then
+          !$omp parallel do private(i,j,acc)
+          do i=1,m
+            acc  = dzero
+            !$omp  simd
+            do j=irp(i), irp(i+1)-1
+              acc  = acc + real(val(j),8) * real(x(ja(j)),8)
+            enddo
+            y(i) = real(beta,8)*y(i) + acc
+          end do
+
+        else if (alpha == -sone) then
+
+          !$omp parallel do private(i,j,acc)
+          do i=1,m
+            acc  = dzero
+            !$omp  simd
+            do j=irp(i), irp(i+1)-1
+              acc  = acc + real(val(j),8) * real(x(ja(j)),8)
+            enddo
+            y(i) = real(beta,8)*y(i) - acc
+          end do
+
+        else
+
+          !$omp parallel do private(i,j,acc)
+          do i=1,m
+            acc  = dzero
+            !$omp  simd
+            do j=irp(i), irp(i+1)-1
+              acc  = acc + real(val(j),8) * real(x(ja(j)),8)
+            enddo
+            y(i) = real(beta,8)*y(i) + real(alpha,8)*acc
+          end do
+
+        end if
+
+      end if
+
+    else if (tra) then
+
+      if (beta == szero) then
+        !$omp parallel do private(i)
+        do i=1, m
+          y(i) = dzero
+        end do
+      else if (beta == sone) then
+        ! Do nothing
+      else if (beta == -sone) then
+        !$omp parallel do private(i)
+        do i=1, m
+          y(i) = -y(i)
+        end do
+      else
+        !$omp parallel do private(i)
+        do i=1, m
+          y(i) = real(beta,8)*y(i)
+        end do
+      end if
+
+      if (alpha == sone) then
+
+        do i=1,n
+          do j=irp(i), irp(i+1)-1
+            ir = ja(j)
+            y(ir) = y(ir) +  real(val(j),8)*real(x(i),8)
+          end do
+        enddo
+
+      else if (alpha == -sone) then
+
+        do i=1,n
+          do j=irp(i), irp(i+1)-1
+            ir = ja(j)
+            y(ir) = y(ir) -  real(val(j),8)*real(x(i),8)
+          end do
+        enddo
+
+      else
+
+        do i=1,n
+          do j=irp(i), irp(i+1)-1
+            ir = ja(j)
+            y(ir) = y(ir) + real(alpha,8)*real(val(j),8)*real(x(i),8)
+          end do
+        enddo
+
+      end if
+
+    else if (ctra) then
+
+      if (beta == szero) then
+        do i=1, m
+          y(i) = dzero
+        end do
+      else if (beta == sone) then
+        ! Do nothing
+      else if (beta == -sone) then
+        do i=1, m
+          y(i) = -y(i)
+        end do
+      else
+        do i=1, m
+          y(i) = real(beta,8)*y(i)
+        end do
+      end if
+
+      if (alpha == sone) then
+
+        do i=1,n
+          do j=irp(i), irp(i+1)-1
+            ir = ja(j)
+            y(ir) = y(ir) +  real(val(j),8)*real(x(i),8)
+          end do
+        enddo
+
+      else if (alpha == -sone) then
+
+        do i=1,n
+          do j=irp(i), irp(i+1)-1
+            ir = ja(j)
+            y(ir) = y(ir) -  real(val(j),8)*real(x(i),8)
+          end do
+        enddo
+
+      else
+
+        do i=1,n
+          do j=irp(i), irp(i+1)-1
+            ir = ja(j)
+            y(ir) = y(ir) + real(alpha,8)*real(val(j),8)*real(x(i),8)
+          end do
+        enddo
+
+      end if
+
+    endif
+
+    if (is_unit) then
+      do i=1, min(m,n)
+        y(i) = y(i) + real(alpha,8)*real(x(i),8)
+      end do
+    end if
+
+
+  end subroutine psb_s_csr_csmv_mx_inner
+
+
+end subroutine psb_s_csr_csmv_mx
+
+
+
+
+
 subroutine psb_s_csr_csmm(alpha,a,x,beta,y,info,trans)
   use psb_error_mod
   use psb_string_mod

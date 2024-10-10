@@ -1707,6 +1707,200 @@ subroutine psb_s_coo_csmv(alpha,a,x,beta,y,info,trans)
 
 end subroutine psb_s_coo_csmv
 
+
+subroutine psb_s_coo_csmv_mx(alpha,a,x,beta,y,info,trans)
+  use psb_const_mod
+  use psb_error_mod
+  use psb_string_mod
+  use psb_s_base_mat_mod, psb_protect_name => psb_s_coo_csmv_mx
+  implicit none
+
+  class(psb_s_coo_sparse_mat), intent(in)     :: a
+  real(psb_spk_), intent(in)                  :: alpha, beta, x(:)
+  real(psb_dpk_), intent(inout)               :: y(:)
+  integer(psb_ipk_), intent(out)              :: info
+  character, optional, intent(in)             :: trans
+
+  character                                   :: trans_
+  integer(psb_ipk_)                           :: i,j,k,m,n, nnz, ir, jc
+  real(psb_dpk_)                              :: acc
+  logical                                     :: tra, ctra
+  integer(psb_ipk_)                           :: err_act
+  character(len=20)                           :: name='s_coo_csmv_mx_impl'
+  logical, parameter                          :: debug=.false.
+
+  info = psb_success_
+  call psb_erractionsave(err_act)
+
+  if (.not.a%is_asb()) then
+    info = psb_err_invalid_mat_state_
+    call psb_errpush(info,name)
+    goto 9999
+  endif
+
+  if (a%is_dev())   call a%sync()
+
+  if (present(trans)) then
+    trans_ = trans
+  else
+    trans_ = 'N'
+  end if
+
+  tra  = (psb_toupper(trans_) == 'T')
+  ctra = (psb_toupper(trans_) == 'C')
+
+
+  if (tra.or.ctra) then
+    m = a%get_ncols()
+    n = a%get_nrows()
+  else
+    n = a%get_ncols()
+    m = a%get_nrows()
+  end if
+  if (size(x,1) < n) then
+    info = psb_err_input_asize_small_i_
+    call psb_errpush(info,name,i_err=(/3_psb_ipk_,size(x,1,kind=psb_ipk_),n/))
+    goto 9999
+  end if
+  if (size(y,1) < m) then
+    info = psb_err_input_asize_small_i_
+    call psb_errpush(info,name,i_err=(/5_psb_ipk_,size(y,1,kind=psb_ipk_),m/))
+    goto 9999
+  end if
+
+  nnz = a%get_nzeros()
+
+  if (alpha == szero) then
+    if (beta == szero) then
+      do i = 1, m
+        y(i) = dzero
+      enddo
+    else
+      do  i = 1, m
+        y(i) = real(beta,8)*y(i)
+      end do
+    endif
+    return
+  else
+    if (a%is_unit()) then
+      if (beta == szero) then
+        do i = 1, min(m,n)
+          y(i) = real(alpha,8)*real(x(i),8)
+        enddo
+        do i = min(m,n)+1, m
+          y(i) = dzero
+        enddo
+      else
+        do  i = 1, min(m,n)
+          y(i) = real(beta,8)*y(i) + real(alpha,8)*real(x(i),8)
+        end do
+        do i = min(m,n)+1, m
+          y(i) = real(beta,8)*y(i)
+        enddo
+      endif
+    else
+      if (beta == szero) then
+        do i = 1, m
+          y(i) = dzero
+        enddo
+      else
+        do  i = 1, m
+          y(i) = real(beta,8)*y(i)
+        end do
+      endif
+
+    endif
+
+  end if
+
+  if ((.not.tra).and.(.not.ctra)) then
+    i    = 1
+    j    = i
+    if (nnz > 0) then
+      ir   = a%ia(1)
+      acc  = dzero
+      do
+        if (i>nnz) then
+          y(ir) = y(ir) + real(alpha,8) * acc
+          exit
+        endif
+        if (a%ia(i) /= ir) then
+          y(ir) = y(ir) + real(alpha,8) * acc
+          ir    = a%ia(i)
+          acc   = dzero
+        endif
+        acc     = acc + real(a%val(i),8) * real(x(a%ja(i)),8)
+        i       = i + 1
+      enddo
+    end if
+
+  else if (tra) then
+
+    if (alpha == sone) then
+      i    = 1
+      do i=1,nnz
+        ir = a%ja(i)
+        jc = a%ia(i)
+        y(ir) = y(ir) +  real(a%val(i),8)*real(x(jc),8)
+      enddo
+
+    else if (alpha == -sone) then
+
+      do i=1,nnz
+        ir = a%ja(i)
+        jc = a%ia(i)
+        y(ir) = y(ir) - real(a%val(i),8)*real(x(jc),8)
+      enddo
+
+    else
+
+      do i=1,nnz
+        ir = a%ja(i)
+        jc = a%ia(i)
+        y(ir) = y(ir) + real(alpha,8)*real(a%val(i),8)*real(x(jc),8)
+      enddo
+
+    end if                  !.....end testing on alpha
+
+  else if (ctra) then
+
+    if (alpha == sone) then
+      i    = 1
+      do i=1,nnz
+        ir = a%ja(i)
+        jc = a%ia(i)
+        y(ir) = y(ir) +  real(a%val(i),8)*real(x(jc),8)
+      enddo
+
+    else if (alpha == -sone) then
+
+      do i=1,nnz
+        ir = a%ja(i)
+        jc = a%ia(i)
+        y(ir) = y(ir) - real(a%val(i),8)*real(x(jc),8)
+      enddo
+
+    else
+
+      do i=1,nnz
+        ir = a%ja(i)
+        jc = a%ia(i)
+        y(ir) = y(ir) + real(alpha,8)*real(a%val(i),8)*real(x(jc),8)
+      enddo
+
+    end if                  !.....end testing on alpha
+
+  endif
+
+  call psb_erractionrestore(err_act)
+  return
+
+9999 call psb_error_handler(err_act)
+
+  return
+
+end subroutine psb_s_coo_csmv_mx
+
 subroutine psb_s_coo_csmm(alpha,a,x,beta,y,info,trans)
   use psb_const_mod
   use psb_error_mod

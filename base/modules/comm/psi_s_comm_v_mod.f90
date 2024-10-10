@@ -131,7 +131,7 @@ module psi_s_comm_v_mod
       real(psb_spk_), target               :: work(:)
       class(psb_i_base_vect_type), intent(inout) :: idx
       integer(psb_ipk_), intent(in)           :: totxch,totsnd, totrcv
-    end subroutine psi_stran_vidx_multivect
+    end subroutine  
   end interface psi_swaptran
 
   interface psi_ovrl_upd
