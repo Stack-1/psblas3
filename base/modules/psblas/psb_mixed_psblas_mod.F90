@@ -31,8 +31,10 @@
 !
 module psb_mixed_psblas_mod
   use psb_desc_mod, only : psb_desc_type, psb_spk_, psb_dpk_, psb_ipk_, psb_lpk_
-  use psb_d_vect_mod, only : psb_d_vect_type, psb_s_vect_type
-  use psb_d_mat_mod, only : psb_dspmat_type, psb_sspmat_type
+  use psb_s_vect_mod, only : psb_s_vect_type
+  use psb_s_mat_mod, only : psb_sspmat_type
+  use psb_d_vect_mod, only : psb_d_vect_type
+  use psb_d_mat_mod, only : psb_dspmat_type
 
   interface psb_spmm
     subroutine psb_mx_sd_spmv_vect(alpha, a, x, beta, y,&

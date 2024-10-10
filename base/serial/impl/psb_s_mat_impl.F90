@@ -2325,6 +2325,19 @@ subroutine psb_s_csmv_vect(alpha,a,x,beta,y,info,trans)
 end subroutine psb_s_csmv_vect
 
 
+subroutine psb_s_csmv_vect_mx(alpha,a,x,beta,y,info,trans)
+  use psb_s_mat_mod, psb_protect_name => psb_s_csmv_vect_mx
+  use psb_s_vect_mod, only : psb_s_vect_type
+  class(psb_sspmat_type), intent(in)   :: a
+  real(psb_dpk_), intent(in)        :: alpha, beta
+  type(psb_d_vect_type), intent(inout) :: x
+  type(psb_d_vect_type), intent(inout) :: y
+  integer(psb_ipk_), intent(out)                 :: info
+  character, optional, intent(in)      :: trans
+
+  call a%a%spmm(alpha,x%v,beta,y%v,info,trans)
+  
+end subroutine psb_s_csmv_vect_mx
 
 subroutine psb_s_cssm(alpha,a,x,beta,y,info,trans,scale,d)
   use psb_error_mod

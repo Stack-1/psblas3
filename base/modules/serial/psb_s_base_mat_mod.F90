@@ -35,7 +35,7 @@ module psb_s_base_mat_mod
 
   use psb_base_mat_mod
   use psb_s_base_vect_mod
-
+  use psb_d_base_vect_mod
 
   !> \namespace  psb_base_mod  \class  psb_s_base_sparse_mat
   !! \extends psb_base_mat_mod::psb_base_sparse_mat
@@ -103,10 +103,11 @@ module psb_s_base_mat_mod
     !
     ! Computational methods: defined here but not implemented.
     !
+    procedure, pass(a) :: vect_mv_mx  => psb_s_base_vect_mv_mx
     procedure, pass(a) :: vect_mv     => psb_s_base_vect_mv
     procedure, pass(a) :: csmv        => psb_s_base_csmv
     procedure, pass(a) :: csmm        => psb_s_base_csmm
-    generic, public    :: spmm        => csmm, csmv, vect_mv
+    generic, public    :: spmm        => csmm, csmv, vect_mv, vect_mv_mx
     procedure, pass(a) :: in_vect_sv  => psb_s_base_inner_vect_sv
     procedure, pass(a) :: inner_cssv  => psb_s_base_inner_cssv
     procedure, pass(a) :: inner_cssm  => psb_s_base_inner_cssm
@@ -1237,6 +1238,18 @@ module psb_s_base_mat_mod
       integer(psb_ipk_), intent(out)             :: info
       character, optional, intent(in)  :: trans
     end subroutine psb_s_base_vect_mv
+  end interface
+
+  interface
+    subroutine psb_s_base_vect_mv_mx(alpha,a,x,beta,y,info,trans)
+      import
+      class(psb_s_base_sparse_mat), intent(in) :: a
+      real(psb_dpk_), intent(in)       :: alpha, beta
+      class(psb_d_base_vect_type), intent(inout) :: x
+      class(psb_d_base_vect_type), intent(inout) :: y
+      integer(psb_ipk_), intent(out)             :: info
+      character, optional, intent(in)  :: trans
+    end subroutine psb_s_base_vect_mv_mx
   end interface
 
   !

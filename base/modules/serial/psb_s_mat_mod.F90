@@ -78,6 +78,7 @@
 !
 module psb_s_mat_mod
 
+  use psb_d_vect_mod, only : psb_d_vect_type, psb_dpk_
   use psb_s_base_mat_mod
   use psb_s_csr_mat_mod,  only : psb_s_csr_sparse_mat, psb_ls_csr_sparse_mat,&
        & psb_s_ecsr_sparse_mat
@@ -236,6 +237,7 @@ module psb_s_mat_mod
     procedure, pass(a) :: csmv_v   => psb_s_csmv_vect
     procedure, pass(a) :: csmv     => psb_s_csmv
     procedure, pass(a) :: csmm     => psb_s_csmm
+    procedure, pass(a) :: csmm_mx  => psb_s_csmv_vect_mx
     generic, public    :: spmm     => csmm, csmv, csmv_v
     procedure, pass(a) :: scals    => psb_s_scals
     procedure, pass(a) :: scalv    => psb_s_scal
@@ -1089,6 +1091,16 @@ module psb_s_mat_mod
       integer(psb_ipk_), intent(out)                 :: info
       character, optional, intent(in)      :: trans
     end subroutine psb_s_csmv_vect
+    subroutine psb_s_csmv_vect_mx(alpha,a,x,beta,y,info,trans)
+      use psb_s_vect_mod, only : psb_s_vect_type
+      import ! :: psb_ipk_, psb_lpk_, psb_sspmat_type, psb_spk_
+      class(psb_sspmat_type), intent(in)   :: a
+      real(psb_dpk_), intent(in)        :: alpha, beta
+      type(psb_d_vect_type), intent(inout) :: x
+      type(psb_d_vect_type), intent(inout) :: y
+      integer(psb_ipk_), intent(out)                 :: info
+      character, optional, intent(in)      :: trans
+    end subroutine psb_s_csmv_vect_mx
   end interface
 
   interface psb_cssm
