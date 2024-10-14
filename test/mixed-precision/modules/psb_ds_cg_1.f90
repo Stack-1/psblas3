@@ -267,7 +267,7 @@ module psb_ds_cg_1
 
                  ! d_i+1 = r_i+1 + beta_i+1 * d_i     
                 do i=1,size(d_double%v%v)
-                    d_double%v%v(i)            = (r_single%v%v(i) * 1.d0) + ( (beta * 1.d0) * d_double%v%v(i) )
+                    d_double%v%v(i)            = r_double%v%v(i) + ( (beta * 1.d0) * d_double%v%v(i) )
                     d_single%v%v(i)            = d_double%v%V(i)
                 end do
                 

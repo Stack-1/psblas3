@@ -9,7 +9,6 @@ module psb_s_cg
 #ifdef HAVE_CUDA
             use psb_ext_mod
             use psb_cuda_mod
-            use iso_c_binding
 #endif
             implicit none
         
@@ -38,7 +37,6 @@ module psb_s_cg
             type(psb_s_vect_type)                           :: d, rho
             type(psb_s_vect_type)                           :: r
         
-            real(psb_spk_), allocatable, save               :: global_r(:), b_copy(:), r_copy(:), d_copy(:)
             real(psb_spk_)                                  :: beta, alpha
             real(psb_spk_)                                  :: r_scalar_product, r_scalar_product_next, partial_result_d_rho
         
@@ -50,40 +48,6 @@ module psb_s_cg
             
 #ifdef HAVE_CUDA
             type(psb_s_vect_cuda)                           :: gpu_vector_format
-            type(psb_s_cuda_elg_sparse_mat)                 :: gpu_matrix_format
-
-            type(psb_i_vect_cuda)                           :: gpu_descriptor_format
-
-            type(psb_s_coo_sparse_mat)                      :: matrix_coo_format_single
-
-
-            interface
-                subroutine single_to_double(vect_single, vect_double, size) bind(c) 
-                    import c_int, c_float, c_double
-                
-                    implicit none
-
-                    integer(kind=c_int), intent(in), value  :: size
-                    real(kind=c_float), intent(in)          :: vect_single(size)
-                    real(kind=c_double), intent(inout)      :: vect_double(size)
-
-                    
-                end subroutine single_to_double
-
-                subroutine double_to_single(vect_double, vect_single, size) bind(c) 
-                    import c_int, c_float, c_double
-                
-                    implicit none
-
-                    integer(kind=c_int), intent(in), value  :: size
-                    real(kind=c_float), intent(in)          :: vect_single(size)
-                    real(kind=c_double), intent(inout)      :: vect_double(size)
-
-
-                end subroutine double_to_single
-            end interface
-
-
 #endif
 
 
@@ -137,11 +101,6 @@ module psb_s_cg
 
 
 #ifdef HAVE_CUDA
-            call single_to_double(r%v%v,r_double%v%v,size(r%v%v))
-            call single_to_double(b%v%v,b_double%v%v,size(b%v%v))
-
-            call double_to_single(r_double%v%v, r%v%v, size(r_double%v%v))
-            
             ! marking data structures to use them in GPU
             call psb_geasb(r,desc_a,info,scratch=.false.,mold=gpu_vector_format)
             call psb_geasb(d,desc_a,info,scratch=.false.,mold=gpu_vector_format)
@@ -174,9 +133,7 @@ module psb_s_cg
                     goto 9999
                 end if
 
-                !write(*,*) r%v%v
                 call psb_spmm(-sone,a,x,sone,r,desc_a,info) ! r_0 = -A * x_0 + r_0
-                !write(*,*) r%v%v
 
                 if(info /= psb_success_) then
                     info=psb_err_from_subroutine_

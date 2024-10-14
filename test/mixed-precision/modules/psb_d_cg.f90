@@ -52,11 +52,7 @@ module psb_d_cg
 
             ! GPU variables
 #ifdef HAVE_CUDA
-
             type(psb_d_vect_cuda)                           :: gpu_vector_format
-            type(psb_d_cuda_elg_sparse_mat)                 :: gpu_matrix_format
-
-            type(psb_i_vect_cuda)                           :: gpu_descriptor_format
 #endif
 
             info = psb_success_

@@ -53,7 +53,6 @@ program psb_dscg
   real(psb_dpk_)                        :: initial_time, temporary_time, generation_time, preconditioning_time, &
                                           & computation_time, residual_computation_time, output_time,norm_computation_time, &
                                           & total_time
-  real(psb_dpk_)                        :: mean_computation_time
 
   ! sparse matrix
   type(psb_dspmat_type)                 :: local_a, local_a_gpu
@@ -91,7 +90,7 @@ program psb_dscg
   ! Stats variables
   real(psb_dpk_)                        :: r_norm, b_norm
   real(psb_dpk_)                        :: mean_matrix_memory_size, mean_desc_memory_size, mean_err, &
-  & mean_max_r_value, mean_max_r_value_lower, mean_r_norm
+  & mean_max_r_value, mean_max_r_value_lower, mean_r_norm, mean_computation_time
   real(psb_dpk_)                        :: max_r_value, max_r_value_lower
 
 

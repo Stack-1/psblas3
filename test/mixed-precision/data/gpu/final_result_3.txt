@@ -1,5 +1,5 @@
  computed solution on            1  processors.
- iterations to convergence:            0
- time to convergence:    9.3100000100321267E-006
- matrix size:            4  x            4
+ iterations to convergence:   1095516747
+ time to convergence:    2.2841999999911877E-005
+ matrix size:      1000000  x      1000000
  error estimate on exit: ||r|| / ||b|| =    0.0000000000000000     

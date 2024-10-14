@@ -65,7 +65,7 @@ program psb_dscg
 
   ! timers
   real(psb_dpk_)                        :: initial_time, temporary_time, generation_time, preconditioning_time, &
-                                          & computation_time, residual_computation_time, gpu_convertion_time, total_time
+                                          & computation_time, gpu_convertion_time, total_time
 
   ! sparse matrix
   type(psb_dspmat_type)                 :: local_a, local_a_gpu
@@ -98,6 +98,11 @@ program psb_dscg
   real(psb_dpk_)                        :: err, eps
   real(psb_spk_)                        :: err_lower, eps_lower
 
+  ! Stats variables
+  real(psb_dpk_)                        :: r_norm, b_norm
+  real(psb_dpk_)                        :: mean_matrix_memory_size, mean_desc_memory_size, mean_err, &
+  & mean_max_r_value, mean_max_r_value_lower, mean_r_norm, mean_computation_time
+  real(psb_dpk_)                        :: max_r_value, max_r_value_lower
 
   ! debug output variables
   character(len=40)                     :: output_file_string
@@ -125,7 +130,7 @@ program psb_dscg
   type(ainvparms)     :: parms
 
   ! other variables
-  integer(psb_ipk_) :: info, i, err_act, precision_mode
+  integer(psb_ipk_) :: info, i, j, err_act, precision_mode, iteration_number
   character(len=20) :: name,ch_err
   character(len=40) :: fname
   real(psb_dpk_)    :: r_amax, b_amax, scale,resmx,resmxp, condition_number
@@ -144,6 +149,9 @@ program psb_dscg
   itmax = 10000
   itrace = 0 ! Debug option on
   irst = 0 ! Restart parameter, ignored for CG
+
+  
+  iteration_number = 1
 
   call psb_init(ctxt)
   call psb_info(ctxt,my_rank,np)
@@ -190,6 +198,8 @@ program psb_dscg
     end if
     print '(" ")'
   end if 
+  
+  system_size = idim*idim
 
   ! Synchronize metadata
   call psb_bcast(ctxt, precision_mode)
@@ -214,7 +224,8 @@ program psb_dscg
   end if
   
  
-
+  call psb_geall(local_r, desc_a, info)
+  call psb_geall(local_r_lower_precision, desc_a, info)
 
   if (my_rank == psb_root_) then
     print '("[INFO] Overall matrix creation time : ",es12.5, " s")' , generation_time
@@ -299,8 +310,7 @@ program psb_dscg
   ! iterative method parameters
   !
   call psb_barrier(ctxt)
-  eps         = 1.d-6
-  eps_lower   = eps
+
 
   if(my_rank == psb_root_) then
     print '("=================================================================================")'
@@ -353,149 +363,556 @@ program psb_dscg
 
 #endif
 
+  ! Stopping criteria
+  eps         = 1.d-6
+  eps_lower   = eps
 
-  temporary_time = psb_wtime()
+  ! Mean variable initialization
+  mean_computation_time   = 0.d0
+  mean_desc_memory_size   = 0.d0
+  mean_matrix_memory_size = 0.d0
+  mean_err                = 0.d0
+  mean_max_r_value        = 0.d0
+  mean_max_r_value_lower  = 0
+  mean_r_norm             = 0.d0
+  r_norm                  = 0.d0
+  b_norm                  = 0.d0
 
   if(precision_mode == 1) then
     ! Double precision computation
     if(my_rank == psb_root_) print '("[INFO] Calling double precision Conjugate Gradient")'
 
-    call psb_dcg_impl(local_a_gpu,prec,local_b,local_x,eps,desc_a,info,&
-    & itmax=itmax,iter=iter,err=err)
+    do i = 1, iteration_number
+      ! We want to iterate to get a mean value instead of a single computation
+      call local_x%zero()
+
+      temporary_time = psb_wtime()
+
+      call psb_dcg_impl(local_a,prec,local_b,local_x,eps,desc_a,info,&
+      & itmax=itmax,iter=iter,err=err)
+
+      computation_time = psb_wtime() - temporary_time
+      call psb_amx(ctxt, computation_time)
+
+      if(my_rank == psb_root_) mean_computation_time = mean_computation_time + computation_time
+
+#ifdef HAVE_CUDA
+      call psb_cuda_DeviceSync()
+#endif
+
+      ! Compute residual
+      call local_r%zero()
+
+      ! r = b
+      call psb_geaxpby(done, local_b, dzero, local_r, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_
+        ch_err='r = b'
+        call psb_errpush(info,name,a_err=ch_err)
+        goto 9999
+      end if
+
+
+      ! r = r - A * x
+      call psb_spmm(-done, local_a, local_x, done, local_r, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_
+        ch_err='r = r - A * x'
+        call psb_errpush(info,name,a_err=ch_err)
+        goto 9999
+      end if
+
+
+      ! Compute error on exit
+      r_norm = psb_norm2(local_r, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_    
+        call psb_errpush(info,name,a_err='r norms computation')
+        goto 9999
+      end if
+
+      b_norm = psb_norm2(local_b, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_    
+        call psb_errpush(info,name,a_err='b norms computation')
+        goto 9999
+      end if
+
+      call psb_gather(global_r, local_r, desc_a, info)
+
+      if(my_rank == psb_root_) then
+        err       = r_norm / b_norm
+        mean_err  = mean_err + err
+        max_r_value = maxval(global_r)
+      end if 
+
+
+      ! Save stats
+      matrix_memory_size      = local_a%sizeof()
+      call psb_sum(ctxt, matrix_memory_size)
+
+      if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size + matrix_memory_size 
+      if(my_rank == psb_root_) mean_max_r_value = mean_max_r_value + max_r_value 
+      if(my_rank == psb_root_) mean_r_norm = mean_r_norm + r_norm 
+
+      desc_memory_size = desc_a%sizeof()
+      call psb_sum(ctxt, desc_memory_size)
+      if(my_rank == psb_root_)  mean_desc_memory_size = mean_desc_memory_size + desc_memory_size 
+
+    end do
+
+    if(my_rank == psb_root_) mean_computation_time = mean_computation_time / iteration_number
+    if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size / iteration_number
+    if(my_rank == psb_root_) mean_desc_memory_size = mean_desc_memory_size / iteration_number
+    if(my_rank == psb_root_) mean_err = mean_err / iteration_number
+    if(my_rank == psb_root_) mean_r_norm = mean_r_norm /iteration_number 
+
+
+
+
+
   else if(precision_mode == 2) then
     ! Single precision computation
     if(my_rank == psb_root_) print '("[INFO] Calling single precision Conjugate Gradient")'
 
-    call psb_scg_impl(local_a_lower_gpu,prec,local_b_lower_precision,local_x_lower_precision, &
-    & eps,desc_a,info, itmax=itmax,iter=iter,err=err_lower)
+    do i = 1, iteration_number
+      ! We want to iterate to get a mean value instead of a single computation
+      call local_x_lower_precision%zero()      
+
+      temporary_time = psb_wtime()
+
+      call psb_scg_impl(local_a_lower_precision,prec,local_b_lower_precision,local_x_lower_precision, &
+      & eps,desc_a,info, itmax=itmax,iter=iter,err=err_lower)
+
+      computation_time = psb_wtime() - temporary_time
+      call psb_amx(ctxt, computation_time)
+
+#ifdef HAVE_CUDA
+      call psb_cuda_DeviceSync()
+#endif
+      if(my_rank == psb_root_) mean_computation_time = mean_computation_time + computation_time
+      ! Compute residual
+      call local_r_lower_precision%zero()
+
+      ! r = b
+      call psb_geaxpby(sone, local_b_lower_precision, szero, local_r_lower_precision, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_
+        ch_err='r = b'
+        call psb_errpush(info,name,a_err=ch_err)
+        goto 9999
+      end if
+
+
+      ! r = r - A * x
+      call psb_spmm(-sone, local_a_lower_precision, local_x_lower_precision, sone, local_r_lower_precision, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_
+        ch_err='r = r - A * x'
+        call psb_errpush(info,name,a_err=ch_err)
+        goto 9999
+      end if
+
+
+      ! Compute error on exit
+      r_norm = psb_norm2(local_r_lower_precision, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_    
+        call psb_errpush(info,name,a_err='r norms computation')
+        goto 9999
+      end if
+
+      b_norm = psb_norm2(local_b_lower_precision, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_    
+        call psb_errpush(info,name,a_err='b norms computation')
+        goto 9999
+      end if
+
+      call psb_gather(global_r_lower_precision,local_r_lower_precision,desc_a, info)
+
+      if(my_rank == psb_root_) then
+        err                 = r_norm / b_norm
+        mean_err            = mean_err + err
+        max_r_value_lower   = maxval(global_r_lower_precision)
+      end if 
+
+
+      ! Save stats
+      matrix_memory_size      = local_a_lower_precision%sizeof()
+      call psb_sum(ctxt, matrix_memory_size)
+
+      if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size + matrix_memory_size 
+      if(my_rank == psb_root_) mean_max_r_value = mean_max_r_value + max_r_value_lower 
+      if(my_rank == psb_root_) mean_r_norm = mean_r_norm + r_norm 
+
+
+      desc_memory_size = desc_a%sizeof()
+      call psb_sum(ctxt, desc_memory_size)
+      if(my_rank == psb_root_)  mean_desc_memory_size = mean_desc_memory_size + desc_memory_size 
+
+    end do
+
+    if(my_rank == psb_root_) mean_computation_time = mean_computation_time / iteration_number
+    if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size / iteration_number
+    if(my_rank == psb_root_) mean_desc_memory_size = mean_desc_memory_size / iteration_number
+    if(my_rank == psb_root_) mean_err = mean_err / iteration_number
+    if(my_rank == psb_root_) mean_max_r_value = mean_max_r_value / iteration_number 
+    if(my_rank == psb_root_) mean_r_norm = mean_r_norm / iteration_number 
+
+
+
   else if(precision_mode == 3) then  
     ! Mixed precision computation
     if(my_rank == psb_root_) print '("[INFO] Calling mixed precision 1 Conjugate Gradient")'
+
+    do i = 1, iteration_number
+      ! We want to iterate to get a mean value instead of a single computation
+      call local_x%zero()
+
+      temporary_time = psb_wtime()
+
+      call psb_dscg_1_impl(local_a_lower_precision,prec,local_b_lower_precision,local_x_lower_precision, &
+      & eps,desc_a,info, itmax=itmax,iter=iter,err=err)
+
+      computation_time = psb_wtime() - temporary_time
+      call psb_amx(ctxt, computation_time)
+
+      if(my_rank == psb_root_) mean_computation_time = mean_computation_time + computation_time
     
-    !call psb_dscg_1_impl(local_a_lower_gpu,prec,local_b,local_x, &
-    !& eps,desc_a,info, itmax=itmax,iter=iter,err=err)
+#ifdef HAVE_CUDA
+      call psb_cuda_DeviceSync()
+#endif
+
+
+      ! Compute residual
+      call local_r%zero()
+
+      ! r = b
+      call psb_geaxpby(done, local_b, dzero, local_r, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_
+        ch_err='r = b'
+        call psb_errpush(info,name,a_err=ch_err)
+        goto 9999
+      end if
+
+      do j = 1, size(local_x%v%v)
+        local_x%v%v(j)  = local_x_lower_precision%v%v(j)
+      end do
+
+      ! r = r - A * x
+      call psb_spmm(-done, local_a, local_x, done, local_r, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_
+        ch_err='r = r - A * x'
+        call psb_errpush(info,name,a_err=ch_err)
+        goto 9999
+      end if
+
+      ! Compute error on exit
+      r_norm = psb_norm2(local_r, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_    
+        call psb_errpush(info,name,a_err='r norms computation')
+        goto 9999
+      end if
+
+      b_norm = psb_norm2(local_b, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_    
+        call psb_errpush(info,name,a_err='b norms computation')
+        goto 9999
+      end if
+
+      call psb_gather(global_r, local_r, desc_a, info)
+
+
+      if(my_rank == psb_root_) then
+        err       = r_norm / b_norm
+        mean_err  = mean_err + err
+        max_r_value = maxval(global_r)
+      end if 
+
+
+      ! Save stats
+      matrix_memory_size      = local_a_lower_precision%sizeof()
+      call psb_sum(ctxt, matrix_memory_size)
+
+      if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size + matrix_memory_size 
+      if(my_rank == psb_root_) mean_max_r_value = mean_max_r_value + max_r_value 
+      if(my_rank == psb_root_) mean_r_norm = mean_r_norm + r_norm 
+
+
+      desc_memory_size = desc_a%sizeof()
+      call psb_sum(ctxt, desc_memory_size)
+      if(my_rank == psb_root_)  mean_desc_memory_size = mean_desc_memory_size + desc_memory_size 
+
+    end do
+
+    if(my_rank == psb_root_) mean_computation_time = mean_computation_time / iteration_number
+    if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size / iteration_number
+    if(my_rank == psb_root_) mean_desc_memory_size = mean_desc_memory_size / iteration_number
+    if(my_rank == psb_root_) mean_err = mean_err / iteration_number
+    if(my_rank == psb_root_) mean_max_r_value = mean_max_r_value / iteration_number 
+    if(my_rank == psb_root_) mean_r_norm = mean_r_norm / iteration_number
+
+
   else if(precision_mode == 4) then  
     ! Mixed precision computation
     if(my_rank == psb_root_) print '("[INFO] Calling mixed precision 2 Conjugate Gradient")'
-    
-    !call psb_dscg_2_impl(local_a, local_a_lower_precision,prec,local_b,local_x, &
-    !& eps,desc_a,info, itmax=itmax,iter=iter,err=err)
+
+    do i = 1, iteration_number
+      ! We want to iterate to get a mean value instead of a single computation
+      call local_x_lower_precision%zero()   
+      call local_x%zero()   
+
+      temporary_time = psb_wtime()
+
+
+
+      call psb_dscg_2_impl(local_a, local_a_lower_precision,prec,local_b, local_b_lower_precision,local_x, &
+      & local_x_lower_precision, eps,desc_a,info, itmax=itmax,iter=iter,err=err)
+
+      computation_time = psb_wtime() - temporary_time
+      call psb_amx(ctxt, computation_time)
+
+      if(my_rank == psb_root_) mean_computation_time = mean_computation_time + computation_time
+
+#ifdef HAVE_CUDA
+      call psb_cuda_DeviceSync()
+#endif
+
+      do j = 1, size(local_x%v%v)
+        local_x%v%v(j)  = local_x_lower_precision%v%v(j)
+      end do
+
+      call psb_geaxpby(done, local_b, dzero, local_r, desc_a, info)
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_
+        ch_err='r = b'
+        call psb_errpush(info,name,a_err=ch_err)
+        goto 9999
+      end if
+
+      ! r = r - A * x
+      call psb_spmm(-done, local_a, local_x, done, local_r, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_
+        ch_err='r = r - A * x'
+        call psb_errpush(info,name,a_err=ch_err)
+        goto 9999
+      end if
+
+      ! Compute error on exit
+      r_norm = psb_norm2(local_r, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_    
+        call psb_errpush(info,name,a_err='r norms computation')
+        goto 9999
+      end if
+
+      b_norm = psb_norm2(local_b, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_    
+        call psb_errpush(info,name,a_err='b norms computation')
+        goto 9999
+      end if
+
+
+      err = r_norm / b_norm 
+
+
+      ! Compute residual
+
+      ! r = b
+      call psb_geaxpby(done, local_b, dzero, local_r, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_
+        ch_err='r = b'
+        call psb_errpush(info,name,a_err=ch_err)
+        goto 9999
+      end if
+
+      ! r = r - A * x
+      call psb_spmm(-done, local_a, local_x, done, local_r, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_
+        ch_err='r = r - A * x'
+        call psb_errpush(info,name,a_err=ch_err)
+        goto 9999
+      end if
+
+
+      ! Compute error on exit
+      r_norm = psb_norm2(local_r, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_    
+        call psb_errpush(info,name,a_err='r norms computation')
+        goto 9999
+      end if
+
+      b_norm = psb_norm2(local_b, desc_a, info)
+
+      if(info /= psb_success_) then
+        info=psb_err_from_subroutine_    
+        call psb_errpush(info,name,a_err='b norms computation')
+        goto 9999
+      end if
+
+
+      call psb_gather(global_r,local_r,desc_a, info)
+
+      if(my_rank == psb_root_) then
+        err                 = r_norm / b_norm
+        mean_err            = mean_err + err
+        max_r_value         = maxval(global_r)
+      end if 
+
+      ! Save stats
+      matrix_memory_size      = local_a_lower_precision%sizeof() + local_a%sizeof()
+      call psb_sum(ctxt, matrix_memory_size)
+
+      if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size + matrix_memory_size 
+      if(my_rank == psb_root_) mean_max_r_value = mean_max_r_value + max_r_value 
+
+      desc_memory_size = desc_a%sizeof()
+      call psb_sum(ctxt, desc_memory_size)
+      if(my_rank == psb_root_)  mean_desc_memory_size = mean_desc_memory_size + desc_memory_size 
+      if(my_rank == psb_root_)  mean_r_norm = mean_r_norm + r_norm 
+
+    end do
+
+    if(my_rank == psb_root_) mean_computation_time = mean_computation_time / iteration_number
+    if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size / iteration_number
+    if(my_rank == psb_root_) mean_desc_memory_size = mean_desc_memory_size / iteration_number
+    if(my_rank == psb_root_) mean_err = mean_err / iteration_number
+    if(my_rank == psb_root_) mean_r_norm = mean_r_norm / iteration_number
+    if(my_rank == psb_root_) mean_max_r_value = mean_max_r_value / iteration_number 
+
   else if(precision_mode == 5) then  
     ! PSBLAS CG double computation computation
     if(my_rank == psb_root_) print '("[INFO] Calling iterative method ",a)', krylov_method
 
-    call psb_krylov(krylov_method,local_a_gpu,prec,local_b,local_x,eps,desc_a,info,&
-    & itmax=itmax,iter=iter,err=err,itrace=itrace,istop=istopc,irst=irst)
+    do i = 0, iteration_number
+      call local_x%zero()
+      temporary_time = psb_wtime()
+
+      call psb_krylov(krylov_method,local_a,prec,local_b,local_x,eps,desc_a,info,&
+      & itmax=itmax,iter=iter,err=err,itrace=itrace,istop=istopc,irst=irst)
+
+      computation_time = psb_wtime() - temporary_time
+#ifdef HAVE_CUDA
+      call psb_cuda_DeviceSync()
+#endif
+      mean_computation_time = mean_computation_time + computation_time
+    end do
+
+    mean_computation_time = mean_computation_time / iteration_number
 
   else if(precision_mode == 6) then  
     ! PSBLAS CG double computation computation
     if(my_rank == psb_root_) print '("[INFO] Calling iterative method ",a)', krylov_method
 
-    call psb_krylov(krylov_method,local_a_lower_gpu,prec_lower,local_b_lower_precision,local_x_lower_precision,&
-    & eps_lower,desc_a,info,itmax=itmax,iter=iter,err=err_lower,itrace=itrace,istop=istopc,irst=irst)
+    do i = 0, iteration_number
+      call local_x_lower_precision%zero()
+      temporary_time = psb_wtime()
+
+      call psb_krylov(krylov_method,local_a_lower_precision,prec_lower,local_b_lower_precision,local_x_lower_precision,&
+      & eps_lower,desc_a,info,itmax=itmax,iter=iter,err=err_lower,itrace=itrace,istop=istopc,irst=irst)
+
+      computation_time = psb_wtime() - temporary_time
+
+#ifdef HAVE_CUDA
+      call psb_cuda_DeviceSync()
+#endif
+      mean_computation_time = mean_computation_time + computation_time
+    end do
+
+    mean_computation_time = mean_computation_time / iteration_number    
   else
     print '("[ERROR] Invalid call to psb_dscg")'
     call psb_exit(ctxt)
     stop
   end if 
 
+if(info /= psb_success_) then
+  info = psb_err_from_subroutine_
+  ch_err='solver routine'
+  call psb_errpush(info,name,a_err=ch_err)
+  goto 9999
+end if
+
+
+
+call psb_barrier(ctxt)
+
+if (my_rank == psb_root_) then
+  write(psb_out_unit,'(" ")')
+  print '("=================================================================================")'
+  print '("=                         TERMINAL OUTPUT SECTION                               =")'
+  print '("=================================================================================")'
+  print '("[INFO] Printing output statistics")'   
+  print '("       - Number of processes                     : ",i0)'            , np
+  print '("       - Number of threads                       : ",i0)'            , number_of_threads_per_process
+  print '("       - Total number of tasks                   : ",i0)'            , number_of_threads_per_process*np
+  print '("       - Linear system size                      : ",i0," x ",i0)'   , system_size, system_size
 #ifdef HAVE_CUDA
-  call psb_cuda_DeviceSync()
+  print '("       - Time to initialize GPU data structures  : ",es0.5)'         , gpu_convertion_time
 #endif
-
-  if(info /= psb_success_) then
-    info = psb_err_from_subroutine_
-    ch_err='solver routine'
-    call psb_errpush(info,name,a_err=ch_err)
-    goto 9999
+  print '("       - Time to solve system                    : ",es0.5)'         , computation_time
+  print '("       - Time per iteration                      : ",es0.5)'         , computation_time/iter
+  print '("       - Number of iterations                    : ",i0)'            , iter
+  if(precision_mode == 6) then
+    print '("       - Convergence indicator on exit           : ",es0.5)'       , err_lower
+  else
+    print '("       - Convergence indicator on exit           : ",es0.5)'       , err
   end if
-
-  computation_time = psb_wtime() - temporary_time
-  
-  call psb_amx(ctxt,computation_time)
-
-  
-  temporary_time = psb_wtime()
-
-  ! Compute the explicit residual
-  if((precision_mode == 1).or.(precision_mode == 3).or.(precision_mode == 5)) then
-    call psb_geall(local_r, desc_a, info)
-    ! r = b
-    call psb_geaxpby(done, local_b, dzero, local_r, desc_a, info)
-
-    call psb_geasb(local_r, desc_a, info)
-      ! r = r - A * x
-    call psb_spmm(-done, local_a, local_x, done, local_r, desc_a, info)
-    matrix_memory_size = local_a%sizeof()
-  else if((precision_mode == 2).or.(precision_mode == 4).or.(precision_mode == 6)) then
-    call psb_geall(local_r_lower_precision, desc_a, info)
-    ! r = b
-    call psb_geaxpby(sone, local_b_lower_precision, szero, local_r_lower_precision, desc_a, info)
-    
-    call psb_geasb(local_r_lower_precision, desc_a, info)
-      ! r = r - A * x
-    call psb_spmm(-sone, local_a_lower_precision, local_x_lower_precision, sone, local_r_lower_precision, desc_a, info)
-
-    matrix_memory_size = local_a_lower_precision%sizeof()
-  end if
-
-  residual_computation_time = psb_wtime() - temporary_time
-
-  desc_memory_size = desc_a%sizeof()
-  prec_memory_size = prec%sizeof()
-  system_size = desc_a%get_global_rows()
-
-  call psb_sum(ctxt,matrix_memory_size)
-  call psb_sum(ctxt,desc_memory_size)
-  call psb_sum(ctxt,prec_memory_size)
-
-  if (my_rank == psb_root_) then
-    write(psb_out_unit,'(" ")')
-    print '("=================================================================================")'
-    print '("=                         TERMINAL OUTPUT SECTION                               =")'
-    print '("=================================================================================")'
-    print '("[INFO] Printing output statistics")'   
-    print '("       - Number of processes                     : ",i0)'            , np
-    print '("       - Number of threads                       : ",i0)'            , number_of_threads_per_process
-    print '("       - Total number of tasks                   : ",i0)'            , number_of_threads_per_process*np
-    print '("       - Linear system size                      : ",i0," x ",i0)'   , system_size, system_size
-    print '("       - Time to compute residual                : ",es0.5)'         , residual_computation_time
-#ifdef HAVE_CUDA
-    print '("       - Time to initialize GPU data structures  : ",es0.5)'         , gpu_convertion_time
-#endif
-    print '("       - Time to solve system                    : ",es0.5)'         , computation_time
-    print '("       - Time per iteration                      : ",es0.5)'         , computation_time/iter
-    print '("       - Number of iterations                    : ",i0)'            , iter
-    if(precision_mode == 6) then
-      print '("       - Convergence indicator on exit           : ",es0.5)'       , err_lower
-    else
-      print '("       - Convergence indicator on exit           : ",es0.5)'       , err
-    end if
-    print '("       - Info on exit                            : ",i0)'            , info
-    print '("       - Total memory occupation for A           : ",i0,"  bytes")'  , matrix_memory_size
-    print '("       - Total memory occupation for PREC        : ",i0,"  bytes")'  , prec_memory_size 
-    print '("       - Total memory occupation for DESC_A      : ",i0,"  bytes")'  , desc_memory_size
-    print '("       - Storage format for A                    : ",a)'             , local_a%get_fmt()
-    print '("       - Storage format for DESC_A               : ",a)'             , desc_a%get_fmt()
-  end if
+  print '("       - Info on exit                            : ",i0)'            , info
+  print '("       - Total memory occupation for A           : ",i0,"  bytes")'  , matrix_memory_size
+  print '("       - Total memory occupation for PREC        : ",i0,"  bytes")'  , prec_memory_size 
+  print '("       - Total memory occupation for DESC_A      : ",i0,"  bytes")'  , desc_memory_size
+  print '("       - Storage format for A                    : ",a)'             , local_a%get_fmt()
+  print '("       - Storage format for DESC_A               : ",a)'             , desc_a%get_fmt()
+end if
 
 
-  
+
   if(my_rank == psb_root_) then
     write(output_file_string, '("../data/gpu/final_result_",i0,".txt")') precision_mode
     open (unit = 20, file = output_file_string)
     write(20,*) 'computed solution on ',np,' processors.'
     write(20,*) 'iterations to convergence: ',iter
-    write(20,*) 'time to convergence: ',computation_time
+    write(20,*) 'time to convergence: ',mean_computation_time
+    write(20,*) 'Time per iteration : ', mean_computation_time/iter
     write(20,*) 'matrix size: ',idim * idim, ' x ', idim * idim
-    write(20,*) 'error estimate on exit:', &
-    & ' ||r|| / ||b|| = ',err
-    write(21,*) local_x%v%v
-    write(22,*) local_x_lower_precision%v%v
-  endif
+    write(20,*) 'mean error estimate on exit:', &
+    & ' ||r|| / ||b|| = ', mean_err
+    write(20,*) 'maxval r value: ', mean_max_r_value 
+    write(20,*) 'R norm : ', mean_r_norm
+    write(20,*) 'Mean total memory occupation for A  : ',mean_matrix_memory_size
+    write(20,*) 'Mean total memory occupation for DESC_A : ', mean_desc_memory_size
 
+  end if
 
-  call psb_barrier(ctxt)
 
   !
   !  cleanup storage and exit
@@ -516,7 +933,7 @@ program psb_dscg
 
 #ifdef HAVE_CUDA
   call psb_cuda_exit()
-#endif
+#endif  
   call psb_exit(ctxt)
   stop
 

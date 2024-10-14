@@ -43,7 +43,7 @@ program dot_vs_conv
 
     ! Common data
     info              = psb_success_
-    name              = 'dot_vs_conv'
+    name              = 'geaxpby_vs_conv'
     number_of_threads = 1 ! This is a dummy value
     call psb_erractionsave(err_act)
 
