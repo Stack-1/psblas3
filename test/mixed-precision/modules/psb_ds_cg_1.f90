@@ -33,7 +33,7 @@
 !   This module implements a mixed bersion of the conjugate gradient algorithm
 !   implementing the following pseudo-code:
 !   
-!   psb_ds_cg(float A,float b)
+!   conjugate_gradient(float A,float b)
 !       d_0 = r_0 = b - A * x_0
 !       i = 0
 !       while{max(r_single) < error_stopping_criterion}
@@ -98,11 +98,9 @@ module psb_ds_cg_1
         
         ! Double precision vectors
         type(psb_d_vect_type)                           :: r_double, d_double
-        !type(psb_d_vect_type), Intent(inout)            :: b_double, x_double
-        !type(psb_dspmat_type), intent(in)               :: a_double
 
         ! PSBLAS utility variables
-        integer(psb_ipk_)                               :: i, j, err_act, it, itx, m, n, ir, jc, nnz
+        integer(psb_ipk_)                               :: i, j, err_act, it, itx, m, n, ir, jc, nnz, reitarate_counter
 
         ! Norm variables
         real(psb_dpk_)                                  :: r_norm, x_norm, a_norm, b_norm
@@ -143,7 +141,6 @@ module psb_ds_cg_1
             goto 9999
         endif
 
-        allocate(global_x(size(b_single%v%v)))
 
         ! Allocate vectors
         call psb_geall(r_single,desc_a,info)
@@ -160,9 +157,10 @@ module psb_ds_cg_1
         end if
 
         
-        it = 0
-        itx = 0
-        stagnation = .false.
+        it                  = 0
+        itx                 = 0
+        stagnation          = .false.
+        reitarate_counter   = 0
 
         b_norm = psb_norm2(b_single, desc_a, info)
 
@@ -194,6 +192,8 @@ module psb_ds_cg_1
                 r_double%v%v(i) = real(b_single%v%v(i),8)
             end do
 
+            reitarate_counter = reitarate_counter + 1
+            if(reitarate_counter > 2) exit restart
 
             ! select type(new_a => a_single%a)
             !     class is(psb_s_coo_sparse_mat)
@@ -219,7 +219,8 @@ module psb_ds_cg_1
             r_norm = psb_norm2(r_double, desc_a, info)
 
             err = r_norm / b_norm
-            !write(13,*) itx, err, error_stopping_criterion, r_norm
+            !if((my_rank == psb_root_).and.(itx > 9500)) write(13,*) itx, err, error_stopping_criterion, r_norm
+            
             if(err < error_stopping_criterion) then
                 exit restart
             end if
@@ -261,6 +262,21 @@ module psb_ds_cg_1
                     r_single%v%v(i)            = r_double%v%V(i)
                 end do
 
+                ! ||r|| / ||b||
+                r_norm = psb_norm2(r_double, desc_a, info)
+
+                err = r_norm / b_norm
+                !if((my_rank == psb_root_).and.(itx > 9500)) write(13,*) "--->", itx, err, error_stopping_criterion, r_norm
+
+
+                if(err < error_stopping_criterion) then
+                    if(stagnation.eqv..true.) exit restart
+                    stagnation = .true.
+
+                    exit iteration
+                end if
+                stagnation = .false.
+
                 r_scalar_product_next = psb_gedot(r_single,r_single,desc_a,info)      ! r_i+1 * r_i+1
                 beta = r_scalar_product_next / r_scalar_product
 
@@ -270,21 +286,6 @@ module psb_ds_cg_1
                     d_double%v%v(i)            = r_double%v%v(i) + ( (beta * 1.d0) * d_double%v%v(i) )
                     d_single%v%v(i)            = d_double%v%V(i)
                 end do
-                
-
-                ! ||r|| / ||b||
-                r_norm = psb_norm2(r_double, desc_a, info)
-
-                err = r_norm / b_norm
-                !write(13,*) "---> ",itx, err, error_stopping_criterion, r_norm
-
-                if(err < error_stopping_criterion) then
-                    if(stagnation.eqv..true.) exit restart
-                    stagnation = .true.
-
-                    exit iteration
-                end if
-                stagnation = .false.
         
             end do iteration
         end do restart

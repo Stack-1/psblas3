@@ -47,7 +47,7 @@ module psb_d_cg
             integer(psb_ipk_)                               :: i
 
             ! Norm variables
-            real(psb_dpk_)                                  :: r_norm, x_norm, a_norm, b_norm
+            real(psb_dpk_)                                  :: r_norm, b_norm
 
 
             ! GPU variables
@@ -156,12 +156,6 @@ module psb_d_cg
                     call psb_geaxpby(alpha,d,done,x,desc_a,info)    ! x_i+1 = x_i + alpha_i * d_i
                     call psb_geaxpby(-alpha,rho,done,r,desc_a,info)   ! r_i+1 = r_i - alpha_i * rho_i
                     
-                    r_scalar_product_next = psb_gedot(r,r,desc_a,info)  ! r_i+1 * ri+1
-                    
-                    beta = r_scalar_product_next / r_scalar_product
-
-                    call psb_geaxpby(done,r,beta,d,desc_a,info)       ! d_i+1 = r_i+1 + beta_i+1 * d_i
-
                     ! ||r|| / ||b||
                     r_norm = psb_norm2(r, desc_a, info)
                     b_norm = psb_norm2(b, desc_a, info)
@@ -171,6 +165,13 @@ module psb_d_cg
                     if(err < error_stopping_criterion) then
                         exit restart
                     end if
+    
+                    r_scalar_product_next = psb_gedot(r,r,desc_a,info)  ! r_i+1 * ri+1
+                    beta = r_scalar_product_next / r_scalar_product
+
+                    call psb_geaxpby(done,r,beta,d,desc_a,info)       ! d_i+1 = r_i+1 + beta_i+1 * d_i
+
+
 
                 end do iteration
             end do restart

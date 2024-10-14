@@ -107,7 +107,7 @@ module psb_ds_cg_2
             type(psb_dspmat_type), intent(in)               :: a_double
 
             ! PSBLAS utility variables
-            integer(psb_ipk_)                               :: i, j, err_act, it, itx, n_col, n_row
+            integer(psb_ipk_)                               :: i, j, err_act, it, itx, n_col, n_row, reitarate_counter
 
             ! Norm variables
             real(psb_dpk_)                                  :: r_norm, x_norm, a_norm, b_norm
@@ -274,9 +274,10 @@ module psb_ds_cg_2
 #endif
 
             
-            it = 0
-            itx = 0
-            starvation = .false.
+            it                  = 0
+            itx                 = 0
+            reitarate_counter   = 0
+            starvation          = .false.
 
             b_norm = psb_norm2(b_double, desc_a, info)
         
@@ -288,6 +289,8 @@ module psb_ds_cg_2
                 if(itx >= itmax) exit restart 
                 it = 0
 
+                reitarate_counter = reitarate_counter + 1
+                if(reitarate_counter > 2) exit restart
 
 #ifdef HAVE_CUDA
                 call single_to_double(x_single%v%v,x_double%v%v,size(x_single%v%v))
@@ -371,6 +374,21 @@ module psb_ds_cg_2
                         r_single%v%v(i)            = r_double%v%v(i)
                     end do
 #endif
+
+                    ! ||r|| / ||b||
+                    r_norm = psb_norm2(r_double, desc_a, info)
+
+                    err = r_norm / b_norm
+                    !if(itx < 20) write(*,*) itx, r_norm, b_norm, err, error_stopping_criterion
+
+                    if(err < error_stopping_criterion) then
+                        if(starvation.eqv..true.) exit restart
+                        starvation = .true.
+                    
+                        exit iteration
+                    end if
+                    starvation = .false.
+
                     r_scalar_product_next = psb_gedot(r_single,r_single,desc_a,info)      ! r_i+1 * r_i+1
                     beta = r_scalar_product_next / r_scalar_product
 
@@ -386,19 +404,7 @@ module psb_ds_cg_2
 #endif       
 
                     
-                    ! ||r|| / ||b||
-                    r_norm = psb_norm2(r_double, desc_a, info)
 
-                    err = r_norm / b_norm
-                    !if(itx < 20) write(*,*) itx, r_norm, b_norm, err, error_stopping_criterion
-
-                    if(err < error_stopping_criterion) then
-                        if(starvation.eqv..true.) exit restart
-                        starvation = .true.
-
-                        exit iteration
-                    end if
-                    starvation = .false.
             
                 end do iteration
             end do restart
