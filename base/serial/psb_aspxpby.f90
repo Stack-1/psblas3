@@ -126,6 +126,58 @@ subroutine psb_d_aspxpby(alpha, nx, ix, x, beta, y, info)
 
 
 end subroutine psb_d_aspxpby
+
+subroutine psb_aspxpby_mx(alpha, nx, ix, x, beta, y, info)
+  use psb_const_mod
+  integer(psb_ipk_), intent(in)               :: nx
+  integer(psb_ipk_), intent(in)               :: ix(:)
+  real(psb_spk_), intent (in)                 :: x(:)
+  real(psb_dpk_), intent (inout)              :: y(:)
+  real(psb_spk_), intent (in)                 :: alpha, beta
+  integer(psb_ipk_), intent(out)              :: info
+  integer(psb_ipk_)                           :: i, ip 
+
+  info=psb_success_
+  
+  if (nx > max(size(ix),size(x))) then 
+    info = -2
+    return
+  end if
+
+  if (beta /= sone) then 
+    if (beta == -sone) then 
+      y(:) = -y(:)
+    else if (beta == szero) then 
+      y(:) = dzero
+    else
+      y(:) = real(beta,8) * y(:)
+    end if
+  end if
+
+  if (alpha == szero) return 
+
+  if (alpha == sone) then 
+    do i=1, nx
+      ip = ix(i) 
+      y(ip) = y(ip) + real(x(i),8)
+    end do
+  else   if (alpha == -sone) then 
+    do i=1, nx
+      ip = ix(i) 
+      y(ip) = y(ip) - real(x(i),8)
+    end do
+  else
+    do i=1, nx
+      ip = ix(i) 
+      y(ip) = y(ip) + real(alpha,8)*real(x(i),8)
+    end do
+  end if
+
+
+end subroutine psb_aspxpby_mx
+
+
+
 subroutine psb_c_aspxpby(alpha, nx, ix, x, beta, y, info)
   use psb_const_mod
   integer(psb_ipk_), intent(in)               :: nx

@@ -49,6 +49,7 @@ module psb_d_base_vect_mod
   use psb_realloc_mod
   use psb_i_base_vect_mod
   use psb_l_base_vect_mod
+  use psb_s_base_vect_mod
 
   !> \namespace  psb_base_mod  \class psb_d_base_vect_type
   !! The psb_d_base_vect_type
@@ -151,10 +152,16 @@ module psb_d_base_vect_mod
     procedure, pass(x) :: dot_a    => d_base_dot_a
     generic, public    :: dot      => dot_v, dot_a
     procedure, pass(y) :: axpby_v  => d_base_axpby_v
+    procedure, pass(y) :: axpby_v_mx          => d_base_axpby_v_mx
+
     procedure, pass(y) :: axpby_a  => d_base_axpby_a
+    procedure, pass(y) :: axpby_a_mx  => d_base_axpby_a_mx
+
     procedure, pass(z) :: axpby_v2  => d_base_axpby_v2
+
     procedure, pass(z) :: axpby_a2  => d_base_axpby_a2
-    generic, public    :: axpby    => axpby_v, axpby_a, axpby_v2, axpby_a2
+    generic, public    :: axpby    => axpby_v, axpby_a, axpby_a_mx, axpby_v2, axpby_a2, axpby_v_mx !, axpby_v2_mx
+    procedure, pass(x) :: axpby_mx_v2 => vect_axpby_mx_v2_impl
     procedure, pass(z) :: upd_xyz  => d_base_upd_xyz
     procedure, pass(w) :: xyzw     => d_base_xyzw
     
@@ -1046,6 +1053,70 @@ contains
 
   end subroutine d_base_axpby_v
 
+
+  !
+  ! AXPBY is invoked via Y, hence the structure below.
+  !
+  !
+  !
+  !> Function  d_base_axpby_v_mx
+  !! \memberof  psb_d_base_vect_type
+  !! \brief AXPBY  by a (base_vect) y=alpha*x+beta*y
+  !! \param m    Number of entries to be considered
+  !! \param alpha scalar alpha
+  !! \param x     The class(base_vect) to be added
+  !! \param beta scalar beta
+  !! \param info   return code
+  !!
+  subroutine d_base_axpby_v_mx(m,alpha, x, beta, y, info)
+    use psi_serial_mod
+    implicit none
+    integer(psb_ipk_), intent(in)               :: m
+    class(psb_s_base_vect_type), intent(inout)  :: x
+    class(psb_d_base_vect_type), intent(inout)  :: y
+    real(psb_spk_), intent (in)                 :: alpha, beta
+    integer(psb_ipk_), intent(out)              :: info
+
+    if (x%is_dev()) call x%sync()
+
+    call y%axpby(m,alpha,x%v,beta,info)
+
+  end subroutine d_base_axpby_v_mx
+
+  !
+  ! AXPBY is invoked via Y, hence the structure below.
+  !
+  !
+  !> Function  base_axpby_a
+  !! \memberof  psb_d_base_vect_type
+  !! \brief AXPBY  by a normal array y=alpha*x+beta*y
+  !! \param m    Number of entries to be considered
+  !! \param alpha scalar alpha
+  !! \param x(:) The array to be added
+  !! \param beta scalar beta
+  !! \param info   return code
+  !!
+  subroutine vect_axpby_mx_v2_impl(m,alpha, x, beta, y, info)
+    use psi_serial_mod
+    implicit none
+    integer(psb_ipk_), intent(in)               :: m
+    class(psb_d_base_vect_type), intent(inout)  :: x
+    class(psb_s_base_vect_type), intent(inout)  :: y
+    real(psb_spk_), intent (in)                 :: alpha, beta
+    integer(psb_ipk_), intent(out)              :: info
+
+    if (x%is_dev()) call x%sync()
+
+    if (y%is_dev()) call y%sync()
+    
+    write(*,*) 'vect_axpby_mx_v2_impl reached' 
+    call psb_geaxpby(m,alpha,x%v,beta,y%v,info)
+    
+    call y%set_host()
+
+  end subroutine vect_axpby_mx_v2_impl
+
+
   !
   ! AXPBY is invoked via Z, hence the structure below.
   !
@@ -1078,6 +1149,9 @@ contains
 
   end subroutine d_base_axpby_v2
 
+
+
+
   !
   ! AXPBY is invoked via Y, hence the structure below.
   !
@@ -1105,6 +1179,66 @@ contains
     call y%set_host()
 
   end subroutine d_base_axpby_a
+
+
+  !
+  ! AXPBY is invoked via Y, hence the structure below.
+  !
+  !
+  !> Function  base_axpby_a
+  !! \memberof  psb_d_base_vect_type
+  !! \brief AXPBY  by a normal array y=alpha*x+beta*y
+  !! \param m    Number of entries to be considered
+  !! \param alpha scalar alpha
+  !! \param x(:) The array to be added
+  !! \param beta scalar beta
+  !! \param info   return code
+  !!
+  subroutine d_base_axpby_a_mx(m,alpha, x, beta, y, info)
+    use psi_serial_mod
+    implicit none
+    integer(psb_ipk_), intent(in)               :: m
+    real(psb_spk_), intent(in)                  :: x(:)
+    class(psb_d_base_vect_type), intent(inout)  :: y
+    real(psb_spk_), intent (in)                 :: alpha, beta
+    integer(psb_ipk_), intent(out)              :: info
+
+    if (y%is_dev()) call y%sync()
+    call psb_geaxpby(m,alpha,x,beta,y%v,info)
+    call y%set_host()
+
+  end subroutine d_base_axpby_a_mx
+
+
+  
+  !
+  ! AXPBY is invoked via Y, hence the structure below.
+  !
+  !
+  !> Function  base_axpby_a
+  !! \memberof  psb_d_base_vect_type
+  !! \brief AXPBY  by a normal array y=alpha*x+beta*y
+  !! \param m    Number of entries to be considered
+  !! \param alpha scalar alpha
+  !! \param x(:) The array to be added
+  !! \param beta scalar beta
+  !! \param info   return code
+  !!
+  subroutine vect_axpby_mx_v2_a_impl(m,alpha, x, beta, y, info)
+    use psi_serial_mod
+    implicit none
+    integer(psb_ipk_), intent(in)               :: m
+    real(psb_spk_), intent(in)                  :: x(:)
+    class(psb_d_base_vect_type), intent(inout)  :: y
+    real(psb_spk_), intent (in)                 :: alpha, beta
+    integer(psb_ipk_), intent(out)              :: info
+
+    if (y%is_dev()) call y%sync()
+    call psb_geaxpby(m,alpha,x,beta,y%v,info)
+    call y%set_host()
+
+  end subroutine vect_axpby_mx_v2_a_impl
+
 
   !
   ! AXPBY is invoked via Z, hence the structure below.

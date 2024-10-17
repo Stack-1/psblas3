@@ -1,0 +1,11 @@
+ computed solution on           40  processors.
+ iterations to convergence:        11497
+ time to convergence:    1223.6113603399999     
+ Time per iteration :   0.10642875187788117     
+ matrix size:     39992976  x     39992976
+ mean error estimate on exit: ||r|| / ||b|| =    1.8149810596031174E-005
+ maxval r value:    1.2518735602498055     
+ R norm :    912.63989678464964     
+ Mean total memory occupation for A  :    5598309312.0000000     
+ Mean total memory occupation for DESC_A :    21723440.000000000     
+ Mean total memory occupation for vectors :    1781394912.0000000     

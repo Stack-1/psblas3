@@ -181,6 +181,23 @@ int spmvHllDeviceFloat(void *deviceMat, float alpha, void* deviceX,
   return SPGPU_SUCCESS;
 }
 
+int spmvHllDeviceMixed(void *deviceMat, float alpha, void* deviceX, 
+			float beta, void* deviceY)
+{
+  HllDevice *devMat = (HllDevice *) deviceMat;
+  struct MultiVectDevice *x = (struct MultiVectDevice *) deviceX;
+  struct MultiVectDevice *y = (struct MultiVectDevice *) deviceY;
+  spgpuHandle_t handle=psb_cudaGetHandle();
+
+  spgpuShellspmv_mx (handle, (double *)y->v_, (double *)y->v_, alpha, (float *)devMat->cM, 
+		  devMat->rP,devMat->hackSize,devMat->hackOffs, devMat->rS, NULL,
+		  devMat->avgNzr, devMat->rows, (float *)x->v_, beta, devMat->baseIndex);
+
+  return SPGPU_SUCCESS;
+}
+
+
+
 //new
 int spmvHllDeviceDouble(void *deviceMat, double alpha, void* deviceX, 
 		       double beta, void* deviceY)

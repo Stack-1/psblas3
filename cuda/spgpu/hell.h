@@ -68,7 +68,40 @@ void spgpuShellspmv (spgpuHandle_t handle,
 	float beta,
 	int baseIndex);
 
-
+/** 
+* \fn void spgpuShellspmv_mx (spgpuHandle_t handle,__device double *z,const __device double *y, float alpha, const __device float* cM, const __device int* rP,int hackSize,const __device int* hackOffsets, const __device int* rS,const __device int* rIdx, int avgNnzPerRow, int rows, const __device float *x, float beta,int baseIndex)
+ * Computes mixed precision z = alpha*A*x + beta*y, with A stored in Hacked ELLpack Format on GPU.
+ * \param handle The spgpu handle used to call this routine
+ * \param z The output vector of the routine. z could be y, but not y + k (i.e. an overlapping area over y, but starting from a base index different from y).
+ * \param y The y input vector
+ * \param alpha The alpha scalar
+ * \param cM The HELL non zero values allocation pointer
+ * \param rP The HELL column indices allocation pointer
+ * \param hackSize The constant size of every hack (must be a multiple of 32).
+ * \param hackOffsets the array of base index offset for every hack of HELL non zero values allocation and HELL indices allocation.
+ * \param rS the array containing the row sized (in non zero elements)
+ * \param rIdx (optional) An array containing the row index per every row (i.e. the reorder array) of the Hell matrix. Pass NULL if you don't use a reorder array (i.e. the k-th row is stored in the k-th position in the HELL format).
+ * \param avgNnzPerRow (optional) Average number of non zeroes per row. Pass 0 if you don't have such information.
+ * \param rows the rows count
+ * \param x the x vector
+ * \param beta the beta scalar
+ * \param baseIndex the ELL format base index used (i.e. 0 for C, 1 for Fortran).
+ */
+void spgpuShellspmv_mx (spgpuHandle_t handle,
+	__device double *z,
+	const __device double *y, 
+	float alpha, 
+	const __device float* cM, 
+	const __device int* rP,
+	int hackSize,
+	const __device int* hackOffsets, 
+	const __device int* rS,
+	const __device int* rIdx, 
+	int avgNnzPerRow,
+	int rows, 
+	const __device float *x, 
+	float beta,
+	int baseIndex);
 
 /** 
 * \fn void spgpuDhellspmv (spgpuHandle_t handle,__device double *z,const __device double *y, double alpha, const __device double* cM, const __device int* rP,int hackSize,const __device int* hackOffsets, const __device int* rS,const __device int* rIdx, int avgNnzPerRow, int rows, const __device double *x, double beta,int baseIndex)

@@ -60,7 +60,7 @@
 module psb_ds_cg_2
     
     contains
-        subroutine psb_dscg_2_impl(a_double,a_single,prec,b_double,b_single,x_double,x_single,&
+        subroutine psb_dscg_2_impl(a_double,a_single,prec,b_single,x_single,&
             & error_stopping_criterion,desc_a,info,itmax,iter,err)
             use psb_base_mod
             use psb_prec_mod
@@ -102,8 +102,7 @@ module psb_ds_cg_2
             real(psb_spk_)                                  :: r_scalar_product, r_scalar_product_next, partial_result_d_rho
             
             ! Double precision vectors
-            type(psb_d_vect_type)                           :: r_double, d_double
-            type(psb_d_vect_type), Intent(inout)            :: b_double, x_double
+            type(psb_d_vect_type)                           :: r_double, d_double, x_double
             type(psb_dspmat_type), intent(in)               :: a_double
 
             ! PSBLAS utility variables
@@ -160,23 +159,6 @@ module psb_ds_cg_2
                 
                 end subroutine geaxpby_double_to_single
             end interface
-            
-            interface
-                subroutine geaxpby_double_to_double(vect_single, vect_double, second_vect_single, size, beta) bind(c) 
-                    import c_int, c_float, c_double
-                
-                    implicit none
-                
-                    integer(kind=c_int), intent(in), value  :: size
-                    real(kind=c_float), intent(in), value   :: beta
-                    real(kind=c_float), intent(in)          :: vect_single(size)
-                    real(kind=c_float), intent(inout)       :: second_vect_single(size)
-                    real(kind=c_double), intent(inout)      :: vect_double(size)
-                
-                
-                end subroutine geaxpby_double_to_double
-            end interface
-
 
             interface
                 subroutine geaxpby_single(vect_single, second_vect_single, size, alpha) bind(c) 
@@ -191,6 +173,21 @@ module psb_ds_cg_2
                 
                 
                 end subroutine geaxpby_single
+            end interface
+
+            interface
+                subroutine geaxpby_double_to_double(vect_double, second_vect_double, vect_single, size, beta) bind(c) 
+                    import c_int, c_float, c_double
+                
+                    implicit none
+                
+                    integer(kind=c_int), intent(in), value  :: size
+                    real(kind=c_float), intent(in), value   :: beta
+                    real(kind=c_float), intent(in)          :: vect_single(size)
+                    real(kind=c_double), intent(inout)      :: vect_double(size)
+                    real(kind=c_double), intent(inout)      :: second_vect_double(size)
+                
+                end subroutine geaxpby_double_to_double
             end interface
 #endif
         
@@ -222,16 +219,6 @@ module psb_ds_cg_2
                 call psb_errpush(info,name)
                 goto 9999
             endif
-            if (.not.allocated(b_double%v)) then 
-                info = psb_err_invalid_vect_state_
-                call psb_errpush(info,name)
-                goto 9999
-            endif
-            if (.not.allocated(x_double%v)) then 
-                info = psb_err_invalid_vect_state_
-                call psb_errpush(info,name)
-                goto 9999
-            endif
             if (.not.allocated(a_double%a)) then 
                 info = psb_err_invalid_vect_state_
                 call psb_errpush(info,name)
@@ -242,6 +229,7 @@ module psb_ds_cg_2
             call psb_geall(r_single,desc_a,info)
             call psb_geall(r_double,desc_a,info)
             call psb_geall(d_double,desc_a,info)
+            call psb_geall(x_double,desc_a,info)
             call psb_geall(d_single,desc_a,info)
             call psb_geall(rho_single,desc_a,info)
 
@@ -258,6 +246,7 @@ module psb_ds_cg_2
             ! marking data structures to use them in GPU
             call psb_geasb(r_double,desc_a,info,scratch=.false.,mold=gpu_vector_format_double)
             call psb_geasb(d_double,desc_a,info,scratch=.false.,mold=gpu_vector_format_double)
+            call psb_geasb(x_double,desc_a,info,scratch=.false.,mold=gpu_vector_format_double)
 
             call psb_geasb(r_single,desc_a,info,scratch=.false.,mold=gpu_vector_format_single)
             call psb_geasb(d_single,desc_a,info,scratch=.false.,mold=gpu_vector_format_single)
@@ -279,7 +268,7 @@ module psb_ds_cg_2
             reitarate_counter   = 0
             starvation          = .false.
 
-            b_norm = psb_norm2(b_double, desc_a, info)
+            b_norm = psb_norm2(b_single, desc_a, info)
         
             ! Restart function should be implemented to helps stabilize the computation
             restart: do 
@@ -292,17 +281,21 @@ module psb_ds_cg_2
                 reitarate_counter = reitarate_counter + 1
                 if(reitarate_counter > 2) exit restart
 
+
 #ifdef HAVE_CUDA
                 call single_to_double(x_single%v%v,x_double%v%v,size(x_single%v%v))
-#else  
+                call geaxpby_double_to_single(b_single%v%v, r_double%v%v, r_single%v%v, size(r_double%v%v), 1.0);
+                call psb_geasb(r_double,desc_a,info,scratch=.false.,mold=gpu_vector_format_double)
+                call psb_geasb(r_single,desc_a,info,scratch=.false.,mold=gpu_vector_format_single)
+                call psb_geasb(x_double,desc_a,info,scratch=.false.,mold=gpu_vector_format_double)
+
+#else   
+                ! r_0 = b_0
                 do j = 1, size(x_double%v%v)
                     x_double%v%v(j)  = x_single%v%v(j)
+                    r_double%v%v(j)  = real(b_single%v%v(j), 8)
                 end do
-#endif              
-
-
-                call psb_geaxpby(done, b_double, dzero, r_double, desc_a, info) ! r_0 = b_0
-
+#endif
 
                 if(info /= psb_success_) then
                   info=psb_err_from_subroutine_
@@ -310,18 +303,26 @@ module psb_ds_cg_2
                   call psb_errpush(info,name,a_err=ch_err)
                   goto 9999
                 end if
-
+                
                 
                 ! r = r - A * x
                 call psb_spmm(-done, a_double, x_double, done, r_double, desc_a, info) ! r_0 = - A * x_0 + r_0
+                if(info /= psb_success_) then
+                    info=psb_err_from_subroutine_
+                    ch_err='r - Ax'
+                    call psb_errpush(info,name,a_err=ch_err)
+                    goto 9999
+                end if
 
+#ifdef HAVE_CUDA
+                call psb_geasb(r_double,desc_a,info,scratch=.false.,mold=gpu_vector_format_double)
+#endif
                 ! computed r_0 = b - A * x_0
-
-                
-                r_norm = psb_norm2(r_double, desc_a, info)
+                !write(*,*) 'R_DOUBLE: ', r_double%get_vect()
+                r_norm = psb_norm2(r_double , desc_a, info)
                 ! if(itx == 3) write(*,*) my_rank, r_norm, r_double%v%v
                 err = r_norm / b_norm
-                ! write(14,*) itx, err, error_stopping_criterion, r_norm
+                !write(*,*) itx, err, error_stopping_criterion, r_norm
 
                 if(err < error_stopping_criterion) then
                     exit restart
@@ -331,6 +332,20 @@ module psb_ds_cg_2
                 ! d_0 = r_0 
 #ifdef HAVE_CUDA
                 call d_to_r_kernel(r_double%v%v,r_single%v%v,d_double%v%v,d_single%v%v,size(r_double%v%v))
+                call psb_geasb(r_double,desc_a,info,scratch=.false.,mold=gpu_vector_format_double)
+                call psb_geasb(d_double,desc_a,info,scratch=.false.,mold=gpu_vector_format_double)
+                call psb_geasb(r_single,desc_a,info,scratch=.false.,mold=gpu_vector_format_single)
+                call psb_geasb(d_single,desc_a,info,scratch=.false.,mold=gpu_vector_format_single)
+
+                ! call d_single%set_host()
+                ! call d_single%sync()
+! 
+                ! call d_double%set_host()
+                ! call d_double%sync()
+! 
+                ! call r_single%set_host()
+                ! call r_single%sync()
+
 #else  
                 do i=1,size(d_single%v%v)
                     r_single%v%v(i)     = r_double%v%v(i)
@@ -345,22 +360,44 @@ module psb_ds_cg_2
                     it   = it + 1
                     itx = itx + 1
                     if(it > itmax) exit restart
-                    
+
+                    call psb_spmm(sone,a_single,d_single,szero,rho_single,desc_a,info) ! rho_i = A * d_i                
+#ifdef HAVE_CUDA
+                    if(info /= psb_success_) then
+                        info=psb_err_from_subroutine_
+                        ch_err='rho = A d'
+                        call psb_errpush(info,name,a_err=ch_err)
+                        goto 9999
+                    end if
+
+                    call rho_single%set_dev()
+                    call rho_single%sync()
+
+                    !write(*,*) rho_single%get_vect()
+#endif
+
+
                     if(it == 1) then
                         r_scalar_product    = psb_gedot(r_single,r_single,desc_a,info)   ! r_i * r_i
                     else
                         r_scalar_product    = r_scalar_product_next
                     end if
                     
+                    
                     ! call prec%apply(r_single,z,desc_a,info,work=aux)
 
-                    call psb_spmm(sone,a_single,d_single,szero,rho_single,desc_a,info) ! rho_i = A * d_i                
 
                     partial_result_d_rho      = psb_gedot(d_single,rho_single,desc_a,info) ! d_i * rho_i
                     alpha                     = r_scalar_product / partial_result_d_rho
 
+
 #ifdef HAVE_CUDA
                     call geaxpby_single(d_single%v%v, x_single%v%v, size(d_single%v%v), alpha);
+                    call psb_geasb(x_single,desc_a,info,scratch=.false.,mold=gpu_vector_format_single)
+                    ! call x_single%set_host()
+                    ! call x_single%sync()
+
+                    !write(*,*) x_single%get_vect()
 #else 
                     call psb_geaxpby(alpha,d_single,sone,x_single,desc_a,info)     ! x_i+1 = x_i + alpha_i * d_i
 #endif
@@ -374,12 +411,22 @@ module psb_ds_cg_2
                         r_single%v%v(i)            = r_double%v%v(i)
                     end do
 #endif
+                    ! call r_double%set_host()
+                    ! call r_double%sync()
+! 
+                    ! call r_single%set_host()
+                    ! call r_single%sync()
+                    call psb_geasb(r_double,desc_a,info,scratch=.false.,mold=gpu_vector_format_double)
+                    call psb_geasb(r_single,desc_a,info,scratch=.false.,mold=gpu_vector_format_single)
+
+                    !write(*,*) r_double%get_vect()
+                    !write(*,*) r_single%get_vect()
 
                     ! ||r|| / ||b||
                     r_norm = psb_norm2(r_double, desc_a, info)
 
                     err = r_norm / b_norm
-                    !if(itx < 20) write(*,*) itx, r_norm, b_norm, err, error_stopping_criterion
+                    !write(*,*) itx, r_norm, b_norm, err, error_stopping_criterion
 
                     if(err < error_stopping_criterion) then
                         if(starvation.eqv..true.) exit restart
@@ -392,10 +439,17 @@ module psb_ds_cg_2
                     r_scalar_product_next = psb_gedot(r_single,r_single,desc_a,info)      ! r_i+1 * r_i+1
                     beta = r_scalar_product_next / r_scalar_product
 
-
                      ! d_i+1 = r_i+1 + beta_i+1 * d_i     
 #ifdef HAVE_CUDA
-                    call geaxpby_double_to_double(r_single%v%v,d_double%v%v,d_single%v%v, size(d_double%v%v),beta)
+                    call geaxpby_double_to_double(r_double%v%v,d_double%v%v,d_single%v%v, size(d_double%v%v),beta)
+                    call d_double%set_host()
+                    call d_double%sync()
+
+                    call d_single%set_host()
+                    call d_single%sync()
+                    
+                    !write(*,*) d_double%get_vect()
+                    !write(*,*) d_single%get_vect()
 #else
                     do i=1,size(d_double%v%v)
                         d_double%v%v(i)            = real(r_single%v%v(i),8) + ( real(beta,8) * d_double%v%v(i) )
@@ -403,7 +457,6 @@ module psb_ds_cg_2
                     end do
 #endif       
 
-                    
 
             
                 end do iteration

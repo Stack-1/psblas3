@@ -58,16 +58,17 @@ gpu: --runsd
 	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -c $(MATRIX_GENERATION_D).f90 -o $(MATRIX_GENERATION_D).o
 	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -c $(MATRIX_GENERATION_S).f90 -o $(MATRIX_GENERATION_S).o
 	nvcc -O3 -c modules/cuda_kernels.cu -allow-unsupported-compiler -o modules/cuda_kernels.o
-	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -c  $(MIXED_VERSION_1).f90 -o $(MIXED_VERSION_1).o
-	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -c  $(MIXED_VERSION_2).f90 -o $(MIXED_VERSION_2).o
-	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -c  $(DOUBLE_VERSION).f90 -o $(DOUBLE_VERSION).o
-	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -c  $(SINGLE_VERSION).f90 -o $(SINGLE_VERSION).o
-	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -c  $(CG_FILE)_gpu.f90 -o $(CG_FILE)_gpu.o
+	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -DHAVE_CUDA -c  $(MIXED_VERSION_1).f90 -o $(MIXED_VERSION_1).o
+	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -DHAVE_CUDA -c  $(MIXED_VERSION_2).f90 -o $(MIXED_VERSION_2).o
+	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -DHAVE_CUDA -c  $(DOUBLE_VERSION).f90 -o $(DOUBLE_VERSION).o
+	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -DHAVE_CUDA -c  $(SINGLE_VERSION).f90 -o $(SINGLE_VERSION).o
+	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -DHAVE_CUDA -c  $(CG_FILE)_gpu.f90 -o $(CG_FILE)_gpu.o
 	$(FLINK) $(LOPT) $(CCOPT) $(GPU_OBJ) modules/cuda_kernels.o $(CG_FILE)_gpu.o -o psb_dscg_gpu $(PSBLAS_LIB) $(LDLIBS) 
 	/bin/mv $(CG_FILE)_gpu $(EXEDIR)
 
 gpu-special:
-	$(FLINK) $(LOPT) $(CCOPT) $(OBJ) modules/single_to_double.o $(CG_FILE)_gpu.o -o psb_dscg_gpu $(PSBLAS_LIB) $(LDLIBS) 
+	mpifort -fallow-argument-mismatch -frecursive -g -O3 -cpp -I../../modules -I. -DHAVE_CUDA -c  $(MIXED_VERSION_1).f90 -o $(MIXED_VERSION_1).o
+	$(FLINK) $(LOPT) $(CCOPT) $(GPU_OBJ) modules/cuda_kernels.o $(CG_FILE)_gpu.o -o psb_dscg_gpu $(PSBLAS_LIB) $(LDLIBS) 
 	/bin/mv $(CG_FILE)_gpu $(EXEDIR)
 
 clean: 

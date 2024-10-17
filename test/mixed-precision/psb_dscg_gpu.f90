@@ -137,7 +137,7 @@ program psb_dscg
 
   ! Common data
   info = psb_success_
-  name = 'psb_dscg'
+  name = 'psb_dscg_gpu'
   number_of_threads_per_process = 1 ! This is a dummy value, every process is launched using only a thread
   call psb_erractionsave(err_act)
   
@@ -146,7 +146,7 @@ program psb_dscg
   prec_type = "NONE"
   afmt = "COO"
   istopc = 2 ! 1 - Normwise backword error, 2 - Relative residual in the 2-norm , 3 - relative residual reduction in the 2-norm
-  itmax = 10000
+  itmax = 15000
   itrace = 0 ! Debug option on
   irst = 0 ! Restart parameter, ignored for CG
 
@@ -388,7 +388,7 @@ program psb_dscg
 
       temporary_time = psb_wtime()
 
-      call psb_dcg_impl(local_a,prec,local_b,local_x,eps,desc_a,info,&
+      call psb_dcg_impl(local_a_gpu,prec,local_b,local_x,eps,desc_a,info,&
       & itmax=itmax,iter=iter,err=err)
 
       computation_time = psb_wtime() - temporary_time
@@ -452,7 +452,7 @@ program psb_dscg
 
 
       ! Save stats
-      matrix_memory_size      = local_a%sizeof()
+      matrix_memory_size      = local_a_gpu%sizeof()
       call psb_sum(ctxt, matrix_memory_size)
 
       if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size + matrix_memory_size 
@@ -485,7 +485,7 @@ program psb_dscg
 
       temporary_time = psb_wtime()
 
-      call psb_scg_impl(local_a_lower_precision,prec,local_b_lower_precision,local_x_lower_precision, &
+      call psb_scg_impl(local_a_lower_gpu,prec,local_b_lower_precision,local_x_lower_precision, &
       & eps,desc_a,info, itmax=itmax,iter=iter,err=err_lower)
 
       computation_time = psb_wtime() - temporary_time
@@ -547,7 +547,7 @@ program psb_dscg
 
 
       ! Save stats
-      matrix_memory_size      = local_a_lower_precision%sizeof()
+      matrix_memory_size      = local_a_lower_gpu%sizeof()
       call psb_sum(ctxt, matrix_memory_size)
 
       if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size + matrix_memory_size 
@@ -580,7 +580,7 @@ program psb_dscg
 
       temporary_time = psb_wtime()
 
-      call psb_dscg_1_impl(local_a_lower_precision,prec,local_b_lower_precision,local_x_lower_precision, &
+      call psb_dscg_1_impl(local_a_lower_gpu,prec,local_b_lower_precision,local_x_lower_precision, &
       & eps,desc_a,info, itmax=itmax,iter=iter,err=err)
 
       computation_time = psb_wtime() - temporary_time
@@ -606,9 +606,15 @@ program psb_dscg
         goto 9999
       end if
 
+      call local_x_lower_precision%set_dev()
+      call local_x_lower_precision%sync()
+
       do j = 1, size(local_x%v%v)
         local_x%v%v(j)  = local_x_lower_precision%v%v(j)
       end do
+
+      call local_x%set_host()
+      call local_x%sync()
 
       ! r = r - A * x
       call psb_spmm(-done, local_a, local_x, done, local_r, desc_a, info)
@@ -648,7 +654,7 @@ program psb_dscg
 
 
       ! Save stats
-      matrix_memory_size      = local_a_lower_precision%sizeof()
+      matrix_memory_size      = local_a_lower_gpu%sizeof()
       call psb_sum(ctxt, matrix_memory_size)
 
       if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size + matrix_memory_size 
@@ -683,11 +689,13 @@ program psb_dscg
 
 
 
-      call psb_dscg_2_impl(local_a, local_a_lower_precision,prec,local_b, local_b_lower_precision,local_x, &
+      call psb_dscg_2_impl(local_a_gpu, local_a_lower_gpu, prec, local_b_lower_precision, &
       & local_x_lower_precision, eps,desc_a,info, itmax=itmax,iter=iter,err=err)
 
       computation_time = psb_wtime() - temporary_time
       call psb_amx(ctxt, computation_time)
+
+
 
       if(my_rank == psb_root_) mean_computation_time = mean_computation_time + computation_time
 
@@ -696,8 +704,12 @@ program psb_dscg
 #endif
 
       do j = 1, size(local_x%v%v)
-        local_x%v%v(j)  = local_x_lower_precision%v%v(j)
+        local_x%v%v(j)  = real(local_x_lower_precision%v%v(j),8)
       end do
+      call local_x%set_host()
+      call local_x%sync()
+      !call psb_geasb(local_x,desc_a,info,scratch=.false.,mold=gpu_vector_format_double)
+
 
       call psb_geaxpby(done, local_b, dzero, local_r, desc_a, info)
       if(info /= psb_success_) then
@@ -788,7 +800,7 @@ program psb_dscg
       end if 
 
       ! Save stats
-      matrix_memory_size      = local_a_lower_precision%sizeof() + local_a%sizeof()
+      matrix_memory_size      = local_a_lower_gpu%sizeof() + local_a_gpu%sizeof()
       call psb_sum(ctxt, matrix_memory_size)
 
       if(my_rank == psb_root_) mean_matrix_memory_size = mean_matrix_memory_size + matrix_memory_size 
@@ -816,7 +828,7 @@ program psb_dscg
       call local_x%zero()
       temporary_time = psb_wtime()
 
-      call psb_krylov(krylov_method,local_a,prec,local_b,local_x,eps,desc_a,info,&
+      call psb_krylov(krylov_method,local_a_gpu,prec,local_b,local_x,eps,desc_a,info,&
       & itmax=itmax,iter=iter,err=err,itrace=itrace,istop=istopc,irst=irst)
 
       computation_time = psb_wtime() - temporary_time
@@ -836,7 +848,7 @@ program psb_dscg
       call local_x_lower_precision%zero()
       temporary_time = psb_wtime()
 
-      call psb_krylov(krylov_method,local_a_lower_precision,prec_lower,local_b_lower_precision,local_x_lower_precision,&
+      call psb_krylov(krylov_method,local_a_lower_gpu,prec_lower,local_b_lower_precision,local_x_lower_precision,&
       & eps_lower,desc_a,info,itmax=itmax,iter=iter,err=err_lower,itrace=itrace,istop=istopc,irst=irst)
 
       computation_time = psb_wtime() - temporary_time

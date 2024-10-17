@@ -575,7 +575,7 @@ program psb_dscg
 
       temporary_time = psb_wtime()
 
-      call psb_dscg_2_impl(local_a, local_a_lower_precision,prec,local_b, local_b_lower_precision,local_x, &
+      call psb_dscg_2_impl(local_a, local_a_lower_precision,prec, local_b_lower_precision, &
         & local_x_lower_precision, eps,desc_a,info, itmax=itmax,iter=iter,err=err)
 
 
@@ -678,7 +678,7 @@ program psb_dscg
       call psb_sum(ctxt, matrix_memory_size)
 
       vect_memory_size        = local_x_lower_precision%sizeof() * 5 &
-      & + local_x%sizeof() * 2 
+      & + local_x%sizeof() * 3 
       call psb_sum(ctxt, vect_memory_size)
 
       if(my_rank == psb_root_) mean_matrix_memory_size  = mean_matrix_memory_size + matrix_memory_size 

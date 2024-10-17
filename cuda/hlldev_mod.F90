@@ -229,13 +229,23 @@ module hlldev_mod
   !  end function getHllDeviceMaxRowSize
   !end interface
 
+  interface spmvHllDeviceMixed
+    function spmvHllDeviceMixed(deviceMat,alpha,x,beta,y) &
+      & result(res) bind(c,name='spmvHllDeviceMixed')
+      use iso_c_binding
+      integer(c_int)		  :: res
+      type(c_ptr), value 	:: deviceMat, x, y
+      real(c_float),value :: alpha, beta
+    end function spmvHllDeviceMixed
+  end interface
+
   interface spmvHllDevice
 
     function spmvHllDeviceFloat(deviceMat,alpha,x,beta,y) &
          & result(res) bind(c,name='spmvHllDeviceFloat')
       use iso_c_binding
-      integer(c_int)		:: res
-      type(c_ptr), value 	:: deviceMat, x, y
+      integer(c_int)		        :: res
+      type(c_ptr), value 	      :: deviceMat, x, y
       real(c_float),value     	:: alpha, beta
     end function spmvHllDeviceFloat
 

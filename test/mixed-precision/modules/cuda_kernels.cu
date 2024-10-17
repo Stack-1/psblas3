@@ -7,7 +7,7 @@
 extern "C"  {void single_to_double(float *vect_single, double *vect_double, int size);}
 extern "C"  {void d_to_r_kernel(double *r_double,float *r_single,double *d_double,float *d_single,int size);}
 extern "C"  {void geaxpby_double_to_single(float *vect_single, double *vect_double, float *second_vect_single, int size, float alpha);}
-extern "C"  {void geaxpby_double_to_double(float *vect_single, double *vect_double, int size, float beta);}
+extern "C"  {void geaxpby_double_to_double(double *vect_double, double *second_vect_double, float * vect_single, int size, float beta);}
 extern "C"  {void geaxpby_single(float *vect_single, float *second_vect_single, int size, float alpha);}
 
 __global__ void convert_single_to_double(float *vect_single_dev, double *vect_double_dev, int size)
@@ -157,31 +157,32 @@ void geaxpby_double_to_single(float *vect_single, double *vect_double, float *se
 }
 
 
-
-__global__ void geaxpby_d_d(float *vect_single_dev, double *vect_double_dev, float *second_vect_single_dev, float beta, int size)
+ // d_i+1 = r_i+1 + beta_i+1 * d_i    
+__global__ void geaxpby_d_d(double *vect_double_dev, double *second_vect_double_dev, float *vect_single_dev, float beta, int size)
 {
     int tid = (blockIdx.x * blockDim.x) + threadIdx.x;
     if(tid < size){
-        vect_double_dev[tid]                    = static_cast<double>(vect_single_dev[tid]) + ( static_cast<double>(beta) * vect_double_dev[tid] );
-        second_vect_single_dev[tid]             = static_cast<float>(vect_double_dev[tid]);
+        second_vect_double_dev[tid]             = vect_double_dev[tid] + ( static_cast<double>(beta) * second_vect_double_dev[tid] );
+        vect_single_dev[tid]                    = static_cast<float>(second_vect_double_dev[tid]);
+        //printf("%lf %lf %lf\n", second_vect_double_dev[tid] , vect_double_dev[tid], static_cast<double>(beta));
     }
 
 }
 
 
-void geaxpby_double_to_double(float *vect_single, double *vect_double, float *second_vect_single , int size, float beta){
-    float *vect_single_dev, *second_vect_single_dev;
-    double *vect_double_dev;
+void geaxpby_double_to_double(double *vect_double, double *second_vect_double, float *vect_single, int size, float beta){
+    float *vect_single_dev;
+    double *vect_double_dev, *second_vect_double_dev;
     int number_of_blocks;
     cudaError_t err;
 
     cudaMalloc((void**)&vect_single_dev, sizeof(float)*size);
-    cudaMalloc((void**)&second_vect_single_dev, sizeof(float)*size);
     cudaMalloc((void**)&vect_double_dev, sizeof(double)*size);
+    cudaMalloc((void**)&second_vect_double_dev, sizeof(double)*size);
 
     cudaMemcpy(vect_single_dev, vect_single, sizeof(float) * size, cudaMemcpyHostToDevice);
-    cudaMemcpy(second_vect_single_dev, second_vect_single, sizeof(float) * size, cudaMemcpyHostToDevice);
-    cudaMemcpy(vect_double_dev, vect_double, sizeof(double) * size, cudaMemcpyHostToDevice);
+    cudaMemcpy(vect_double_dev, vect_double, sizeof(double) * size, cudaMemcpyHostToDevice); 
+    cudaMemcpy(second_vect_double_dev, second_vect_double, sizeof(double) * size, cudaMemcpyHostToDevice);
 
     number_of_blocks = size / THREADS_PER_BLOCK;
     if(number_of_blocks == 0){
@@ -189,21 +190,24 @@ void geaxpby_double_to_double(float *vect_single, double *vect_double, float *se
     }
 
 
-    geaxpby_d_d<<< number_of_blocks , THREADS_PER_BLOCK>>>(vect_single_dev,vect_double_dev, second_vect_single_dev, beta, size);
+    geaxpby_d_d<<< number_of_blocks , THREADS_PER_BLOCK>>>(vect_double_dev,second_vect_double_dev, vect_single_dev, beta, size);
     
     err = cudaGetLastError();
     
     if (err != cudaSuccess) 
-        printf("Error in geaxpby_double_to_single: %s\n", cudaGetErrorString(err));
+        printf("Error in geaxpby_double_to_double: %s\n", cudaGetErrorString(err));
 
 
-    cudaMemcpy(vect_double, vect_double_dev, sizeof(double) * size, cudaMemcpyDeviceToHost);
-    cudaMemcpy(second_vect_single, second_vect_single_dev, sizeof(float) * size, cudaMemcpyDeviceToHost);
+    cudaMemcpy(second_vect_double, second_vect_double_dev, sizeof(double) * size, cudaMemcpyDeviceToHost);
+    cudaMemcpy(vect_single, vect_single_dev, sizeof(float) * size, cudaMemcpyDeviceToHost);
 
+    /*for(int i = 0; i<size;i++){
+        printf("%lf ", second_vect_double[i] );
+    }*/
     
     cudaFree(vect_single_dev);
     cudaFree(vect_double_dev);
-    cudaFree(second_vect_single_dev);
+    cudaFree(second_vect_double_dev);
 }
 
 

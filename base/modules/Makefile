@@ -29,8 +29,8 @@ SERIAL_MODS=serial/psb_s_serial_mod.o serial/psb_d_serial_mod.o \
 	serial/psb_serial_mod.o \
 	serial/psb_i_base_vect_mod.o serial/psb_i_vect_mod.o\
 	serial/psb_l_base_vect_mod.o serial/psb_l_vect_mod.o\
-	serial/psb_d_base_vect_mod.o serial/psb_d_vect_mod.o\
 	serial/psb_s_base_vect_mod.o serial/psb_s_vect_mod.o\
+	serial/psb_d_base_vect_mod.o serial/psb_d_vect_mod.o\
 	serial/psb_c_base_vect_mod.o serial/psb_c_vect_mod.o\
 	serial/psb_z_base_vect_mod.o serial/psb_z_vect_mod.o\
 	serial/psb_vect_mod.o\
@@ -251,12 +251,15 @@ auxil/psb_ip_reord_mod.o:  auxil/psb_m_ip_reord_mod.o auxil/psb_e_ip_reord_mod.o
 serial/psb_base_mat_mod.o: auxil/psi_serial_mod.o
 serial/psb_s_base_mat_mod.o serial/psb_d_base_mat_mod.o serial/psb_c_base_mat_mod.o serial/psb_z_base_mat_mod.o: serial/psb_base_mat_mod.o
 #serial/psb_ld_base_mat_mod.o: serial/psb_base_mat_mod.o
-serial/psb_s_base_mat_mod.o: serial/psb_s_base_vect_mod.o
+serial/psb_s_base_mat_mod.o: serial/psb_s_base_vect_mod.o serial/psb_d_base_vect_mod.o
 serial/psb_d_base_mat_mod.o: serial/psb_d_base_vect_mod.o 
 #serial/psb_ld_base_mat_mod.o: serial/psb_d_base_vect_mod.o 
 serial/psb_c_base_mat_mod.o: serial/psb_c_base_vect_mod.o
 serial/psb_z_base_mat_mod.o: serial/psb_z_base_vect_mod.o
 serial/psb_l_base_vect_mod.o: serial/psb_i_base_vect_mod.o 
+
+serial/psb_d_base_vect_mod.o: serial/psb_s_base_vect_mod.o
+
 serial/psb_c_base_vect_mod.o serial/psb_s_base_vect_mod.o serial/psb_d_base_vect_mod.o serial/psb_z_base_vect_mod.o: serial/psb_i_base_vect_mod.o serial/psb_l_base_vect_mod.o
 serial/psb_i_base_vect_mod.o serial/psb_l_base_vect_mod.o serial/psb_c_base_vect_mod.o serial/psb_s_base_vect_mod.o serial/psb_d_base_vect_mod.o serial/psb_z_base_vect_mod.o: auxil/psi_serial_mod.o psb_realloc_mod.o
 serial/psb_s_mat_mod.o: serial/psb_s_base_mat_mod.o serial/psb_s_csr_mat_mod.o serial/psb_s_csc_mat_mod.o serial/psb_s_vect_mod.o \
@@ -277,7 +280,7 @@ serial/psb_serial_mod.o: serial/psb_s_serial_mod.o serial/psb_d_serial_mod.o ser
 serial/psb_i_vect_mod.o: serial/psb_i_base_vect_mod.o
 serial/psb_l_vect_mod.o: serial/psb_l_base_vect_mod.o serial/psb_i_vect_mod.o 
 serial/psb_s_vect_mod.o: serial/psb_s_base_vect_mod.o serial/psb_i_vect_mod.o
-serial/psb_d_vect_mod.o: serial/psb_d_base_vect_mod.o serial/psb_i_vect_mod.o
+serial/psb_d_vect_mod.o: serial/psb_d_base_vect_mod.o serial/psb_i_vect_mod.o serial/psb_s_vect_mod.o
 serial/psb_c_vect_mod.o: serial/psb_c_base_vect_mod.o serial/psb_i_vect_mod.o
 serial/psb_z_vect_mod.o: serial/psb_z_base_vect_mod.o serial/psb_i_vect_mod.o
 serial/psb_s_serial_mod.o serial/psb_d_serial_mod.o serial/psb_c_serial_mod.o serial/psb_z_serial_mod.o: serial/psb_mat_mod.o auxil/psb_string_mod.o auxil/psb_sort_mod.o auxil/psi_serial_mod.o

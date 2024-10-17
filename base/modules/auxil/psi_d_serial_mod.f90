@@ -30,7 +30,7 @@
 !
 !
 module psi_d_serial_mod
-  use psb_const_mod, only :  psb_ipk_, psb_lpk_, psb_mpk_, psb_epk_, psb_dpk_
+  use psb_const_mod, only :  psb_ipk_, psb_lpk_, psb_mpk_, psb_epk_, psb_dpk_,psb_spk_
 
   interface psb_gelp 
     ! 2-D version
@@ -97,6 +97,47 @@ module psi_d_serial_mod
       real(psb_dpk_), intent (in)       :: alpha, beta
       integer(psb_ipk_), intent(out)     :: info
     end subroutine psi_daxpbyv2
+    
+    ! Mixed precision routines
+    ! subroutine psi_axpby_mx(m,n,alpha, x, beta, y, info)
+    !   import :: psb_ipk_, psb_spk_, psb_dpk_
+    !   implicit none
+    !   integer(psb_ipk_), intent(in)       :: m, n
+    !   real(psb_spk_), intent (in)         ::  x(:,:)
+    !   real(psb_dpk_), intent (inout)      ::  y(:,:)
+    !   real(psb_spk_), intent (in)         ::  alpha, beta
+    !   integer(psb_ipk_), intent(out)      :: info
+    ! end subroutine psi_axpby_mx
+    subroutine psi_axpbyv_mx(m,alpha, x, beta, y, info)
+      import :: psb_ipk_, psb_spk_, psb_dpk_
+      implicit none
+      integer(psb_ipk_), intent(in)       :: m
+      real(psb_spk_), intent (in)         ::  x(:)
+      real(psb_dpk_), intent (inout)      ::  y(:)
+      real(psb_spk_), intent (in)         :: alpha, beta
+      integer(psb_ipk_), intent(out)      :: info
+    end subroutine psi_axpbyv_mx
+
+    subroutine psi_axpbyv_mx_v2(m,alpha, x, beta, y, info)
+      import :: psb_ipk_, psb_spk_, psb_dpk_
+      implicit none
+      integer(psb_ipk_), intent(in)       :: m
+      real(psb_dpk_), intent (in)         :: x(:)
+      real(psb_spk_), intent (inout)      :: y(:)
+      real(psb_spk_), intent (in)         :: alpha, beta
+      integer(psb_ipk_), intent(out)      :: info
+    end subroutine psi_axpbyv_mx_v2
+
+    ! subroutine psi_axpbyv2_mx(m,alpha, x, beta, y, z, info)
+    !   import :: psb_ipk_, psb_spk_, psb_dpk_
+    !   implicit none
+    !   integer(psb_ipk_), intent(in)       :: m
+    !   real(psb_spk_), intent (in)         ::  x(:)
+    !   real(psb_dpk_), intent (in)         ::  y(:)
+    !   real(psb_dpk_), intent (inout)      ::  z(:)
+    !   real(psb_spk_), intent (in)         :: alpha, beta
+    !   integer(psb_ipk_), intent(out)      :: info
+    ! end subroutine psi_axpbyv2_mx
   end interface psb_geaxpby
 
   interface psi_upd_xyz

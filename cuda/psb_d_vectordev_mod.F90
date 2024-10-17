@@ -313,6 +313,28 @@ module psb_d_vectordev_mod
     end function axpbyMultiVecDeviceDouble
   end interface
 
+  interface axpbyMultiVecDeviceMixed
+    function axpbyMultiVecDeviceMixed(n,alpha,deviceVecA,beta,deviceVecB) &
+         & result(res) bind(c,name='axpbyMultiVecDeviceMixed')
+      use iso_c_binding
+      integer(c_int)          :: res
+      integer(c_int), value   :: n
+      real(c_float), value    :: alpha, beta
+      type(c_ptr), value      :: deviceVecA, deviceVecB
+    end function axpbyMultiVecDeviceMixed
+  end interface 
+
+  interface axpbyMultiVecDeviceMixed_v2
+    function axpbyMultiVecDeviceMixed_v2(n,alpha,deviceVecA,beta,deviceVecB) &
+         & result(res) bind(c,name='axpbyMultiVecDeviceMixed_v2')
+      use iso_c_binding
+      integer(c_int)          :: res
+      integer(c_int), value   :: n
+      real(c_float), value    :: alpha, beta
+      type(c_ptr), value      :: deviceVecA, deviceVecB
+    end function axpbyMultiVecDeviceMixed_v2
+  end interface 
+
   interface upd_xyzMultiVecDevice
     function upd_xyzMultiVecDeviceDouble(n,alpha,beta,gamma,delta,deviceVecX,&
          & deviceVecY,deviceVecZ) &

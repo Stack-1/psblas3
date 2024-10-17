@@ -52,4 +52,29 @@ module psb_mx_psblas_mod
     end subroutine psb_mx_spmv_vect
   end interface
 
+
+  interface psb_geaxpby
+    subroutine psb_axpby_vect_mx(alpha, x, beta, y,&
+      & desc_a, info)
+      import :: psb_desc_type, psb_dpk_, psb_ipk_, psb_spk_, &
+           & psb_d_vect_type, psb_s_vect_type, psb_dspmat_type
+      type(psb_s_vect_type), intent (inout)   :: x
+      type(psb_d_vect_type), intent (inout)   :: y
+      real(psb_spk_), intent (in)             :: alpha, beta
+      type(psb_desc_type), intent (in)        :: desc_a
+      integer(psb_ipk_), intent(out)          :: info
+    end subroutine psb_axpby_vect_mx
+
+    subroutine psb_axpby_vect_mx_v2(alpha, x, beta, y,&
+      & desc_a, info)
+      import :: psb_desc_type, psb_dpk_, psb_ipk_, psb_spk_, &
+           & psb_d_vect_type, psb_s_vect_type, psb_dspmat_type
+      type(psb_d_vect_type), intent (inout)   :: x
+      type(psb_s_vect_type), intent (inout)   :: y
+      real(psb_spk_), intent (in)             :: alpha, beta
+      type(psb_desc_type), intent (in)        :: desc_a
+      integer(psb_ipk_), intent(out)          :: info
+    end subroutine psb_axpby_vect_mx_v2
+  end interface
+
 end module psb_mx_psblas_mod

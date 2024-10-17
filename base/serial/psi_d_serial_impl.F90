@@ -904,6 +904,537 @@ subroutine psi_daxpbyv2(m,alpha, x, beta, y, z, info)
 
 end subroutine psi_daxpbyv2
 
+!subroutine psi_axpby_mx(m,n,alpha, x, beta, y, info)
+!
+!  use psb_const_mod
+!  use psb_error_mod
+!  implicit none
+!  integer(psb_ipk_), intent(in)       :: m, n
+!  real(psb_spk_), intent (in)         :: x(:,:)
+!  real(psb_dpk_), intent (inout)      :: y(:,:)
+!  real(psb_spk_), intent (in)         ::  alpha, beta
+!  integer(psb_ipk_), intent(out)      :: info
+!  integer(psb_ipk_)                   :: err_act
+!  integer(psb_ipk_)                   :: lx, ly, i
+!  integer(psb_ipk_)                   :: ierr(5)
+!  character(len=20)                   :: name, ch_err
+!
+!  name='psb_geaxpby_mx'
+!  info=psb_success_
+!  call psb_erractionsave(err_act)
+!  if (psb_errstatus_fatal()) then
+!    info = psb_err_internal_error_ ;    goto 9999
+!  end if
+!
+!  if (m < 0) then
+!    info = psb_err_iarg_neg_
+!    ierr(1) = 1; ierr(2) = m
+!    call psb_errpush(info,name,i_err=ierr)
+!    goto 9999
+!  end if
+!  if (n < 0) then
+!    info = psb_err_iarg_neg_
+!    ierr(1) = 2; ierr(2) = n
+!    call psb_errpush(info,name,i_err=ierr)
+!    goto 9999
+!  end if
+!  lx = size(x,1)
+!  ly = size(y,1)
+!  if (lx < m) then
+!    info = psb_err_input_asize_small_i_
+!    ierr(1) = 4; ierr(2) = m
+!    call psb_errpush(info,name,i_err=ierr)
+!    goto 9999
+!  end if
+!  if (ly < m) then
+!    info = psb_err_input_asize_small_i_
+!    ierr(1) = 6; ierr(2) = m
+!    call psb_errpush(info,name,i_err=ierr)
+!    goto 9999
+!  end if
+!
+!  if ((m>0).and.(n>0)) call axpby(m,n,alpha,x,lx,beta,y,ly,info)
+!
+!  call psb_erractionrestore(err_act)
+!  return
+!
+!9999 call psb_error_handler(err_act)
+!
+!  return
+!end subroutine psi_axpby_mx
+
+subroutine psi_axpbyv_mx(m,alpha, x, beta, y, info)
+
+  use psb_const_mod
+  use psb_error_mod
+  implicit none
+  integer(psb_ipk_), intent(in)       :: m
+  real(psb_spk_), intent (in)         ::  x(:)
+  real(psb_dpk_), intent (inout)      ::  y(:)
+  real(psb_spk_), intent (in)         :: alpha, beta
+  integer(psb_ipk_), intent(out)      :: info
+  integer(psb_ipk_)                   :: err_act
+  integer(psb_ipk_)                   :: lx, ly
+  integer(psb_ipk_)                   :: ierr(5)
+  integer(psb_ipk_)                   :: i
+  character(len=20)                   :: name, ch_err
+
+  name='psb_geaxpby_mx'
+  info=psb_success_
+  call psb_erractionsave(err_act)
+  if (psb_errstatus_fatal()) then
+    info = psb_err_internal_error_ ;    goto 9999
+  end if
+
+  if (m < 0) then
+    info = psb_err_iarg_neg_
+    ierr(1) = 1; ierr(2) = m
+    call psb_errpush(info,name,i_err=ierr)
+    goto 9999
+  end if
+  lx = size(x,1)
+  ly = size(y,1)
+  if (lx < m) then
+    info = psb_err_input_asize_small_i_
+    ierr(1) = 3; ierr(2) = m
+    call psb_errpush(info,name,i_err=ierr)
+    goto 9999
+  end if
+  if (ly < m) then
+    info = psb_err_input_asize_small_i_
+    ierr(1) = 5; ierr(2) = m
+    call psb_errpush(info,name,i_err=ierr)
+    goto 9999
+  end if
+
+!  if (m>0) call daxpby(m,ione,alpha,x,lx,beta,y,ly,info)
+
+  if (alpha.eq.szero) then
+    if (beta.eq.szero) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = dzero
+      enddo
+    else if (beta.eq.sone) then
+      !
+      !        Do nothing!
+      !
+
+    else if (beta.eq.-sone) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = - y(i)
+      enddo
+    else
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) =  real(beta,psb_dpk_)*y(i)
+      enddo
+    endif
+
+  else if (alpha.eq.sone) then
+
+    if (beta.eq.szero) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = real(x(i),psb_dpk_)
+      enddo
+    else if (beta.eq.sone) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = real(x(i),psb_dpk_) + y(i)
+      enddo
+
+    else if (beta.eq.-sone) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = real(x(i),psb_dpk_) - y(i)
+      enddo
+    else
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = real(x(i),psb_dpk_) + real(beta,psb_dpk_)*y(i)
+      enddo
+    endif
+
+  else if (alpha.eq.-sone) then
+
+    if (beta.eq.szero) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = -real(x(i),psb_dpk_)
+      enddo
+    else if (beta.eq.sone) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = -real(x(i),psb_dpk_) + y(i)
+      enddo
+    else if (beta.eq.-sone) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = -real(x(i),psb_dpk_) - y(i)
+      enddo
+    else
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = -real(x(i),psb_dpk_) + real(beta,psb_dpk_)*y(i)
+      enddo
+    endif
+
+  else
+
+    if (beta.eq.szero) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = real(alpha,psb_dpk_)*real(x(i),psb_dpk_)
+      enddo
+    else if (beta.eq.sone) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = real(alpha,psb_dpk_)*real(x(i),psb_dpk_) + y(i)
+      enddo
+    else if (beta.eq.-sone) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = real(alpha,psb_dpk_)*real(x(i),psb_dpk_) - y(i)
+      enddo
+    else
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = real(alpha,psb_dpk_)*real(x(i),psb_dpk_) + real(beta,psb_dpk_)*y(i)
+      enddo
+    endif
+
+  endif
+
+
+  call psb_erractionrestore(err_act)
+  return
+
+9999 call psb_error_handler(err_act)
+
+  return
+
+end subroutine psi_axpbyv_mx
+
+
+
+subroutine psi_axpbyv_mx_v2(m,alpha, x, beta, y, info)
+
+  use psb_const_mod
+  use psb_error_mod
+  implicit none
+  integer(psb_ipk_), intent(in)       :: m
+  real(psb_dpk_), intent (in)         :: x(:)
+  real(psb_spk_), intent (inout)      :: y(:)
+  real(psb_spk_), intent (in)         :: alpha, beta
+  integer(psb_ipk_), intent(out)      :: info
+  integer(psb_ipk_)                   :: err_act
+  integer(psb_ipk_)                   :: lx, ly
+  integer(psb_ipk_)                   :: ierr(5)
+  integer(psb_ipk_)                   :: i
+  character(len=20)                   :: name, ch_err
+
+  name='psb_geaxpby_mx_v2'
+  info=psb_success_
+  call psb_erractionsave(err_act)
+  if (psb_errstatus_fatal()) then
+    info = psb_err_internal_error_ ;    goto 9999
+  end if
+
+  if (m < 0) then
+    info = psb_err_iarg_neg_
+    ierr(1) = 1; ierr(2) = m
+    call psb_errpush(info,name,i_err=ierr)
+    goto 9999
+  end if
+  lx = size(x,1)
+  ly = size(y,1)
+  if (lx < m) then
+    info = psb_err_input_asize_small_i_
+    ierr(1) = 3; ierr(2) = m
+    call psb_errpush(info,name,i_err=ierr)
+    goto 9999
+  end if
+  if (ly < m) then
+    info = psb_err_input_asize_small_i_
+    ierr(1) = 5; ierr(2) = m
+    call psb_errpush(info,name,i_err=ierr)
+    goto 9999
+  end if
+
+
+  if (alpha.eq.szero) then
+    if (beta.eq.szero) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = szero
+      enddo
+    else if (beta.eq.sone) then
+      !
+      !        Do nothing!
+      !
+
+    else if (beta.eq.-sone) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = - y(i)
+      enddo
+    else
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) =  beta*y(i)
+      enddo
+    endif
+
+  else if (alpha.eq.sone) then
+
+    if (beta.eq.szero) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = real(x(i),psb_spk_)
+      enddo
+    else if (beta.eq.sone) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = real(x(i),psb_spk_) + y(i)
+      enddo
+
+    else if (beta.eq.-sone) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = real(x(i),psb_spk_) - y(i)
+      enddo
+    else
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = real(x(i),psb_spk_) + beta*y(i)
+      enddo
+    endif
+
+  else if (alpha.eq.-sone) then
+
+    if (beta.eq.szero) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = -real(x(i),psb_spk_)
+      enddo
+    else if (beta.eq.sone) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = -real(x(i),psb_spk_) + y(i)
+      enddo
+    else if (beta.eq.-sone) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = -real(x(i),psb_spk_) - y(i)
+      enddo
+    else
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = -real(x(i),psb_spk_) + beta*y(i)
+      enddo
+    endif
+
+  else
+
+    if (beta.eq.szero) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = alpha*real(x(i),psb_spk_)
+      enddo
+    else if (beta.eq.sone) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = alpha*real(x(i),psb_spk_) + y(i)
+      enddo
+    else if (beta.eq.-sone) then
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = alpha*real(x(i),psb_spk_) - y(i)
+      enddo
+    else
+      !$omp parallel do private(i)
+      do i=1,m
+        y(i) = alpha*real(x(i),psb_spk_) + beta*y(i)
+      enddo
+    endif
+
+  endif
+
+
+  call psb_erractionrestore(err_act)
+  return
+
+9999 call psb_error_handler(err_act)
+
+  return
+
+end subroutine psi_axpbyv_mx_v2
+
+
+! subroutine psi_daxpbyv2_mx(m,alpha, x, beta, y, z, info)
+! 
+!   use psb_const_mod
+!   use psb_error_mod
+!   implicit none
+!   integer(psb_ipk_), intent(in)       :: m
+!   real(psb_spk_), intent (in)         :: x(:)
+!   real(psb_dpk_), intent (in)         :: y(:)
+!   real(psb_dpk_), intent (inout)      :: z(:)
+!   real(psb_spk_), intent (in)         :: alpha, beta
+!   integer(psb_ipk_), intent(out)      :: info
+!   integer(psb_ipk_)                   :: err_act
+!   integer(psb_ipk_)                   :: lx, ly, lz, i
+!   integer(psb_ipk_)                   :: ierr(5)
+!   character(len=20)                   :: name, ch_err
+
+!   name='psb_geaxpby_mx'
+!   info=psb_success_
+!   call psb_erractionsave(err_act)
+!   if (psb_errstatus_fatal()) then
+!     info = psb_err_internal_error_ ;    goto 9999
+!   end if
+! 
+!   if (m < 0) then
+!     info = psb_err_iarg_neg_
+!     ierr(1) = 1; ierr(2) = m
+!     call psb_errpush(info,name,i_err=ierr)
+!     goto 9999
+!   end if
+!   lx = size(x,1)
+!   ly = size(y,1)
+!   lz = size(z,1)
+!   if (lx < m) then
+!     info = psb_err_input_asize_small_i_
+!     ierr(1) = 3; ierr(2) = m
+!     call psb_errpush(info,name,i_err=ierr)
+!     goto 9999
+!   end if
+!   if (ly < m) then
+!     info = psb_err_input_asize_small_i_
+!     ierr(1) = 5; ierr(2) = m
+!     call psb_errpush(info,name,i_err=ierr)
+!     goto 9999
+!   end if
+!   if (lz < m) then
+!     info = psb_err_input_asize_small_i_
+!     ierr(1) = 5; ierr(2) = m
+!     call psb_errpush(info,name,i_err=ierr)
+!     goto 9999
+!   end if
+! 
+!   if (alpha.eq.szero) then
+!     if (beta.eq.szero) then
+!       !$omp parallel do private(i)
+!       do i=1,m
+!         Z(i) = dzero
+!       enddo
+!     else if (beta.eq.sone) then
+!       !
+!       !        Do nothing!
+!       !
+! 
+!     else if (beta.eq.-sone) then
+!       !$omp parallel do private(i)
+!       do i=1,m
+!         Z(i) = - y(i)
+!       enddo
+!     else
+!       !$omp parallel do private(i)
+!       do i=1,m
+!         Z(i) =  real(beta,psb_dpk_)*y(i)
+!       enddo
+!     endif
+! 
+!   else if (alpha.eq.sone) then
+! 
+!     if (beta.eq.szero) then
+!       !$omp parallel do private(i)
+!       do i=1,m
+!         Z(i) = real(x(i),psb_dpk_)
+!       enddo
+!     else if (beta.eq.sone) then
+!       !$omp parallel do private(i)
+!       do i=1,m
+!         Z(i) = real(x(i),psb_dpk_) + y(i)
+!       enddo
+! 
+!     else if (beta.eq.-sone) then
+!       !$omp parallel do private(i)
+!       do i=1,m
+!           Z(i) = real(x(i),psb_dpk_) - y(i)
+!         enddo
+!     else
+!       !$omp parallel do private(i)
+!       do i=1,m
+!         Z(i) = real(x(i),psb_dpk_) + real(beta,psb_dpk_)*y(i)
+!       enddo
+!     endif
+! 
+!   else if (alpha.eq.-sone) then
+! 
+!     if (beta.eq.szero) then
+!       !$omp parallel do private(i)
+!       do i=1,m
+!         Z(i) = -real(x(i),psb_dpk_)
+!       enddo
+!     else if (beta.eq.sone) then
+!       !$omp parallel do private(i)
+!       do i=1,m
+!         Z(i) = -real(x(i),psb_dpk_) + y(i)
+!       enddo
+! 
+!     else if (beta.eq.-sone) then
+!       !$omp parallel do private(i)
+!       do i=1,m
+!         Z(i) = -real(x(i),psb_dpk_) - y(i)
+!       enddo
+!     else
+!       !$omp parallel do private(i)
+!       do i=1,m
+!         Z(i) = -real(x(i),psb_dpk_) + real(beta,8)*y(i)
+!       enddo
+!     endif
+! 
+!   else
+! 
+!     if (beta.eq.szero) then
+!       !$omp parallel do private(i)
+!       do i=1,m
+!         Z(i) = real(alpha,psb_dpk_)*real(x(i),psb_dpk_)
+!       enddo
+!     else if (beta.eq.sone) then
+!       !$omp parallel do private(i)
+!       do i=1,m
+!         Z(i) = real(alpha,psb_dpk_)*real(x(i),psb_dpk_) + y(i)
+!       enddo
+! 
+!     else if (beta.eq.-sone) then
+!       !$omp parallel do private(i)
+!       do i=1,m
+!         Z(i) = real(alpha,8)*real(x(i),psb_dpk_) - y(i)
+!       enddo
+!     else
+!       !$omp parallel do private(i)
+!       do i=1,m
+!           Z(i) = real(alpha,psb_dpk_)*real(x(i),psb_dpk_) + real(beta,psb_dpk_)*y(i)
+!       enddo
+!     endif
+! 
+!   endif
+! 
+!   call psb_erractionrestore(err_act)
+!   return
+! 
+! 9999 call psb_error_handler(err_act)
+! 
+!   return
+! 
+! end subroutine psi_daxpbyv2_mx
+
+
+
 subroutine psi_dgthmv(n,k,idx,alpha,x,beta,y)
 
   use psb_const_mod
@@ -1191,7 +1722,7 @@ subroutine psi_dsctv(n,idx,x,beta,y)
   end if
 end subroutine psi_dsctv
 
-subroutine  daxpby(m, n, alpha, X, lldx, beta, Y, lldy, info)
+subroutine daxpby(m, n, alpha, X, lldx, beta, Y, lldy, info)
   use psb_const_mod
   use psb_error_mod
   implicit none
@@ -1376,7 +1907,195 @@ subroutine  daxpby(m, n, alpha, X, lldx, beta, Y, lldy, info)
 
 end subroutine daxpby
 
-subroutine  daxpbyv2(m, n, alpha, X, lldx, beta, Y, lldy, Z, lldz, info)
+subroutine axpbyv_mx(m, n, alpha, X, lldx, beta, Y, lldy, info)
+  use psb_const_mod
+  use psb_error_mod
+  implicit none
+  integer(psb_ipk_) :: n, m, lldx, lldy, info
+  real(psb_dpk_) Y(lldy,*) 
+  real(psb_spk_) X(lldx,*)
+  real(psb_spk_) alpha, beta
+  integer(psb_ipk_) :: i, j
+  integer(psb_ipk_) :: int_err(5)
+  character  name*20
+  name='axpbyv_mx'
+
+
+  !
+  !     Error handling
+  !
+  info = psb_success_
+  if (m.lt.0) then
+    info=psb_err_iarg_neg_
+    int_err(1)=1
+    int_err(2)=m
+    call fcpsb_errpush(info,name,int_err)
+    goto 9999
+  else if (n.lt.0) then
+    info=psb_err_iarg_neg_
+    int_err(1)=1
+    int_err(2)=n
+    call fcpsb_errpush(info,name,int_err)
+    goto 9999
+  else if (lldx.lt.max(1,m)) then
+    info=psb_err_iarg_not_gtia_ii_
+    int_err(1)=5
+    int_err(2)=1
+    int_err(3)=lldx
+    int_err(4)=m
+    call fcpsb_errpush(info,name,int_err)
+    goto 9999
+  else if (lldy.lt.max(1,m)) then
+    info=psb_err_iarg_not_gtia_ii_
+    int_err(1)=8
+    int_err(2)=1
+    int_err(3)=lldy
+    int_err(4)=m
+    call fcpsb_errpush(info,name,int_err)
+    goto 9999
+  endif
+
+  if (alpha.eq.szero) then
+    if (beta.eq.szero) then
+      do j=1, n
+        !$omp parallel do private(i)
+        do i=1,m
+          y(i,j) = dzero
+        enddo
+      enddo
+    else if (beta.eq.sone) then
+      !
+      !        Do nothing!
+      !
+
+    else if (beta.eq.-sone) then
+      do j=1,n
+        !$omp parallel do private(i)
+        do i=1,m
+          y(i,j) = - y(i,j)
+        enddo
+      enddo
+    else
+      do j=1,n
+        !$omp parallel do private(i)
+        do i=1,m
+          y(i,j) =  real(beta,psb_dpk_)*y(i,j)
+        enddo
+      enddo
+    endif
+
+  else if (alpha.eq.sone) then
+
+    if (beta.eq.szero) then
+      do j=1,n
+        !$omp parallel do private(i)
+        do i=1,m
+          y(i,j) = real(x(i,j), psb_dpk_)
+        enddo
+      enddo
+    else if (beta.eq.sone) then
+      do j=1,n
+        !$omp parallel do private(i)
+        do i=1,m
+          y(i,j) = real(x(i,j),psb_dpk_) + y(i,j)
+        enddo
+      enddo
+
+    else if (beta.eq.-sone) then
+      do j=1,n
+        !$omp parallel do private(i)
+        do i=1,m
+          y(i,j) = real(x(i,j),psb_dpk_) - y(i,j)
+        enddo
+      enddo
+    else
+      do j=1,n
+        !$omp parallel do private(i)
+        do i=1,m
+          y(i,j) = real(x(i,j),psb_dpk_) + real(beta,psb_dpk_)*y(i,j)
+        enddo
+      enddo
+    endif
+
+  else if (alpha.eq.-sone) then
+
+    if (beta.eq.szero) then
+      do j=1,n
+        !$omp parallel do private(i)
+        do i=1,m
+          y(i,j) = -real(x(i,j), psb_dpk_)
+        enddo
+      enddo
+    else if (beta.eq.sone) then
+      do j=1,n
+        !$omp parallel do private(i)
+        do i=1,m
+          y(i,j) = -real(x(i,j),psb_dpk_) + y(i,j)
+        enddo
+      enddo
+
+    else if (beta.eq.-sone) then
+      do j=1,n
+        !$omp parallel do private(i)
+        do i=1,m
+          y(i,j) = -real(x(i,j),psb_dpk_) - y(i,j)
+        enddo
+      enddo
+    else
+      do j=1,n
+        !$omp parallel do private(i)
+        do i=1,m
+          y(i,j) = -real(x(i,j),psb_dpk_) + beta*y(i,j)
+        enddo
+      enddo
+    endif
+
+  else
+
+    if (beta.eq.szero) then
+      do j=1,n
+        !$omp parallel do private(i)
+        do i=1,m
+          y(i,j) = real(alpha,psb_dpk_)*real(x(i,j),psb_dpk_)
+        enddo
+      enddo
+    else if (beta.eq.sone) then
+      do j=1,n
+        !$omp parallel do private(i)
+        do i=1,m
+          y(i,j) = real(alpha,psb_dpk_)*real(x(i,j),psb_dpk_) + y(i,j)
+        enddo
+      enddo
+
+    else if (beta.eq.-done) then
+      do j=1,n
+        !$omp parallel do private(i)
+        do i=1,m
+          y(i,j) = real(alpha,psb_dpk_)*real(x(i,j),psb_dpk_) - y(i,j)
+        enddo
+      enddo
+    else
+      do j=1,n
+        !$omp parallel do private(i)
+        do i=1,m
+          y(i,j) = real(alpha,psb_dpk_)*real(x(i,j),psb_dpk_) + real(beta,psb_dpk_)*y(i,j)
+        enddo
+      enddo
+    endif
+
+  endif
+
+  return
+
+9999 continue
+  call fcpsb_serror()
+  return
+
+end subroutine axpbyv_mx
+
+
+
+subroutine daxpbyv2(m, n, alpha, X, lldx, beta, Y, lldy, Z, lldz, info)
   use psb_const_mod
   use psb_error_mod
   implicit none

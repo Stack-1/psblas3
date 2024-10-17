@@ -181,6 +181,47 @@ void spgpuSaxpby(spgpuHandle_t handle,
 	float alpha,
 	__device float* x);
 
+/** 
+* \fn void spgpu_axpby_mx(spgpuHandle_t handle, __device double *z, int n, float beta, __device double *y, float alpha, __device float* x)
+ * Computes the single precision z = beta * y + alpha * x. z could be exactly x or y (without offset) or another vector.
+ * \param handle the spgpu handle used to call this routine
+ * \param z the resulting vector
+ * \param n the vectors' length
+ * \param beta the beta value
+ * \param y the first input vector
+ * \param alpha the alpha value
+ * \param x the second input vector
+ */
+void spgpu_axpby_mx(spgpuHandle_t handle,
+	__device double *z,
+	int n,
+	float beta,
+	__device double *y,
+	float alpha,
+	__device float* x);
+
+
+
+/** 
+* \fn void spgpu_axpby_mx_v2(spgpuHandle_t handle, __device double *z, int n, float beta, __device double *y, float alpha, __device float* x)
+ * Computes the single precision z = beta * y + alpha * x. z could be exactly x or y (without offset) or another vector.
+ * \param handle the spgpu handle used to call this routine
+ * \param z the resulting vector
+ * \param n the vectors' length
+ * \param beta the beta value
+ * \param y the first input vector
+ * \param alpha the alpha value
+ * \param x the second input vector
+ */
+void spgpu_axpby_mx_v2(spgpuHandle_t handle,
+	__device float *z,
+	int n,
+	float beta,
+	__device float *y,
+	float alpha,
+	__device double* x);
+
+
 
 void spgpuSupd_xyz(spgpuHandle_t handle,
 		   int n,

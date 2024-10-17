@@ -35,6 +35,8 @@ module psb_d_cuda_vect_mod
   use psb_const_mod
   use psb_error_mod
   use psb_d_vect_mod
+  use psb_s_vect_mod, only : psb_s_base_vect_type, psb_s_vect_type, psb_spk_
+  use psb_s_cuda_vect_mod, only: psb_s_vect_cuda
   use psb_cuda_env_mod
   use psb_i_vect_mod
   use psb_i_cuda_vect_mod
@@ -89,7 +91,10 @@ module psb_d_cuda_vect_mod
     procedure, pass(x) :: dot_v    => d_cuda_dot_v
     procedure, pass(x) :: dot_a    => d_cuda_dot_a
     procedure, pass(y) :: axpby_v  => d_cuda_axpby_v
+    procedure, pass(y) :: axpby_v_mx          => d_cuda_axpby_v_mx
     procedure, pass(y) :: axpby_a  => d_cuda_axpby_a
+    procedure, pass(x) :: axpby_mx_v2 => cuda_axpby_mx_v2
+    
     procedure, pass(z) :: upd_xyz  => d_cuda_upd_xyz
     procedure, pass(y) :: mlt_v    => d_cuda_mlt_v
     procedure, pass(y) :: mlt_a    => d_cuda_mlt_a
@@ -895,6 +900,80 @@ contains
     end select
 
   end subroutine d_cuda_axpby_v
+
+
+  subroutine d_cuda_axpby_v_mx(m,alpha, x, beta, y, info)
+    use psi_serial_mod
+    implicit none 
+    integer(psb_ipk_), intent(in)               :: m
+    class(psb_s_base_vect_type), intent(inout)  :: x
+    class(psb_d_vect_cuda), intent(inout)       :: y
+    real(psb_spk_), intent (in)                 :: alpha, beta
+    integer(psb_ipk_), intent(out)              :: info
+    integer(psb_ipk_)                           :: nx, ny
+
+    info = psb_success_
+
+    select type(xx => x)
+    type is (psb_s_vect_cuda)
+      ! Do something different here 
+      if ((beta /= szero).and.y%is_host())&
+           &  call y%sync()
+      if (xx%is_host()) call xx%sync()
+      nx = getMultiVecDeviceSize(xx%deviceVect)
+      ny = getMultiVecDeviceSize(y%deviceVect)
+      if ((nx<m).or.(ny<m)) then
+        info = psb_err_internal_error_
+      else
+        info = axpbyMultiVecDeviceMixed(m,alpha,xx%deviceVect,beta,y%deviceVect)
+      end if
+      call y%set_dev()
+    class default
+      ! Do it on the host side
+      if ((alpha /= szero).and.(x%is_dev()))&
+         & call x%sync()
+      ! call y%axpby(m,alpha,x%v,beta,info)
+      write(*,*) 'Error, not supposed to call defualt for cuda computation'
+    end select
+
+  end subroutine d_cuda_axpby_v_mx
+
+
+  subroutine cuda_axpby_mx_v2(m,alpha, x, beta, y, info)
+    use psi_serial_mod
+    implicit none 
+    integer(psb_ipk_), intent(in)               :: m
+    class(psb_d_vect_cuda), intent(inout)       :: x
+    class(psb_s_base_vect_type), intent(inout)  :: y
+    real(psb_spk_), intent (in)                 :: alpha, beta
+    integer(psb_ipk_), intent(out)              :: info
+    integer(psb_ipk_)                           :: nx, ny
+
+    info = psb_success_
+    select type(yy => y)
+    type is (psb_s_vect_cuda)
+      ! Do something different here 
+      if ((beta /= szero).and.x%is_host())&
+           &  call y%sync()
+      if (yy%is_host()) call yy%sync()
+      nx = getMultiVecDeviceSize(x%deviceVect)
+      ny = getMultiVecDeviceSize(yy%deviceVect)
+      if ((nx<m).or.(ny<m)) then
+        info = psb_err_internal_error_
+      else
+        info = axpbyMultiVecDeviceMixed_v2(m,alpha,x%deviceVect,beta,yy%deviceVect)
+      end if
+      call y%set_dev()
+    class default
+      ! Do it on the host side
+      if ((alpha /= szero).and.(x%is_dev()))&
+         & call y%sync()
+      !call y%axpby(m,alpha,x%v,beta,info)
+      write(*,*) 'Error, not supposed to call defualt for cuda computation'
+    end select
+
+  end subroutine cuda_axpby_mx_v2
+
 
   subroutine d_cuda_upd_xyz(m,alpha, beta, gamma,delta,x, y, z, info)
     use psi_serial_mod

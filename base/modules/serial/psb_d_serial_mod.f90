@@ -221,6 +221,17 @@ module psb_d_serial_mod
       real(psb_dpk_), intent (in)       :: alpha, beta
       integer(psb_ipk_), intent(out)              :: info
     end subroutine psb_d_aspxpby
+
+
+    subroutine psb_aspxpby_mx(alpha, nx, ix, x, beta, y, info)
+      use psb_const_mod, only : psb_ipk_, psb_dpk_, psb_spk_
+      integer(psb_ipk_), intent(in)               :: nx
+      integer(psb_ipk_), intent(in)               :: ix(:)
+      real(psb_spk_), intent (in)                 :: x(:)
+      real(psb_dpk_), intent (inout)              :: y(:)
+      real(psb_spk_), intent (in)                 :: alpha, beta
+      integer(psb_ipk_), intent(out)              :: info
+    end subroutine psb_aspxpby_mx
   end interface psb_aspxpby
 
   interface psb_spspmm

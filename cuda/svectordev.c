@@ -242,6 +242,8 @@ int axpbyMultiVecDeviceFloat(int n,float alpha, void* devMultiVecX,
   return(i);
 }
 
+
+
 int upd_xyzMultiVecDeviceFloat(int n,float alpha,float beta, float gamma, float delta, 
 				void* devMultiVecX, void* devMultiVecY, void* devMultiVecZ)
 { int j=0, i=0;

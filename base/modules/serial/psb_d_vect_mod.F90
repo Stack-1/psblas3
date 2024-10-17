@@ -41,7 +41,9 @@ module psb_d_vect_mod
 
   use psb_realloc_mod
   use psb_d_base_vect_mod
+  use psb_s_base_vect_mod
   use psb_i_vect_mod
+  use psb_s_vect_mod
 
   type psb_d_vect_type
     class(psb_d_base_vect_type), allocatable :: v
@@ -98,10 +100,17 @@ module psb_d_vect_mod
     procedure, pass(x) :: dot_a    => d_vect_dot_a
     generic, public    :: dot      => dot_v, dot_a
     procedure, pass(y) :: axpby_v  => d_vect_axpby_v
+    procedure, pass(y) :: axpby_v_mx  => vect_axpby_v_mx
+    procedure, pass(x) :: axpby_mx_v2  => vect_axpby_mx_v2
+    !procedure, pass(x) :: axpby_mx_a_v2  => vect_axpby_mx_a_v2
+
+    
     procedure, pass(y) :: axpby_a  => d_vect_axpby_a
     procedure, pass(z) :: axpby_v2  => d_vect_axpby_v2
+    !procedure, pass(z) :: axpby_v2_mx  => d_vect_axpby_v2_mx
+
     procedure, pass(z) :: axpby_a2  => d_vect_axpby_a2
-    generic, public    :: axpby    => axpby_v, axpby_a, axpby_v2, axpby_a2
+    generic, public    :: axpby    => axpby_v, axpby_a, axpby_v2, axpby_a2, axpby_v_mx! , axpby_v2_mx
     procedure, pass(z) :: upd_xyz  => d_vect_upd_xyz
     procedure, pass(z) :: xyzw     => d_vect_xyzw
     procedure, pass(y) :: mlt_v    => d_vect_mlt_v
@@ -750,6 +759,79 @@ contains
     end if
 
   end subroutine d_vect_axpby_v2
+
+
+  subroutine vect_axpby_v_mx(m,alpha, x, beta, y, info)
+    use psi_serial_mod
+    implicit none
+    integer(psb_ipk_), intent(in)               :: m
+    class(psb_s_vect_type), intent(inout)       :: x
+    class(psb_d_vect_type), intent(inout)       :: y
+    real(psb_spk_), intent (in)                 :: alpha, beta
+    integer(psb_ipk_), intent(out)              :: info
+
+    if (allocated(x%v).and.allocated(y%v)) then
+      call y%v%axpby(m,alpha,x%v,beta,info)
+    else
+      info = psb_err_invalid_vect_state_
+    end if
+
+  end subroutine vect_axpby_v_mx
+
+  subroutine vect_axpby_mx_v2(m,alpha, x, beta, y, info)
+    use psi_serial_mod
+    implicit none
+    integer(psb_ipk_), intent(in)               :: m
+    class(psb_d_vect_type), intent(inout)       :: x
+    class(psb_s_vect_type), intent(inout)       :: y
+    real(psb_spk_), intent (in)                 :: alpha, beta
+    integer(psb_ipk_), intent(out)              :: info
+
+
+    if (allocated(x%v).and.allocated(y%v)) then
+      call x%v%axpby_mx_v2(m,alpha,beta,y%v,info)
+    else
+      info = psb_err_invalid_vect_state_
+    endif 
+
+  end subroutine vect_axpby_mx_v2
+  
+
+
+  ! 
+  ! subroutine vect_axpby_mx_a_v2(m,alpha, x, beta, y, info)
+  !   use psi_serial_mod
+  !   implicit none
+  !   integer(psb_ipk_), intent(in)             :: m
+  !   class(psb_d_vect_type), intent(inout)     :: x
+  !   real(psb_spk_), intent(inout)             :: y(:)
+  !   real(psb_spk_), intent (in)               :: alpha, beta
+  !   integer(psb_ipk_), intent(out)            :: info
+! 
+  !   if (allocated(x%v)) &
+  !        & call x%v%axpby_mx_v2(m,alpha,beta,y,info)
+! 
+  ! end subroutine vect_axpby_mx_a_v2
+
+
+  ! subroutine d_vect_axpby_v2_mx(m,alpha, x, beta, y, z, info)
+  !   use psi_serial_mod
+  !   implicit none
+  !   integer(psb_ipk_), intent(in)             :: m
+  !   class(psb_s_vect_type), intent(inout)     :: x
+  !   class(psb_d_vect_type), intent(inout)     :: y
+  !   class(psb_d_vect_type), intent(inout)     :: z
+  !   real(psb_spk_), intent (in)               :: alpha, beta
+  !   integer(psb_ipk_), intent(out)            :: info
+! 
+  !   if (allocated(x%v).and.allocated(y%v)) then
+  !     call z%v%axpby(m,alpha,x%v,beta,y%v,info)
+  !   else
+  !     info = psb_err_invalid_vect_state_
+  !   end if
+! 
+  ! end subroutine d_vect_axpby_v2_mx
+
 
   subroutine d_vect_axpby_a(m,alpha, x, beta, y, info)
     use psi_serial_mod

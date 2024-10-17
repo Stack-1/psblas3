@@ -15,6 +15,7 @@
  */
 #include "cudadebug.h"
 #include "cudalang.h"
+#include <cuda_runtime.h>
 
 extern "C"
 {

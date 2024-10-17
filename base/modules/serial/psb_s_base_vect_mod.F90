@@ -1045,7 +1045,6 @@ contains
     call y%axpby(m,alpha,x%v,beta,info)
 
   end subroutine s_base_axpby_v
-
   !
   ! AXPBY is invoked via Z, hence the structure below.
   !
@@ -1105,6 +1104,7 @@ contains
     call y%set_host()
 
   end subroutine s_base_axpby_a
+  
 
   !
   ! AXPBY is invoked via Z, hence the structure below.

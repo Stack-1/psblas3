@@ -13,7 +13,7 @@ module psb_s_cg
             implicit none
         
             class(psb_dprec_type), intent(inout)            :: prec
-        
+    
             real(psb_dpk_), Intent(in)                      :: error_stopping_criterion
             integer(psb_ipk_), intent(out)                  :: info
             integer(psb_ipk_), Optional, Intent(in)         :: itmax
@@ -145,6 +145,7 @@ module psb_s_cg
 
                 call psb_geaxpby(sone,r,szero,d,desc_a,info) ! d_0 = r_0
 
+
                 ! This is the actual CG method 
                 iteration:  do   
                     it   = it + 1
@@ -163,13 +164,12 @@ module psb_s_cg
             
                     call psb_spmm(sone,a,d,szero,rho,desc_a,info) ! rho_i = A * d_i
 
-                    
                     partial_result_d_rho      = psb_gedot(d,rho,desc_a,info) ! d_i * rho_i
                     alpha                     = r_scalar_product / partial_result_d_rho
 
                     call psb_geaxpby(alpha,d,sone,x,desc_a,info)        ! x_i+1 = x_i + alpha_i * rho_i
-
                     call psb_geaxpby(-alpha,rho,sone,r,desc_a,info)     ! r_i+1 = r_i - alpha_i * rho_i
+
 
                     ! ||r|| / ||b||
                     r_norm = psb_norm2(r, desc_a, info)
@@ -189,8 +189,6 @@ module psb_s_cg
 
 
                     call psb_geaxpby(sone,r,beta,d,desc_a,info)       ! d_i+1 = r_i+1 + beta_i+1 * d_i
-
-
 
 
             

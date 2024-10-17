@@ -66,7 +66,10 @@ module psb_ds_cg_1
         use psb_prec_mod
         use psb_util_mod
         use psb_krylov_mod
-
+#ifdef HAVE_CUDA
+        use psb_ext_mod
+        use psb_cuda_mod
+#endif
         implicit none
         
         ! Preconditioner variables  
@@ -111,9 +114,12 @@ module psb_ds_cg_1
     
         character(len=20) :: output_file_name
         integer(psb_lpk_), allocatable :: ltg(:)
-
+#ifdef HAVE_CUDA
+        type(psb_s_vect_cuda)                           :: gpu_vector_format_single
+        type(psb_d_vect_cuda)                           :: gpu_vector_format_double
+#endif
         info = psb_success_
-        name = 'mixed_psb_dscg'
+        name = 'mixed_psb_dscg_1'
         call psb_erractionsave(err_act)
     
         ! Initialize parameters
@@ -156,6 +162,24 @@ module psb_ds_cg_1
             goto 9999
         end if
 
+#ifdef HAVE_CUDA
+        ! marking data structures to use them in GPU
+        call psb_geasb(r_double,desc_a,info,scratch=.false.,mold=gpu_vector_format_double)
+        call psb_geasb(d_double,desc_a,info,scratch=.false.,mold=gpu_vector_format_double)
+
+        call psb_geasb(r_single,desc_a,info,scratch=.false.,mold=gpu_vector_format_single)
+        call psb_geasb(d_single,desc_a,info,scratch=.false.,mold=gpu_vector_format_single)
+
+        call psb_geasb(rho_single,desc_a,info,scratch=.false.,mold=gpu_vector_format_single)
+
+        if(info /= psb_success_) then
+          info=psb_err_from_subroutine_
+          ch_err='gpu convert vectors'
+          call psb_errpush(info,name,a_err=ch_err)
+          goto 9999
+        end if
+
+#endif
         
         it                  = 0
         itx                 = 0
@@ -187,39 +211,28 @@ module psb_ds_cg_1
             if(itx >= itmax) exit restart 
             it = 0
 
-            ! r_0 = b_0
-            do i = 1, size(r_double%v%v) 
-                r_double%v%v(i) = real(b_single%v%v(i),8)
-            end do
+            ! r_0 = b
+            call psb_geaxpby(sone,b_single,szero,r_double,desc_a,info) 
+
 
             reitarate_counter = reitarate_counter + 1
             if(reitarate_counter > 2) exit restart
 
-            ! select type(new_a => a_single%a)
-            !     class is(psb_s_coo_sparse_mat)
-! 
-            !         call psb_gather(global_x, x_single, desc_a, info)
-! 
-! 
-            !         ! r_0 = - A * x_0 + r_0
-            !         do i=1,nnz
-            !             ir = new_a%ia(i)
-            !             jc = new_a%ja(i)
-            !             r_double%v%v(ir) = r_double%v%v(ir) &
-            !             & - ( real(new_a%val(i),8) * real(global_x(jc),8) )
-            !         end do
-! 
-            !     class default
-            !         write(*,'("Error in class initialization")') 
-            ! end select
+
 
             call psb_spmm(-sone, a_single, x_single, sone, r_double, desc_a, info) ! r_0 = - A * x_0 + r_0
+            if(info /= psb_success_) then
+                info=psb_err_from_subroutine_
+                ch_err='SpMV'
+                call psb_errpush(info,name,a_err=ch_err)
+                goto 9999
+            end if
+
 
             ! computed r_0 = b - A * x_0
             r_norm = psb_norm2(r_double, desc_a, info)
 
             err = r_norm / b_norm
-            !if((my_rank == psb_root_).and.(itx > 9500)) write(13,*) itx, err, error_stopping_criterion, r_norm
             
             if(err < error_stopping_criterion) then
                 exit restart
@@ -228,12 +241,12 @@ module psb_ds_cg_1
             ! Initialize d
             ! d_0 = r_0 
 
-            do i=1,size(d_single%v%v)
-                r_single%v%v(i)     = r_double%v%v(i)
-                d_double%v%v(i)     = r_double%v%v(i)
-                d_single%v%v(i)     = d_double%v%v(i)
-            end do
-            
+            call psb_geaxpby(sone,r_double,szero,r_single,desc_a,info)
+            call psb_geaxpby(done,r_double,dzero,d_double,desc_a,info)
+            call psb_geaxpby(sone,d_double,szero,d_single,desc_a,info) 
+
+
+
             ! This is the actual CG method 
             iteration:  do   
                 it   = it + 1
@@ -257,10 +270,8 @@ module psb_ds_cg_1
                 call psb_geaxpby(alpha,d_single,sone,x_single,desc_a,info)     ! x_i+1 = x_i + alpha_i * d_i
 
                 ! r_i+1 = r_i - alpha_i * rho_i
-                do i=1,size(r_double%v%v) 
-                    r_double%v%v(i)            = (r_single%v%v(i) * 1.d0) - ( (alpha * 1.d0) * ( rho_single%v%v(i) *1.d0 ) )
-                    r_single%v%v(i)            = r_double%v%V(i)
-                end do
+                call psb_geaxpby(-alpha,rho_single,sone,r_double,desc_a,info)
+                call psb_geaxpby(sone,r_double,szero,r_single,desc_a,info)
 
                 ! ||r|| / ||b||
                 r_norm = psb_norm2(r_double, desc_a, info)
@@ -282,10 +293,8 @@ module psb_ds_cg_1
 
 
                  ! d_i+1 = r_i+1 + beta_i+1 * d_i     
-                do i=1,size(d_double%v%v)
-                    d_double%v%v(i)            = r_double%v%v(i) + ( (beta * 1.d0) * d_double%v%v(i) )
-                    d_single%v%v(i)            = d_double%v%V(i)
-                end do
+                call psb_geaxpby(done,r_double,real(beta,psb_dpk_),d_double,desc_a,info)
+                call psb_geaxpby(sone,d_double,szero,d_single,desc_a,info)
         
             end do iteration
         end do restart

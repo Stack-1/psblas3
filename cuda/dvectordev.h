@@ -68,6 +68,10 @@ int asumMultiVecDeviceDouble(double* y_res, int n, void* devVecA);
 int dotMultiVecDeviceDouble(double* y_res, int n, void* devVecA, void* devVecB);
 
 int axpbyMultiVecDeviceDouble(int n, double alpha, void* devVecX, double beta, void* devVecY);
+int axpbyMultiVecDeviceMixed(int n, float alpha, void* devVecX, float beta, void* devVecY);
+int axpbyMultiVecDeviceMixed_v2(int n, float alpha, void* devVecX, float beta, void* devVecY);
+
+
 int upd_xyzMultiVecDeviceDouble(int n,double alpha,double beta, double gamma, double delta, 
 				void* devMultiVecX, void* devMultiVecY, void* devMultiVecZ);
 int xyzwMultiVecDeviceDouble(int n,double a, double b, double c, double d, double e, double f, 

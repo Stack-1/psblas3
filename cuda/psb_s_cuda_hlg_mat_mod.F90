@@ -56,6 +56,7 @@ module psb_s_cuda_hlg_mat_mod
     procedure, nopass  :: get_fmt       => s_cuda_hlg_get_fmt
     procedure, pass(a) :: sizeof        => s_cuda_hlg_sizeof
     procedure, pass(a) :: vect_mv       => psb_s_cuda_hlg_vect_mv
+    procedure, pass(a) :: vect_mv_mx    => psb_s_cuda_hlg_vect_mv_mx
     procedure, pass(a) :: csmm          => psb_s_cuda_hlg_csmm
     procedure, pass(a) :: csmv          => psb_s_cuda_hlg_csmv
     procedure, pass(a) :: in_vect_sv    => psb_s_cuda_hlg_inner_vect_sv
@@ -97,6 +98,18 @@ module psb_s_cuda_hlg_mat_mod
       integer(psb_ipk_), intent(out)             :: info
       character, optional, intent(in)            :: trans
     end subroutine psb_s_cuda_hlg_vect_mv
+  end interface
+
+  interface 
+    subroutine psb_s_cuda_hlg_vect_mv_mx(alpha,a,x,beta,y,info,trans) 
+      import :: psb_s_cuda_hlg_sparse_mat, psb_spk_, psb_s_base_vect_type, psb_d_base_vect_type, psb_ipk_
+      class(psb_s_cuda_hlg_sparse_mat), intent(in)    :: a
+      real(psb_spk_), intent(in)                      :: alpha, beta
+      class(psb_s_base_vect_type), intent(inout)      :: x
+      class(psb_d_base_vect_type), intent(inout)      :: y
+      integer(psb_ipk_), intent(out)                  :: info
+      character, optional, intent(in)                 :: trans
+    end subroutine psb_s_cuda_hlg_vect_mv_mx
   end interface
 
   interface 

@@ -30,7 +30,7 @@
 !
 !
 module psi_s_serial_mod
-  use psb_const_mod, only :  psb_ipk_, psb_lpk_, psb_mpk_, psb_epk_, psb_spk_
+  use psb_const_mod, only :  psb_ipk_, psb_lpk_, psb_mpk_, psb_epk_, psb_spk_, psb_dpk_
 
   interface psb_gelp 
     ! 2-D version
@@ -72,31 +72,32 @@ module psi_s_serial_mod
     subroutine psi_saxpby(m,n,alpha, x, beta, y, info)
       import :: psb_ipk_, psb_spk_
       implicit none
-      integer(psb_ipk_), intent(in)      :: m, n
-      real(psb_spk_), intent (in)       ::  x(:,:)
-      real(psb_spk_), intent (inout)    ::  y(:,:)
-      real(psb_spk_), intent (in)       ::  alpha, beta
-      integer(psb_ipk_), intent(out)     :: info
+      integer(psb_ipk_), intent(in)       :: m, n
+      real(psb_spk_), intent (in)         ::  x(:,:)
+      real(psb_spk_), intent (inout)      ::  y(:,:)
+      real(psb_spk_), intent (in)         ::  alpha, beta
+      integer(psb_ipk_), intent(out)      :: info
     end subroutine psi_saxpby
     subroutine psi_saxpbyv(m,alpha, x, beta, y, info)
       import :: psb_ipk_, psb_spk_
       implicit none
-      integer(psb_ipk_), intent(in)      :: m
-      real(psb_spk_), intent (in)       ::  x(:)
-      real(psb_spk_), intent (inout)    ::  y(:)
-      real(psb_spk_), intent (in)       :: alpha, beta
-      integer(psb_ipk_), intent(out)     :: info
+      integer(psb_ipk_), intent(in)       :: m
+      real(psb_spk_), intent (in)         ::  x(:)
+      real(psb_spk_), intent (inout)      ::  y(:)
+      real(psb_spk_), intent (in)         :: alpha, beta
+      integer(psb_ipk_), intent(out)      :: info
     end subroutine psi_saxpbyv
     subroutine psi_saxpbyv2(m,alpha, x, beta, y, z, info)
       import :: psb_ipk_, psb_spk_
       implicit none
-      integer(psb_ipk_), intent(in)      :: m
-      real(psb_spk_), intent (in)       ::  x(:)
-      real(psb_spk_), intent (in)       ::  y(:)
-      real(psb_spk_), intent (inout)    ::  z(:)
-      real(psb_spk_), intent (in)       :: alpha, beta
-      integer(psb_ipk_), intent(out)     :: info
+      integer(psb_ipk_), intent(in)       :: m
+      real(psb_spk_), intent (in)         ::  x(:)
+      real(psb_spk_), intent (in)         ::  y(:)
+      real(psb_spk_), intent (inout)      ::  z(:)
+      real(psb_spk_), intent (in)         :: alpha, beta
+      integer(psb_ipk_), intent(out)      :: info
     end subroutine psi_saxpbyv2
+
   end interface psb_geaxpby
 
   interface psi_upd_xyz

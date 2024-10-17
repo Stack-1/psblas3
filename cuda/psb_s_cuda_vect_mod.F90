@@ -56,51 +56,52 @@ module psb_s_cuda_vect_mod
     type(c_ptr) :: i_buf = c_null_ptr
     integer :: i_buf_sz = 0
   contains
-    procedure, pass(x) :: get_nrows => s_cuda_get_nrows
-    procedure, nopass  :: get_fmt   => s_cuda_get_fmt
+    procedure, pass(x) :: get_nrows           => s_cuda_get_nrows
+    procedure, nopass  :: get_fmt             => s_cuda_get_fmt
 
-    procedure, pass(x) :: all      => s_cuda_all
-    procedure, pass(x) :: zero     => s_cuda_zero
-    procedure, pass(x) :: asb_m    => s_cuda_asb_m
-    procedure, pass(x) :: sync     => s_cuda_sync
-    procedure, pass(x) :: sync_space => s_cuda_sync_space
-    procedure, pass(x) :: bld_x    => s_cuda_bld_x
-    procedure, pass(x) :: bld_mn   => s_cuda_bld_mn
-    procedure, pass(x) :: free     => s_cuda_free
-    procedure, pass(x) :: ins_a    => s_cuda_ins_a
-    procedure, pass(x) :: ins_v    => s_cuda_ins_v
-    procedure, pass(x) :: is_host  => s_cuda_is_host
-    procedure, pass(x) :: is_dev   => s_cuda_is_dev
-    procedure, pass(x) :: is_sync  => s_cuda_is_sync
-    procedure, pass(x) :: set_host => s_cuda_set_host
-    procedure, pass(x) :: set_dev  => s_cuda_set_dev
-    procedure, pass(x) :: set_sync => s_cuda_set_sync
-    procedure, pass(x) :: set_scal => s_cuda_set_scal
+    procedure, pass(x) :: all                 => s_cuda_all
+    procedure, pass(x) :: zero                => s_cuda_zero
+    procedure, pass(x) :: asb_m               => s_cuda_asb_m
+    procedure, pass(x) :: sync                => s_cuda_sync
+    procedure, pass(x) :: sync_space          => s_cuda_sync_space
+    procedure, pass(x) :: bld_x               => s_cuda_bld_x
+    procedure, pass(x) :: bld_mn              => s_cuda_bld_mn
+    procedure, pass(x) :: free                => s_cuda_free
+    procedure, pass(x) :: ins_a               => s_cuda_ins_a
+    procedure, pass(x) :: ins_v               => s_cuda_ins_v
+    procedure, pass(x) :: is_host             => s_cuda_is_host
+    procedure, pass(x) :: is_dev              => s_cuda_is_dev
+    procedure, pass(x) :: is_sync             => s_cuda_is_sync
+    procedure, pass(x) :: set_host            => s_cuda_set_host
+    procedure, pass(x) :: set_dev             => s_cuda_set_dev
+    procedure, pass(x) :: set_sync            => s_cuda_set_sync
+    procedure, pass(x) :: set_scal            => s_cuda_set_scal
 !!$    procedure, pass(x) :: set_vect => s_cuda_set_vect
-    procedure, pass(x) :: gthzv_x  => s_cuda_gthzv_x
-    procedure, pass(y) :: sctb     => s_cuda_sctb
-    procedure, pass(y) :: sctb_x   => s_cuda_sctb_x
-    procedure, pass(x) :: gthzbuf  => s_cuda_gthzbuf
-    procedure, pass(y) :: sctb_buf => s_cuda_sctb_buf
-    procedure, pass(x) :: new_buffer   => s_cuda_new_buffer
-    procedure, nopass  :: device_wait  => s_cuda_device_wait
-    procedure, pass(x) :: free_buffer  => s_cuda_free_buffer
-    procedure, pass(x) :: maybe_free_buffer  => s_cuda_maybe_free_buffer
-    procedure, pass(x) :: dot_v    => s_cuda_dot_v
-    procedure, pass(x) :: dot_a    => s_cuda_dot_a
-    procedure, pass(y) :: axpby_v  => s_cuda_axpby_v
-    procedure, pass(y) :: axpby_a  => s_cuda_axpby_a
-    procedure, pass(z) :: upd_xyz  => s_cuda_upd_xyz
-    procedure, pass(y) :: mlt_v    => s_cuda_mlt_v
-    procedure, pass(y) :: mlt_a    => s_cuda_mlt_a
-    procedure, pass(z) :: mlt_a_2  => s_cuda_mlt_a_2
-    procedure, pass(z) :: mlt_v_2  => s_cuda_mlt_v_2
-    procedure, pass(x) :: scal     => s_cuda_scal
-    procedure, pass(x) :: nrm2     => s_cuda_nrm2
-    procedure, pass(x) :: amax     => s_cuda_amax
-    procedure, pass(x) :: asum     => s_cuda_asum
-    procedure, pass(x) :: absval1  => s_cuda_absval1
-    procedure, pass(x) :: absval2  => s_cuda_absval2
+    procedure, pass(x) :: gthzv_x             => s_cuda_gthzv_x
+    procedure, pass(y) :: sctb                => s_cuda_sctb
+    procedure, pass(y) :: sctb_x              => s_cuda_sctb_x
+    procedure, pass(x) :: gthzbuf             => s_cuda_gthzbuf
+    procedure, pass(y) :: sctb_buf            => s_cuda_sctb_buf
+    procedure, pass(x) :: new_buffer          => s_cuda_new_buffer
+    procedure, nopass  :: device_wait         => s_cuda_device_wait
+    procedure, pass(x) :: free_buffer         => s_cuda_free_buffer
+    procedure, pass(x) :: maybe_free_buffer   => s_cuda_maybe_free_buffer
+    procedure, pass(x) :: dot_v               => s_cuda_dot_v
+    procedure, pass(x) :: dot_a               => s_cuda_dot_a
+    procedure, pass(y) :: axpby_v             => s_cuda_axpby_v
+
+    procedure, pass(y) :: axpby_a             => s_cuda_axpby_a
+    procedure, pass(z) :: upd_xyz             => s_cuda_upd_xyz
+    procedure, pass(y) :: mlt_v               => s_cuda_mlt_v
+    procedure, pass(y) :: mlt_a               => s_cuda_mlt_a
+    procedure, pass(z) :: mlt_a_2             => s_cuda_mlt_a_2
+    procedure, pass(z) :: mlt_v_2             => s_cuda_mlt_v_2
+    procedure, pass(x) :: scal                => s_cuda_scal
+    procedure, pass(x) :: nrm2                => s_cuda_nrm2
+    procedure, pass(x) :: amax                => s_cuda_amax
+    procedure, pass(x) :: asum                => s_cuda_asum
+    procedure, pass(x) :: absval1             => s_cuda_absval1
+    procedure, pass(x) :: absval2             => s_cuda_absval2
 
     final              :: s_cuda_vect_finalize
   end type psb_s_vect_cuda
@@ -895,7 +896,7 @@ contains
     end select
 
   end subroutine s_cuda_axpby_v
-
+ 
   subroutine s_cuda_upd_xyz(m,alpha, beta, gamma,delta,x, y, z, info)
     use psi_serial_mod
     implicit none
