@@ -416,8 +416,8 @@ module psb_ds_cg_2
 ! 
                     ! call r_single%set_host()
                     ! call r_single%sync()
-                    call psb_geasb(r_double,desc_a,info,scratch=.false.,mold=gpu_vector_format_double)
-                    call psb_geasb(r_single,desc_a,info,scratch=.false.,mold=gpu_vector_format_single)
+                    ! call psb_geasb(r_double,desc_a,info,scratch=.false.,mold=gpu_vector_format_double)
+                    ! call psb_geasb(r_single,desc_a,info,scratch=.false.,mold=gpu_vector_format_single)
 
                     !write(*,*) r_double%get_vect()
                     !write(*,*) r_single%get_vect()
